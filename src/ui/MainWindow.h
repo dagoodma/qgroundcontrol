@@ -67,12 +67,12 @@ This file is part of the QGROUNDCONTROL project
 #include "QGCGoogleEarthView.h"
 #endif
 #include "QGCToolBar.h"
-#include "SlugsDataSensorView.h"
+//#include "SlugsDataSensorView.h"
 #include "LogCompressor.h"
 
-#include "SlugsHilSim.h"
+//#include "SlugsHilSim.h"
 
-#include "SlugsPadCameraControl.h"
+//#include "SlugsPadCameraControl.h"
 #include "UASControlParameters.h"
 #include "QGCMAVLinkInspector.h"
 #include "QGCMAVLinkLogPlayer.h"

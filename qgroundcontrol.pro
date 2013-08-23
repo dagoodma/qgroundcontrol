@@ -187,9 +187,9 @@ FORMS += src/ui/MainWindow.ui \
     src/ui/QMap3D.ui \
     src/ui/QGCWebView.ui \
     src/ui/map3D/QGCGoogleEarthView.ui \
-    src/ui/SlugsDataSensorView.ui \
-    src/ui/SlugsHilSim.ui \
-    src/ui/SlugsPadCameraControl.ui \
+#    src/ui/SlugsDataSensorView.ui \
+#    src/ui/SlugsHilSim.ui \
+#    src/ui/SlugsPadCameraControl.ui \
     src/ui/uas/QGCUnconnectedInfoWidget.ui \
     src/ui/designer/QGCToolWidget.ui \
     src/ui/designer/QGCParamSlider.ui \
@@ -325,9 +325,9 @@ HEADERS += src/MG.h \
     src/comm/QGCMAVLink.h \
     src/ui/QGCWebView.h \
     src/ui/map3D/QGCWebPage.h \
-    src/ui/SlugsDataSensorView.h \
-    src/ui/SlugsHilSim.h \
-    src/ui/SlugsPadCameraControl.h \
+#    src/ui/SlugsDataSensorView.h \
+#    src/ui/SlugsHilSim.h \
+#    src/ui/SlugsPadCameraControl.h \
     src/ui/QGCMainWindowAPConfigurator.h \
     src/comm/MAVLinkSwarmSimulationLink.h \
     src/ui/uas/QGCUnconnectedInfoWidget.h \
@@ -400,7 +400,8 @@ HEADERS += src/MG.h \
     src/ui/JoystickButton.h \
     src/ui/JoystickAxis.h \
     src/ui/main/QGCViewModeSelection.h \
-    src/ui/main/QGCWelcomeMainWindow.h
+    src/ui/main/QGCWelcomeMainWindow.h \
+    src/ui/uas/SlugsControlWidget.h
 
 # Google Earth is only supported on Mac OS and Windows with Visual Studio Compiler
 macx|macx-g++|macx-g++42|win32-msvc2008|win32-msvc2010|win32-msvc2012::HEADERS += src/ui/map3D/QGCGoogleEarthView.h
@@ -508,9 +509,9 @@ SOURCES += src/main.cc \
     src/ui/RadioCalibration/RadioCalibrationData.cc \
     src/ui/QGCWebView.cc \
     src/ui/map3D/QGCWebPage.cc \
-    src/ui/SlugsDataSensorView.cc \
-    src/ui/SlugsHilSim.cc \
-    src/ui/SlugsPadCameraControl.cpp \
+#    src/ui/SlugsDataSensorView.cc \
+#    src/ui/SlugsHilSim.cc \
+#    src/ui/SlugsPadCameraControl.cpp \
     src/ui/QGCMainWindowAPConfigurator.cc \
     src/comm/MAVLinkSwarmSimulationLink.cc \
     src/ui/uas/QGCUnconnectedInfoWidget.cc \
@@ -580,7 +581,8 @@ SOURCES += src/main.cc \
     src/ui/JoystickButton.cc \
     src/ui/JoystickAxis.cc \
     src/ui/main/QGCViewModeSelection.cc \
-    src/ui/main/QGCWelcomeMainWindow.cc
+    src/ui/main/QGCWelcomeMainWindow.cc \
+    src/ui/uas/SlugsControlWidget.cc
 
 # Enable Google Earth only on Mac OS and Windows with Visual Studio compiler
 macx|macx-g++|macx-g++42|win32-msvc2008|win32-msvc2010|win32-msvc2012::SOURCES += src/ui/map3D/QGCGoogleEarthView.cc

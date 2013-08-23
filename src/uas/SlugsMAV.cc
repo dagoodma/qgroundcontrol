@@ -5,11 +5,15 @@
 SlugsMAV::SlugsMAV(MAVLinkProtocol* mavlink, int id) :
     UAS(mavlink, id)
 {
+    qDebug() << "Spawning a SLUGS MAV.";
+    /*
     widgetTimer = new QTimer (this);
     widgetTimer->setInterval(SLUGS_UPDATE_RATE);
 
     connect (widgetTimer, SIGNAL(timeout()), this, SLOT(emitSignals()));
     widgetTimer->start();
+*/
+    /*
     memset(&mlRawImuData ,0, sizeof(mavlink_raw_imu_t));// clear all the state structures
 
 #ifdef MAVLINK_ENABLED_SLUGS
@@ -36,6 +40,69 @@ SlugsMAV::SlugsMAV(MAVLinkProtocol* mavlink, int id) :
     updateRoundRobin = 0;
     uasId = id;
 #endif
+*/
+}
+
+
+/**
+* The mode can be passthrough, landing, liftoff, selective passthrough,
+*   lost, returning, mid-level, waypoint, ISR, and line patrol.
+* @return the mode text of the autopilot
+*/
+QString SlugsMAV::getNavModeText(int mode) {
+
+#ifdef MAVLINK_ENABLED_SLUGS
+    switch (mode) {
+    case SLUGS_MODE_PASSTHROUGH:
+        return QString("PASSTHROUGH");
+        break;
+    case SLUGS_MODE_LANDING:
+        return QString("LANDING");
+        break;
+    case SLUGS_MODE_LIFTOFF:
+        return QString("LIFTOFF");
+        break;
+    /*case SLUGS_MODE_SELECTIVE_PASSTHROUGH:
+        return QString("SELECT_PT");
+        break;
+    */
+    case SLUGS_MODE_LOST:
+        return QString("LOST");
+        break;
+    case SLUGS_MODE_RETURNING:
+        return QString("RETURNING");
+        break;
+    case SLUGS_MODE_MID_LEVEL:
+        return QString("MID_LEVEL");
+        break;
+    case SLUGS_MODE_WAYPOINT:
+        return QString("WAYPOINT");
+        break;
+    case SLUGS_MODE_ISR:
+        return QString("ISR");
+        break;
+    case SLUGS_MODE_LINE_PATROL:
+        return QString("LINE_PATROL");
+        break;
+    default:
+        return QString("UKNOWN2");
+    }
+#else
+    return UAS::getNavModeText(mode);
+#endif
+}
+
+/**
+ * @param newNavMode SLUGS navigation mode to set.
+ */
+void SlugsMAV::setNavMode(int newNavMode) {
+
+    //this->navMode = newNavMode; // don't set here, update on receive hearbeat message from UAS
+
+    mavlink_message_t msg;
+    mavlink_msg_set_mode_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, (uint8_t)uasId, this->mode, (uint16_t)newNavMode);
+    sendMessage(msg);
+    qDebug() << "SENDING REQUEST TO SET MODE TO SYSTEM" << uasId << ", REQUEST TO SET SLUGS NAV MODE " << newNavMode;
 }
 
 /**
@@ -51,73 +118,70 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
     UAS::receiveMessage(link, message);// Let UAS handle the default message set
 
     if (message.sysid == uasId) {
-#ifdef MAVLINK_ENABLED_SLUGS// Handle your special messages mavlink_message_t* msg = &message;
+#ifdef MAVLINK_ENABLED_SLUGS
 
         switch (message.msgid) {
-        case MAVLINK_MSG_ID_RAW_IMU:
-            mavlink_msg_raw_imu_decode(&message, &mlRawImuData);
+        /* Handled in UAS.cc where
+         *  navModeChanged(uasId, state.custom_mode, getNavModeText(state.custom_mode))
+         * is emitted.
+        // ----------- Handle SLUGS Specific Common Messages -----------
+        case MAVLINK_MSG_ID_HEARTBEAT:
+            // Check custom mode for slugs nav mode
+            SLUGS_MODE navModeTemp = mavlink_msg_heartbeat_get_custom_mode(message);
+            if (navMode != navModeTemp) {
+                navMode = navModeTemp;
+                emit slugsNavModeChanged(uasId, navModeTemp, getNavModeText(navModeTemp));
+            }
             break;
+         */
 
+        // --------------- Custom Slugs Message Handling ---------------
+        case MAVLINK_MSG_ID_SENSOR_DIAG:
+            // TODO handle sensor diagnostic message
+            break;
+        case MAVLINK_MSG_ID_CPU_LOAD:
+            // TODO handle cpu load message
+            break;
+        case MAVLINK_MSG_ID_SENSOR_BIAS:
+            // TODO handle sensor bias message
+            break;
+        case MAVLINK_MSG_ID_STATUS_GPS:
+            // TODO handle status gps message
+            break;
+        case MAVLINK_MSG_ID_NOVATEL_DIAG:
+            // TODO handle novatel diagnostic message
+            break;
+        case MAVLINK_MSG_ID_GPS_DATE_TIME:
+            // TODO handle gps date and time message
+            break;
+        case MAVLINK_MSG_ID_DATA_LOG:
+            // TODO handle data log message
+            break;
+        case MAVLINK_MSG_ID_SLUGS_NAVIGATION:
+            // TODO handle slugs nav message
+            break;
+        case MAVLINK_MSG_ID_ISR_LOCATION:
+            // TODO handle isr location message
+            break;
+        case MAVLINK_MSG_ID_PTZ_STATUS:
+            // TODO handle pan tilt zoom message
+            break;
+        case MAVLINK_MSG_ID_VOLT_SENSOR:
+            // TODO handle isr location message
+            break;
+        case MAVLINK_MSG_ID_CTRL_SRFC_PT:
+            // TODO handle control surface passthrough message
+            break;
         case MAVLINK_MSG_ID_BOOT:
-            mavlink_msg_boot_decode(&message,&mlBoot);
-            emit slugsBootMsg(uasId, mlBoot);
+            // TODO handle boot message
             break;
+        case MAVLINK_MSG_ID_MID_LVL_CMDS:
+            // TODO handle mid-level command message
+            break;
+        }
 
-        case MAVLINK_MSG_ID_ATTITUDE:
-            mavlink_msg_attitude_decode(&message, &mlAttitude);
-            break;
 
-        case MAVLINK_MSG_ID_GPS_RAW:
-            mavlink_msg_gps_raw_decode(&message, &mlGpsData);
-            break;
-
-        case MAVLINK_MSG_ID_CPU_LOAD:       //170
-            mavlink_msg_cpu_load_decode(&message,&mlCpuLoadData);
-            break;
-
-        case MAVLINK_MSG_ID_AIR_DATA:       //171
-            mavlink_msg_air_data_decode(&message,&mlAirData);
-            break;
-
-        case MAVLINK_MSG_ID_SENSOR_BIAS:    //172
-            mavlink_msg_sensor_bias_decode(&message,&mlSensorBiasData);
-            break;
-
-        case MAVLINK_MSG_ID_DIAGNOSTIC:     //173
-            mavlink_msg_diagnostic_decode(&message,&mlDiagnosticData);
-            break;
-
-        case MAVLINK_MSG_ID_SLUGS_NAVIGATION://176
-            mavlink_msg_slugs_navigation_decode(&message,&mlNavigation);
-            break;
-
-        case MAVLINK_MSG_ID_DATA_LOG:       //177
-            mavlink_msg_data_log_decode(&message,&mlDataLog);
-            break;
-
-        case MAVLINK_MSG_ID_GPS_DATE_TIME:    //179
-            mavlink_msg_gps_date_time_decode(&message,&mlGpsDateTime);
-            break;
-
-        case MAVLINK_MSG_ID_MID_LVL_CMDS:     //180
-            mavlink_msg_mid_lvl_cmds_decode(&message, &mlMidLevelCommands);
-            break;
-
-        case MAVLINK_MSG_ID_CTRL_SRFC_PT:     //181
-            mavlink_msg_ctrl_srfc_pt_decode(&message, &mlPassthrough);
-            break;
-
-        case MAVLINK_MSG_ID_SLUGS_ACTION:     //183
-            mavlink_msg_slugs_action_decode(&message, &mlAction);
-            break;
-
-        case MAVLINK_MSG_ID_SCALED_IMU:
-            mavlink_msg_scaled_imu_decode(&message, &mlScaled);
-            break;
-
-        case MAVLINK_MSG_ID_SERVO_OUTPUT_RAW:
-            mavlink_msg_servo_output_raw_decode(&message, &mlServo);
-            break;
+        /*
 
         case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
             mavlink_msg_rc_channels_raw_decode(&message, &mlChannels);
@@ -149,12 +213,13 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
             //        qDebug() << "\nSLUGS RECEIVED MESSAGE WITH ID" << message.msgid;
             break;
         }
+        */
 #endif
-    }
+    } // (message.sysid == uasId)
 }
 
 
-
+/*
 void SlugsMAV::emitSignals (void)
 {
 #ifdef MAVLINK_ENABLED_SLUGS
@@ -209,6 +274,9 @@ void SlugsMAV::emitSignals (void)
 
 
 }
+*/
+
+/*
 
 #ifdef MAVLINK_ENABLED_SLUGS
 void SlugsMAV::emitGpsSignals (void)
@@ -233,3 +301,4 @@ void SlugsMAV::emitGpsSignals (void)
 
 
 #endif // MAVLINK_ENABLED_SLUGS
+*/

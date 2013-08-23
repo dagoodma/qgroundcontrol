@@ -506,7 +506,7 @@ public:
     /** @brief Get the human-readable status message for this code */
     void getStatusForCode(int statusCode, QString& uasState, QString& stateDescription);
     /** @brief Get the human-readable navigation mode translation for this mode */
-    QString getNavModeText(int mode);
+    virtual QString getNavModeText(int mode);
     /** @brief Check if vehicle is in autonomous mode */
     bool isAuto();
     /** @brief Check if vehicle is armed */

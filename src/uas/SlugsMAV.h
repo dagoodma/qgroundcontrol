@@ -21,47 +21,39 @@ This file is part of the QGROUNDCONTROL project
 
 ======================================================================*/
 
-#ifndef SLUGSMAV_H
-#define SLUGSMAV_H
+#ifndef _SLUGSMAV_H_
+#define _SLUGSMAV_H_
+
+#define MAVLINK_ENABLED_SLUGS
 
 #include "UAS.h"
 #include "mavlink.h"
 #include <QTimer>
 
-#define SLUGS_UPDATE_RATE   200   // in ms
+#ifdef MAVLINK_ENABLED_SLUGS
+#include "slugs/slugs.h"
+#endif
+
 class SlugsMAV : public UAS
 {
     Q_OBJECT
     Q_INTERFACES(UASInterface)
 
-    enum SLUGS_ACTION {
-        SLUGS_ACTION_NONE,
-        SLUGS_ACTION_SUCCESS,
-        SLUGS_ACTION_FAIL,
-        SLUGS_ACTION_EEPROM,
-        SLUGS_ACTION_MODE_CHANGE,
-        SLUGS_ACTION_MODE_REPORT,
-        SLUGS_ACTION_PT_CHANGE,
-        SLUGS_ACTION_PT_REPORT,
-        SLUGS_ACTION_PID_CHANGE,
-        SLUGS_ACTION_PID_REPORT,
-        SLUGS_ACTION_WP_CHANGE,
-        SLUGS_ACTION_WP_REPORT,
-        SLUGS_ACTION_MLC_CHANGE,
-        SLUGS_ACTION_MLC_REPORT
-    };
-
-
 public:
     SlugsMAV(MAVLinkProtocol* mavlink, int id = 0);
+    //~SlugsMAV(void);
+    /** @brief Sets the SLUGS navigation mode. */
+    void setNavMode(int navNavMode);
+    /** @brief Returns the name of the SLUGS navigation mode. */
+    QString getNavModeText(int mode);
+
 
 public slots:
     /** @brief Receive a MAVLink message from this MAV */
     void receiveMessage(LinkInterface* link, mavlink_message_t message);
 
-    void emitSignals (void);
-
-signals:
+};
+ /*
 
     void slugsRawImu(int uasId, const mavlink_raw_imu_t& rawData);
     void slugsGPSCogSog(int uasId, double cog, double sog);
@@ -127,5 +119,8 @@ private:
 #endif // if SLUGS
 
 };
+*/
 
-#endif // SLUGSMAV_H
+
+#endif // _SLUGSMAV_H_
+
