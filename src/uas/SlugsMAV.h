@@ -46,6 +46,8 @@ public:
     void setNavMode(int navNavMode);
     /** @brief Returns the name of the SLUGS navigation mode. */
     QString getNavModeText(int mode);
+    /** @brief Helper for getNavModeTex. */
+    static QString getSlugsNavModeText(int mode);
 
 
 public slots:

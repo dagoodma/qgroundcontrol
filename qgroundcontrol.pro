@@ -238,7 +238,8 @@ FORMS += src/ui/MainWindow.ui \
     src/ui/JoystickButton.ui \
     src/ui/JoystickAxis.ui \
     src/ui/main/QGCViewModeSelection.ui \
-    src/ui/main/QGCWelcomeMainWindow.ui
+    src/ui/main/QGCWelcomeMainWindow.ui \
+    src/ui/SlugsControl.ui
 INCLUDEPATH += src \
     src/ui \
     src/ui/linechart \

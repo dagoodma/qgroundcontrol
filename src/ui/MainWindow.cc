@@ -528,6 +528,13 @@ void MainWindow::buildCommonWidgets()
 
     createDockWidget(simView,new UASControlWidget(this),tr("Control"),"UNMANNED_SYSTEM_CONTROL_DOCKWIDGET",VIEW_SIMULATION,Qt::LeftDockWidgetArea);
 
+    {
+        QAction* tempAction = ui.menuTools->addAction(tr("SLUGS Control"));
+        tempAction->setCheckable(true);
+        connect(tempAction,SIGNAL(triggered(bool)),this, SLOT(showTool(bool)));
+        createDockWidget(simView,new SlugsControlWidget(this),tr("SLUGS Control"),"UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET",VIEW_SIMULATION,Qt::LeftDockWidgetArea);
+    }
+
     createDockWidget(plannerView,new UASListWidget(this),tr("Unmanned Systems"),"UNMANNED_SYSTEM_LIST_DOCKWIDGET",VIEW_MISSION,Qt::LeftDockWidgetArea);
     createDockWidget(plannerView,new QGCWaypointListMulti(this),tr("Mission Plan"),"WAYPOINT_LIST_DOCKWIDGET",VIEW_MISSION,Qt::BottomDockWidgetArea);
 
@@ -744,6 +751,10 @@ void MainWindow::loadDockWidget(QString name)
     else if (name == "UNMANNED_SYSTEM_CONTROL_DOCKWIDGET")
     {
         createDockWidget(centerStack->currentWidget(),new UASControlWidget(this),tr("Control"),"UNMANNED_SYSTEM_CONTROL_DOCKWIDGET",currentView,Qt::LeftDockWidgetArea);
+    }
+    else if (name == "UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET")
+    {
+        createDockWidget(centerStack->currentWidget(),new SlugsControlWidget(this),tr("SLUGS Control"),"UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET",currentView,Qt::LeftDockWidgetArea);
     }
     else if (name == "UNMANNED_SYSTEM_LIST_DOCKWIDGET")
     {
@@ -1933,6 +1944,10 @@ void MainWindow::loadViewState()
             if (controlDockWidget)
             {
                 controlDockWidget->hide();
+            }
+            if (slugsControlDockWidget)
+            {
+                slugsControlDockWidget->hide();
             }
             if (listDockWidget)
             {

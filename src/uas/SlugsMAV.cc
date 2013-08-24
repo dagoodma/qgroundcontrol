@@ -45,14 +45,29 @@ SlugsMAV::SlugsMAV(MAVLinkProtocol* mavlink, int id) :
 
 
 /**
-* The mode can be passthrough, landing, liftoff, selective passthrough,
-*   lost, returning, mid-level, waypoint, ISR, and line patrol.
+* Overrides getNavModeText with SLUGS navigation modes using getSlugsNavModeText().
 * @return the mode text of the autopilot
 */
 QString SlugsMAV::getNavModeText(int mode) {
 
 #ifdef MAVLINK_ENABLED_SLUGS
+    return getSlugsNavModeText(mode);
+#else
+    return UAS::getNavModeText(mode);
+#endif
+}
+
+/**
+* The mode can be passthrough, landing, liftoff, selective passthrough,
+*   lost, returning, mid-level, waypoint, ISR, and line patrol.
+* @return the mode text of the autopilot
+*/
+QString SlugsMAV::getSlugsNavModeText(int mode) {
+#ifdef MAVLINK_ENABLED_SLUGS
     switch (mode) {
+    case SLUGS_MODE_NONE:
+        return QString("NONE");
+        break;
     case SLUGS_MODE_PASSTHROUGH:
         return QString("PASSTHROUGH");
         break;
@@ -84,12 +99,9 @@ QString SlugsMAV::getNavModeText(int mode) {
     case SLUGS_MODE_LINE_PATROL:
         return QString("LINE_PATROL");
         break;
-    default:
-        return QString("UKNOWN2");
-    }
-#else
-    return UAS::getNavModeText(mode);
+    } // switch
 #endif
+    return QString("UKNOWN");
 }
 
 /**

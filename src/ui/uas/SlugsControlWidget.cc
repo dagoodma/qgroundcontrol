@@ -1,0 +1,299 @@
+/*=====================================================================
+
+PIXHAWK Micro Air Vehicle Flying Robotics Toolkit
+
+(c) 2009, 2010 PIXHAWK PROJECT  <http://pixhawk.ethz.ch>
+
+This file is part of the PIXHAWK project
+
+    PIXHAWK is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    PIXHAWK is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with PIXHAWK. If not, see <http://www.gnu.org/licenses/>.
+
+======================================================================*/
+
+/**
+ * @file
+ *   @brief Definition of widget controlling a SLUGS MAV
+ *
+ *   @author David Goodman <dagoodman@soe.ucsc.edu>
+ *
+ */
+
+#include <QString>
+#include <QTimer>
+#include <QLabel>
+#include <QFileDialog>
+#include <QDebug>
+#include <QProcess>
+#include <QPalette>
+
+#include "SlugsControlWidget.h"
+#include <UASManager.h>
+#include <UAS.h>
+#include <SlugsMAV.h>
+#include "QGC.h"
+
+SlugsControlWidget::SlugsControlWidget(QWidget *parent) : QWidget(parent),
+    uas(0),
+    uasMode(0),
+    uasNavMode(0),
+    engineOn(false)
+{
+    ui.setupUi(this);
+
+    connect(UASManager::instance(), SIGNAL(activeUASSet(UASInterface*)), this, SLOT(setUAS(UASInterface*)));
+
+    // System modes
+    ui.modeComboBox->clear();
+    int modes[] = {
+        MAV_MODE_PREFLIGHT,
+        MAV_MODE_FLAG_MANUAL_INPUT_ENABLED,
+        MAV_MODE_FLAG_STABILIZE_ENABLED | MAV_MODE_FLAG_MANUAL_INPUT_ENABLED,
+        MAV_MODE_FLAG_STABILIZE_ENABLED | MAV_MODE_FLAG_AUTO_ENABLED,
+        MAV_MODE_FLAG_MANUAL_INPUT_ENABLED | MAV_MODE_FLAG_TEST_ENABLED,
+    };
+    for (int i = 0; i < sizeof(modes) / sizeof(int); i++) {
+        int mode = modes[i];
+        ui.modeComboBox->insertItem(i, UAS::getShortModeTextFor(mode).remove(0, 2), mode);
+    }
+    connect(ui.modeComboBox, SIGNAL(activated(int)), this, SLOT(setMode(int)));
+    connect(ui.setModeButton, SIGNAL(clicked()), this, SLOT(transmitMode()));
+
+    uasMode = ui.modeComboBox->itemData(ui.modeComboBox->currentIndex()).toInt();
+
+    ui.modeComboBox->setCurrentIndex(0);
+
+    // Navigation modes
+    ui.navModeComboBox->clear();
+    int navModes[] = {
+    #ifdef MAVLINK_ENABLED_SLUGS
+        SLUGS_MODE_PASSTHROUGH,
+        /*SLUGS_MODE_SELECTIVE_PASSTHROUGH*/
+        SLUGS_MODE_RETURNING,
+        SLUGS_MODE_MID_LEVEL,
+        SLUGS_MODE_WAYPOINT,
+        SLUGS_MODE_ISR,
+        SLUGS_MODE_LINE_PATROL,
+    #endif
+    };
+    for (int i = 0; i < sizeof(navModes) / sizeof(int); i++) {
+        int mode = navModes[i];
+        ui.navModeComboBox->insertItem(i, SlugsMAV::getSlugsNavModeText(mode), mode);
+    }
+    connect(ui.navModeComboBox, SIGNAL(activated(int)), this, SLOT(setNavMode(int)));
+    connect(ui.setNavModeButton, SIGNAL(clicked()), this, SLOT(transmitNavMode()));
+
+    uasNavMode = ui.navModeComboBox->itemData(ui.navModeComboBox->currentIndex()).toInt();
+
+    ui.navModeComboBox->setCurrentIndex(0);
+
+    ui.gridLayout->setAlignment(Qt::AlignTop);
+
+}
+
+void SlugsControlWidget::setUAS(UASInterface* uas)
+{
+    if (this->uas)
+    {
+        UASInterface* oldUAS = UASManager::instance()->getUASForId(this->uas);
+        disconnect(ui.controlButton, SIGNAL(clicked()), oldUAS, SLOT(armSystem()));
+        disconnect(ui.liftoffButton, SIGNAL(clicked()), oldUAS, SLOT(launch()));
+        disconnect(ui.landButton, SIGNAL(clicked()), oldUAS, SLOT(home()));
+        disconnect(ui.shutdownButton, SIGNAL(clicked()), oldUAS, SLOT(shutdown()));
+        //connect(ui.setHomeButton, SIGNAL(clicked()), uas, SLOT(setLocalOriginAtCurrentGPSPosition()));
+        disconnect(uas, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateMode(int,QString,QString)));
+        disconnect(uas,SIGNAL(navModeChanged(int,QString,QString)), this, SLOT(updateNavMode(int,QString,QString)));
+        disconnect(uas, SIGNAL(statusChanged(int)), this, SLOT(updateState(int)));
+    }
+
+    // Connect user interface controls
+    if (uas)
+    {
+        connect(ui.controlButton, SIGNAL(clicked()), this, SLOT(cycleContextButton()));
+        connect(ui.liftoffButton, SIGNAL(clicked()), uas, SLOT(launch()));
+        connect(ui.landButton, SIGNAL(clicked()), uas, SLOT(home()));
+        connect(ui.shutdownButton, SIGNAL(clicked()), uas, SLOT(shutdown()));
+        //connect(ui.setHomeButton, SIGNAL(clicked()), uas, SLOT(setLocalOriginAtCurrentGPSPosition()));
+        connect(uas, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateMode(int,QString,QString)));
+        connect(uas, SIGNAL(navModeChanged(int,QString,QString)), this, SLOT(updateNavMode(int,QString,QString)));
+        connect(uas, SIGNAL(statusChanged(int)), this, SLOT(updateState(int)));
+
+        ui.controlStatusLabel->setText(tr("Connected to ") + uas->getUASName());
+
+        this->uas = uas->getUASID();
+        setBackgroundColor(uas->getColor());
+    }
+    else
+    {
+        this->uas = -1;
+    }
+}
+
+SlugsControlWidget::~SlugsControlWidget()
+{
+
+}
+
+void SlugsControlWidget::updateStatemachine()
+{
+
+    if (engineOn)
+    {
+        ui.controlButton->setText(tr("DISARM SYSTEM"));
+    }
+    else
+    {
+        ui.controlButton->setText(tr("ARM SYSTEM"));
+    }
+}
+
+/**
+ * Set the background color based on the MAV color. If the MAV is selected as the
+ * currently actively controlled system, the frame color is highlighted
+ */
+void SlugsControlWidget::setBackgroundColor(QColor color)
+{
+    // UAS color
+    QColor uasColor = color;
+    QString colorstyle;
+    QString borderColor = "#4A4A4F";
+    borderColor = "#FA4A4F";
+    uasColor = uasColor.darker(900);
+    colorstyle = colorstyle.sprintf("QLabel { border-radius: 3px; padding: 0px; margin: 0px; background-color: #%02X%02X%02X; border: 0px solid %s; }",
+                                    uasColor.red(), uasColor.green(), uasColor.blue(), borderColor.toStdString().c_str());
+    setStyleSheet(colorstyle);
+    QPalette palette = this->palette();
+    palette.setBrush(QPalette::Window, QBrush(uasColor));
+    setPalette(palette);
+    setAutoFillBackground(true);
+}
+
+
+void SlugsControlWidget::updateMode(int uas,QString mode,QString description)
+{
+    Q_UNUSED(uas);
+    Q_UNUSED(mode);
+    Q_UNUSED(description);
+}
+
+void SlugsControlWidget::updateNavMode(int uas,QString mode,QString description)
+{
+    Q_UNUSED(uas);
+    Q_UNUSED(mode);
+    Q_UNUSED(description);
+}
+
+void SlugsControlWidget::updateState(int state)
+{
+    switch (state)
+    {
+    case (int)MAV_STATE_ACTIVE:
+        engineOn = true;
+        ui.controlButton->setText(tr("DISARM SYSTEM"));
+        break;
+    case (int)MAV_STATE_STANDBY:
+        engineOn = false;
+        ui.controlButton->setText(tr("ARM SYSTEM"));
+        break;
+    }
+}
+
+/**
+ * Called by the button
+ */
+void SlugsControlWidget::setMode(int mode)
+{
+    // Adapt context button mode
+    uasMode = ui.modeComboBox->itemData(mode).toInt();
+    ui.modeComboBox->blockSignals(true);
+    ui.modeComboBox->setCurrentIndex(mode);
+    ui.modeComboBox->blockSignals(false);
+
+    emit changedMode(mode);
+}
+
+void SlugsControlWidget::transmitMode()
+{
+    UASInterface* mav = UASManager::instance()->getUASForId(this->uas);
+    if (mav)
+    {
+        // include armed state
+        if (engineOn)
+            uasMode |= MAV_MODE_FLAG_SAFETY_ARMED;
+        else
+            uasMode &= ~MAV_MODE_FLAG_SAFETY_ARMED;
+
+        mav->setMode(uasMode);
+        QString mode = ui.modeComboBox->currentText();
+
+        ui.lastActionLabel->setText(QString("Sent new mode %1 to %2").arg(mode).arg(mav->getUASName()));
+    }
+}
+
+/**
+ * Called by the nav mode button
+ */
+void SlugsControlWidget::setNavMode(int mode)
+{
+    // Adapt context button mode
+    uasNavMode = ui.navModeComboBox->itemData(mode).toInt();
+    ui.navModeComboBox->blockSignals(true);
+    ui.navModeComboBox->setCurrentIndex(mode);
+    ui.navModeComboBox->blockSignals(false);
+
+    emit changedNavMode(mode);
+}
+
+void SlugsControlWidget::transmitNavMode()
+{
+    UASInterface* mav = UASManager::instance()->getUASForId(this->uas);
+    if (!mav) return;
+
+    QString mode = ui.navModeComboBox->currentText();
+    SlugsMAV* slugsMav;
+
+    if (mav->getAutopilotType() != MAV_AUTOPILOT_SLUGS) {
+        ui.lastActionLabel->setText(QString("Cannot set slugs nav mode %1 on non-slugs MAV").arg(mode));
+        return;
+    }
+    slugsMav = static_cast<SlugsMAV*>(mav);
+
+    slugsMav->setNavMode(uasNavMode);
+
+    ui.lastActionLabel->setText(QString("Sent new mode %1 to %2").arg(mode).arg(mav->getUASName()));
+}
+
+void SlugsControlWidget::cycleContextButton()
+{
+    UAS* mav = dynamic_cast<UAS*>(UASManager::instance()->getUASForId(this->uas));
+    if (mav)
+    {
+
+        if (!engineOn)
+        {
+            mav->armSystem();
+            ui.lastActionLabel->setText(QString("Enabled motors on %1").arg(mav->getUASName()));
+        } else {
+            mav->disarmSystem();
+            ui.lastActionLabel->setText(QString("Disabled motors on %1").arg(mav->getUASName()));
+        }
+        // Update state now and in several intervals when MAV might have changed state
+        updateStatemachine();
+
+        QTimer::singleShot(50, this, SLOT(updateStatemachine()));
+        QTimer::singleShot(200, this, SLOT(updateStatemachine()));
+
+    }
+
+}
+

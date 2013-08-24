@@ -43,6 +43,7 @@ This file is part of the QGROUNDCONTROL project
 #include "UASInterface.h"
 #include "UASManager.h"
 #include "UASControlWidget.h"
+#include "SlugsControlWidget.h"
 #include "UASInfoWidget.h"
 #include "WaypointList.h"
 #include "CameraView.h"
@@ -421,6 +422,7 @@ protected:
 
     // Dock widgets
     QPointer<QDockWidget> controlDockWidget;
+    QPointer<QDockWidget> slugsControlDockWidget;
     QPointer<QDockWidget> controlParameterWidget;
     QPointer<QDockWidget> infoDockWidget;
     QPointer<QDockWidget> cameraDockWidget;
