@@ -42,6 +42,8 @@ class SlugsMAV : public UAS
 public:
     SlugsMAV(MAVLinkProtocol* mavlink, int id = 0);
     //~SlugsMAV(void);
+    /** @brief Gets current navigation mode value. */
+    int getNavMode();
     /** @brief Sets the SLUGS navigation mode. */
     void setNavMode(int navNavMode);
     /** @brief Returns the name of the SLUGS navigation mode. */

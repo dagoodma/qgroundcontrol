@@ -79,7 +79,6 @@ SlugsControlWidget::SlugsControlWidget(QWidget *parent) : QWidget(parent),
     #ifdef MAVLINK_ENABLED_SLUGS
         SLUGS_MODE_PASSTHROUGH,
         /*SLUGS_MODE_SELECTIVE_PASSTHROUGH*/
-        SLUGS_MODE_RETURNING,
         SLUGS_MODE_MID_LEVEL,
         SLUGS_MODE_WAYPOINT,
         SLUGS_MODE_ISR,

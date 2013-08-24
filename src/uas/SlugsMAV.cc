@@ -105,6 +105,14 @@ QString SlugsMAV::getSlugsNavModeText(int mode) {
 }
 
 /**
+ * @return Value corresponding to current navigation mode.
+ */
+int SlugsMAV::getNavMode() {
+
+    return this->navMode;
+}
+
+/**
  * @param newNavMode SLUGS navigation mode to set.
  */
 void SlugsMAV::setNavMode(int newNavMode) {

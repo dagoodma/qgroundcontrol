@@ -56,6 +56,8 @@ public slots:
     void updateState(UASInterface* system, QString name, QString description);
     /** @brief Set the system mode */
     void updateMode(int system, QString name, QString description);
+    /** @brief Set the navigation mode */
+    void updateNavMode(int system, int mode, QString name);
     /** @brief Update the system name */
     void updateName(const QString& name);
     /** @brief Set the MAV system type */
@@ -97,6 +99,7 @@ protected:
     QLabel* toolBarSafetyLabel;
     QLabel* toolBarModeLabel;
     QLabel* toolBarStateLabel;
+    QLabel* toolBarNavModeLabel; // TODO wrap this to hide from non-slugs somehow
     QLabel* toolBarWpLabel;
     QLabel* toolBarDistLabel;
     QLabel* toolBarMessageLabel;
@@ -112,6 +115,7 @@ protected:
     float altitudeRel;
     QString state;
     QString mode;
+    QString navMode;
     QString systemName;
     QString lastSystemMessage;
     quint64 lastSystemMessageTimeMs;
