@@ -78,7 +78,7 @@ SlugsControlWidget::SlugsControlWidget(QWidget *parent) : QWidget(parent),
     int navModes[] = {
     #ifdef MAVLINK_ENABLED_SLUGS
         SLUGS_MODE_PASSTHROUGH,
-        /*SLUGS_MODE_SELECTIVE_PASSTHROUGH*/
+        SLUGS_MODE_SELECTIVE_PASSTHROUGH,
         SLUGS_MODE_MID_LEVEL,
         SLUGS_MODE_WAYPOINT,
         SLUGS_MODE_ISR,
@@ -111,7 +111,7 @@ void SlugsControlWidget::setUAS(UASInterface* uas)
         disconnect(ui.shutdownButton, SIGNAL(clicked()), oldUAS, SLOT(shutdown()));
         //connect(ui.setHomeButton, SIGNAL(clicked()), uas, SLOT(setLocalOriginAtCurrentGPSPosition()));
         disconnect(uas, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateMode(int,QString,QString)));
-        disconnect(uas,SIGNAL(navModeChanged(int,QString,QString)), this, SLOT(updateNavMode(int,QString,QString)));
+        disconnect(uas,SIGNAL(navModeChanged(int,int,QString)), this, SLOT(updateNavMode(int,int,QString)));
         disconnect(uas, SIGNAL(statusChanged(int)), this, SLOT(updateState(int)));
     }
 
@@ -124,7 +124,7 @@ void SlugsControlWidget::setUAS(UASInterface* uas)
         connect(ui.shutdownButton, SIGNAL(clicked()), uas, SLOT(shutdown()));
         //connect(ui.setHomeButton, SIGNAL(clicked()), uas, SLOT(setLocalOriginAtCurrentGPSPosition()));
         connect(uas, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateMode(int,QString,QString)));
-        connect(uas, SIGNAL(navModeChanged(int,QString,QString)), this, SLOT(updateNavMode(int,QString,QString)));
+        connect(uas, SIGNAL(navModeChanged(int,int,QString)), this, SLOT(updateNavMode(int,int,QString)));
         connect(uas, SIGNAL(statusChanged(int)), this, SLOT(updateState(int)));
 
         ui.controlStatusLabel->setText(tr("Connected to ") + uas->getUASName());

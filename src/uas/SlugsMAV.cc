@@ -77,10 +77,9 @@ QString SlugsMAV::getSlugsNavModeText(int mode) {
     case SLUGS_MODE_LIFTOFF:
         return QString("LIFTOFF");
         break;
-    /*case SLUGS_MODE_SELECTIVE_PASSTHROUGH:
+    case SLUGS_MODE_SELECTIVE_PASSTHROUGH:
         return QString("SELECT_PT");
         break;
-    */
     case SLUGS_MODE_LOST:
         return QString("LOST");
         break;

@@ -124,7 +124,7 @@ void QGCToolBar::createUI()
     addWidget(toolBarStateLabel);
 
     toolBarNavModeLabel = new QLabel(this);
-    toolBarNavModeLabel->setToolTip(tr("Vehicle navigation mode"));
+    toolBarNavModeLabel->setMaximumWidth(0);
     toolBarNavModeLabel->setObjectName("toolBarNavModeLabel");
     toolBarNavModeLabel->setAlignment(Qt::AlignCenter);
     addWidget(toolBarNavModeLabel);
@@ -212,8 +212,7 @@ void QGCToolBar::resetToolbarUI()
     toolBarSafetyLabel->setText("----");
     toolBarModeLabel->setText("------");
     toolBarStateLabel->setText("------");
-    toolBarNavModeLabel->setText("-----");
-    toolBarNavModeLabel->hide();
+    toolBarNavModeLabel->setText("----");
     toolBarBatteryBar->setValue(0);
     toolBarBatteryBar->setDisabled(true);
     toolBarBatteryVoltageLabel->setText("xx.x V");
@@ -372,9 +371,11 @@ void QGCToolBar::setActiveUAS(UASInterface* active)
         toolBarBatteryBar->setEnabled(true);
         setSystemType(mav, mav->getSystemType());
 
+        // Show navigation mode if using SLUGS autopilot
         if (mav->getAutopilotType() == MAV_AUTOPILOT_SLUGS) {
             SlugsMAV* slugsMav = static_cast<SlugsMAV*>(mav);
-            qDebug() << "Working with the SLUGS autopilot: " << slugsMav->getNavMode();
+            toolBarNavModeLabel->setMaximumWidth(100);
+            toolBarNavModeLabel->setToolTip(tr("Vehicle navigation mode"));
             toolBarNavModeLabel->setText(slugsMav->getNavModeText(slugsMav->getNavMode()));
             toolBarNavModeLabel->show();
         }
