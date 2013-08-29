@@ -73,6 +73,7 @@ enum MAV_CMD
 	MAV_CMD_RETURN_TO_BASE=10011, /* Return vehicle to base. |0: return to base, 1: track mobile base|  */
 	MAV_CMD_STOP_RETURN_TO_BASE=10012, /* Stops the vehicle from returning to base and resumes flight.  | */
 	MAV_CMD_TURN_LIGHT=10013, /* Turns the vehicle's visible or infrared lights on or off. |0: visible lights, 1: infrared lights| 0: turn on, 1: turn off|  */
+	MAV_CMD_GET_MID_LEVEL_COMMANDS=10014, /* Requests vehicle to send current mid-level commands to ground station. | */
 };
 #endif
 
@@ -94,6 +95,24 @@ enum SLUGS_MODE
 	SLUGS_MODE_LINE_PATROL=10, /* Vehicle is patrolling along lines between waypoints. | */
 	SLUGS_MODE_GROUNDED=11, /* Vehicle is grounded or an error has occurred. | */
 	SLUGS_MODE_ENUM_END=12, /*  | */
+};
+#endif
+
+/** @brief These flags encode the control surfaces for selective passthrough mode. If a bit is set then the pilot console
+            has control of the surface, and if not then the autopilot has control of the surface. */
+#ifndef HAVE_ENUM_CONTROL_SURFACE_FLAG
+#define HAVE_ENUM_CONTROL_SURFACE_FLAG
+enum CONTROL_SURFACE_FLAG
+{
+	CONTROL_SURFACE_FLAG_RIGHT_FLAP=1, /* 0b00000001 Right flap control passes through to pilot console. | */
+	CONTROL_SURFACE_FLAG_LEFT_FLAP=2, /* 0b00000010 Left flap control passes through to pilot console. | */
+	CONTROL_SURFACE_FLAG_RIGHT_ELEVATOR=4, /* 0b00000100 Right elevator control passes through to pilot console. | */
+	CONTROL_SURFACE_FLAG_LEFT_ELEVATOR=8, /* 0b00001000 Left elevator control passes through to pilot console. | */
+	CONTROL_SURFACE_FLAG_RUDDER=16, /* 0b00010000 Rudder control passes through to pilot console. | */
+	CONTROL_SURFACE_FLAG_RIGHT_AILERON=32, /* 0b00100000 Right aileron control passes through to pilot console. | */
+	CONTROL_SURFACE_FLAG_LEFT_AILERON=64, /* 0b01000000 Left aileron control passes through to pilot console. | */
+	CONTROL_SURFACE_FLAG_THROTTLE=128, /* 0b10000000 Throttle control passes through to pilot console. | */
+	CONTROL_SURFACE_FLAG_ENUM_END=129, /*  | */
 };
 #endif
 
