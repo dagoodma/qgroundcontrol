@@ -38,9 +38,10 @@ This file is part of the QGROUNDCONTROL project
 #include <QPushButton>
 #include <ui_SlugsControl.h>
 #include <UASInterface.h>
+#include <SlugsMAV.h>
 
 /**
- * @brief Widget controlling a SLUGS MAV
+ * @brief Widget for controlling a SLUGS MAV.
  */
 class SlugsControlWidget : public QWidget
 {
@@ -49,43 +50,47 @@ class SlugsControlWidget : public QWidget
 public:
     SlugsControlWidget(QWidget *parent = 0);
     ~SlugsControlWidget();
-
-public slots:
-    /** @brief Set the system this widget controls */
-    void setUAS(UASInterface* uas);
-    /** @brief Trigger next context action */
-    void cycleContextButton();
-    /** @brief Set the operation mode of the MAV */
-    void setMode(int mode);
-    /** @brief Transmit the operation mode */
-    void transmitMode();
-    /** @brief Set the navigation mode of the SLUGS MAV */
-    void setNavMode(int mode);
-    /** @brief Transmit the navigation mode to the SLUGS */
-    void transmitNavMode();
-    /** @brief Update the mode */
-    void updateMode(int uas,QString mode,QString description);
-    /** @brief Update the navigation mode */
-    void updateNavMode(int uas,QString mode,QString description);
-    /** @brief Update state */
-    void updateState(int state);
-    /** @brief Update internal state machine */
-    void updateStatemachine();
-
-signals:
-    void changedMode(int);
-    void changedNavMode(int);
-
+    /** @brief Transmits the navigation mode to the MAV. */
+    void transmitNavigationMode(int mode);
 
 protected slots:
-    /** @brief Set the background color for the widget */
-    void setBackgroundColor(QColor color);
+    /** @brief Set the system this widget controls. */
+    void setUAS(UASInterface* uas);
+    /** @brief Arms or disarms the MAV's engines. */
+    void armDisarmButtonClicked();
+    /** @brief Updates armed/disarmed state of MAV. */
+    void updateArmDisarm(bool state);
+    /** @brief Requests mid-level commands from the MAV. */
+    void getMidLevelButtonClicked();
+    /** @brief Sends specifed mid-level commands to the MAV. */
+    void setMidLevelButtonClicked();
+    /** @brief Sets the mid-level parameters received from the MAV. */
+    void updateMidLevelParameters(int uas, double altitude, double airspeed, double turnrate);
+    /** @brief Sends selected control surfaces to MAV for selective passthrough mode. */
+    void setPassthroughButtonClicked();
+    /** @brief Sets the navigation mode and trasmits it to the MAV. */
+    void navigationModeButtonClicked(int mode);
+    /** @brief Sets the navigation mode and styles the corresponding button. */
+    void updateNavigationMode(int uas, int mode,QString description);
+
+#ifdef MAVLINK_ENABLED_SLUGS
+    void waypointModeButtonClicked() { navigationModeButtonClicked(SLUGS_MODE_WAYPOINT); }
+    void isrModeButtonClicked()  { navigationModeButtonClicked(SLUGS_MODE_ISR); }
+    void selectivePassthroughModeButtonClicked()  { navigationModeButtonClicked(SLUGS_MODE_SELECTIVE_PASSTHROUGH); }
+    void passthroughModeButtonClicked()  { navigationModeButtonClicked(SLUGS_MODE_PASSTHROUGH); }
+    void midLevelModeButtonClicked() { navigationModeButtonClicked(SLUGS_MODE_MID_LEVEL); }
+    void linePatrolModeButtonClicked() { navigationModeButtonClicked(SLUGS_MODE_LINE_PATROL); }
+#endif
+
+//protected slots:
+    ///** @brief Set the background color for the widget */
+    //void setBackgroundColor(QColor color);
 
 protected:
     int uas;                    ///< Reference to the current uas
-    unsigned int uasMode;       ///< Current uas mode
-    unsigned int uasNavMode;   ///< Current navigation mode
-    bool engineOn;              ///< Engine state
+    unsigned int uasNavigationModeSent;   ///< Current navigation mode sent
+    bool uasMidLevelRequestSent;    ///< Request for mid-level commands sent
+    //bool engineOn;              ///< Engine state
 
 private:
     Ui::slugsControl ui;
