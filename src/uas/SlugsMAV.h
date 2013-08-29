@@ -24,8 +24,6 @@ This file is part of the QGROUNDCONTROL project
 #ifndef _SLUGSMAV_H_
 #define _SLUGSMAV_H_
 
-#define MAVLINK_ENABLED_SLUGS
-
 #include "UAS.h"
 #include "mavlink.h"
 #include <QTimer>
@@ -50,11 +48,19 @@ public:
     QString getNavModeText(int mode);
     /** @brief Helper for getNavModeTex. */
     static QString getSlugsNavModeText(int mode);
-
+    /** @brief Sends a request for current mid-level commands. */
+    void requestMidLevelCommands();
+    /** @brief Sets mid-level commands. */
+    void setMidLevelCommands(double altitude, double airspeed, double turnrate);
+    /** @brief Sets the selective passthrough surfaces for manual control. */
+    void setPassthroughSurfaces(bool throttle, bool aileron, bool rudder, bool elevator);
 
 public slots:
     /** @brief Receive a MAVLink message from this MAV */
     void receiveMessage(LinkInterface* link, mavlink_message_t message);
+
+signals:
+    void midLevelCommandsChanged(int id, double altitude, double airspeed, double turnrate);
 
 };
  /*

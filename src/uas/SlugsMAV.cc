@@ -138,22 +138,7 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
 
     if (message.sysid == uasId) {
 #ifdef MAVLINK_ENABLED_SLUGS
-
         switch (message.msgid) {
-        /* Handled in UAS.cc where
-         *  navModeChanged(uasId, state.custom_mode, getNavModeText(state.custom_mode))
-         * is emitted.
-        // ----------- Handle SLUGS Specific Common Messages -----------
-        case MAVLINK_MSG_ID_HEARTBEAT:
-            // Check custom mode for slugs nav mode
-            SLUGS_MODE navModeTemp = mavlink_msg_heartbeat_get_custom_mode(message);
-            if (navMode != navModeTemp) {
-                navMode = navModeTemp;
-                emit slugsNavModeChanged(uasId, navModeTemp, getNavModeText(navModeTemp));
-            }
-            break;
-         */
-
         // --------------- Custom Slugs Message Handling ---------------
         case MAVLINK_MSG_ID_SENSOR_DIAG:
             // TODO handle sensor diagnostic message
@@ -195,9 +180,14 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
             // TODO handle boot message
             break;
         case MAVLINK_MSG_ID_MID_LVL_CMDS:
-            // TODO handle mid-level command message
+            qDebug() << "Got mid-level command message: altitude=" << mavlink_msg_mid_lvl_cmds_get_hCommand(&message)
+                     << ", airspeed=" << mavlink_msg_mid_lvl_cmds_get_uCommand(&message)
+                     << ", turnrate=" << mavlink_msg_mid_lvl_cmds_get_rCommand(&message);
+            emit midLevelCommandsChanged(uasId, (double)mavlink_msg_mid_lvl_cmds_get_hCommand(&message),
+                                         (double)mavlink_msg_mid_lvl_cmds_get_uCommand(&message),
+                                         (double)mavlink_msg_mid_lvl_cmds_get_rCommand(&message));
             break;
-        }
+        } // switch
 
 
         /*
@@ -237,6 +227,54 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
     } // (message.sysid == uasId)
 }
 
+void SlugsMAV::requestMidLevelCommands() {
+#ifdef MAVLINK_ENABLED_SLUGS
+    mavlink_message_t msg;
+    mavlink_msg_command_long_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, (uint8_t)uasId, 0,
+                                  MAV_CMD_GET_MID_LEVEL_COMMANDS,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+    sendMessage(msg);
+    qDebug() << "Requesting mid-level commands from system " << uasId;
+#endif
+}
+
+/**
+ * @param altitude To hold in meters.
+ * @param airspeed To hold in meters per second.
+ * @param turnrate To hold in radians per second.
+ */
+void SlugsMAV::setMidLevelCommands(double altitude, double airspeed, double turnrate) {
+#ifdef MAVLINK_ENABLED_SLUGS
+    mavlink_message_t msg;
+    mavlink_msg_mid_lvl_cmds_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, (uint8_t)uasId,
+                                  static_cast<float>(altitude), static_cast<float>(airspeed), static_cast<float>(turnrate));
+    sendMessage(msg);
+
+    qDebug() << "Setting mid-level commands for system " << uasId << ": altitude=" << altitude
+             << ", airspeed=" << airspeed << ", turnrate=" << turnrate;
+#endif
+}
+
+/**
+ * @param throttle Whether pilot console controls throttle.
+ * @param ailerons Whether pilot console controls ailerons.
+ * @param rudder Whether pilot console controls rudder.
+ * @param elevator Whether pilot console controls elevator.
+ */
+void SlugsMAV::setPassthroughSurfaces(bool throttle, bool ailerons, bool rudder, bool elevator) {
+#ifdef MAVLINK_ENABLED_SLUGS
+    uint16_t passthroughBitfield = 0;
+    if (throttle) passthroughBitfield += CONTROL_SURFACE_FLAG_THROTTLE;
+    if (ailerons) passthroughBitfield += CONTROL_SURFACE_FLAG_LEFT_AILERON + CONTROL_SURFACE_FLAG_RIGHT_AILERON;
+    if (rudder) passthroughBitfield += CONTROL_SURFACE_FLAG_RUDDER;
+    if (elevator) passthroughBitfield += CONTROL_SURFACE_FLAG_LEFT_ELEVATOR + CONTROL_SURFACE_FLAG_RIGHT_ELEVATOR;
+
+    qDebug() << "Changing passthrough surface selection " << passthroughBitfield;
+
+    mavlink_message_t msg;
+    mavlink_msg_ctrl_srfc_pt_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, 0, passthroughBitfield);
+    sendMessage(msg);
+#endif
+}
 
 /*
 void SlugsMAV::emitSignals (void)
