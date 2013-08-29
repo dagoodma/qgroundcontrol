@@ -143,6 +143,11 @@ QGCToolBar QLabel#toolBarStateLabel {
     font-size: 15pt;
 }
 
+QGCToolBar QLabel#toolBarNavModeLabel {
+    color: #FFFFFF;
+    font-size: 15pt;
+}
+
 QGCToolBar QLabel#toolBarBatteryVoltageLabel {
     color: #0F0;
     font-size: 15pt;
