@@ -43,7 +43,6 @@ This file is part of the QGROUNDCONTROL project
 #include "UASInterface.h"
 #include "UASManager.h"
 #include "UASControlWidget.h"
-#include "SlugsControlWidget.h"
 #include "UASInfoWidget.h"
 #include "WaypointList.h"
 #include "CameraView.h"
@@ -68,12 +67,11 @@ This file is part of the QGROUNDCONTROL project
 #include "QGCGoogleEarthView.h"
 #endif
 #include "QGCToolBar.h"
-//#include "SlugsDataSensorView.h"
 #include "LogCompressor.h"
 
-//#include "SlugsHilSim.h"
-
-//#include "SlugsPadCameraControl.h"
+#ifdef MAVLINK_ENABLED_SLUGS
+#include "SlugsTabbedControlWidget.h"
+#endif
 #include "UASControlParameters.h"
 #include "QGCMAVLinkInspector.h"
 #include "QGCMAVLinkLogPlayer.h"
@@ -422,7 +420,7 @@ protected:
 
     // Dock widgets
     QPointer<QDockWidget> controlDockWidget;
-    QPointer<QDockWidget> slugsControlDockWidget;
+    QPointer<QDockWidget> slugsTabbedControlDockWidget;
     QPointer<QDockWidget> controlParameterWidget;
     QPointer<QDockWidget> infoDockWidget;
     QPointer<QDockWidget> cameraDockWidget;
@@ -445,9 +443,6 @@ protected:
     QPointer<QDockWidget> hsiDockWidget;
     QPointer<QDockWidget> rcViewDockWidget;
     QPointer<QDockWidget> hudDockWidget;
-    QPointer<QDockWidget> slugsDataWidget;
-    QPointer<QDockWidget> slugsHilSimWidget;
-    QPointer<QDockWidget> slugsCamControlWidget;
 
     QPointer<QGCToolBar> toolBar;
     QPointer<QGCStatusBar> customStatusBar;

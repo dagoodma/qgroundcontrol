@@ -72,7 +72,9 @@ This file is part of the QGROUNDCONTROL project
 
 // FIXME Move
 #include "PxQuadMAV.h"
+#ifdef MAVLINK_ENABLED_SLUGS
 #include "SlugsMAV.h"
+#endif
 
 #include "LogCompressor.h"
 
@@ -529,10 +531,12 @@ void MainWindow::buildCommonWidgets()
     createDockWidget(simView,new UASControlWidget(this),tr("Control"),"UNMANNED_SYSTEM_CONTROL_DOCKWIDGET",VIEW_SIMULATION,Qt::LeftDockWidgetArea);
 
     {
-        QAction* tempAction = ui.menuTools->addAction(tr("SLUGS Control"));
+#ifdef MAVLINK_ENABLED_SLUGS
+        QAction* tempAction = ui.menuTools->addAction(tr("SLUGS View"));
         tempAction->setCheckable(true);
         connect(tempAction,SIGNAL(triggered(bool)),this, SLOT(showTool(bool)));
-        createDockWidget(simView,new SlugsControlWidget(this),tr("SLUGS Control"),"UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET",VIEW_SIMULATION,Qt::LeftDockWidgetArea);
+        createDockWidget(simView,new SlugsTabbedControlWidget(this),tr("SLUGS View"),"UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET",VIEW_SIMULATION,Qt::LeftDockWidgetArea);
+#endif
     }
 
     createDockWidget(plannerView,new UASListWidget(this),tr("Unmanned Systems"),"UNMANNED_SYSTEM_LIST_DOCKWIDGET",VIEW_MISSION,Qt::LeftDockWidgetArea);
@@ -752,10 +756,12 @@ void MainWindow::loadDockWidget(QString name)
     {
         createDockWidget(centerStack->currentWidget(),new UASControlWidget(this),tr("Control"),"UNMANNED_SYSTEM_CONTROL_DOCKWIDGET",currentView,Qt::LeftDockWidgetArea);
     }
+#ifdef MAVLINK_ENABLED_SLUGS
     else if (name == "UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET")
     {
-        createDockWidget(centerStack->currentWidget(),new SlugsControlWidget(this),tr("SLUGS Control"),"UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET",currentView,Qt::LeftDockWidgetArea);
+        createDockWidget(centerStack->currentWidget(),new SlugsTabbedControlWidget(this),tr("SLUGS View"),"UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET",currentView,Qt::LeftDockWidgetArea);
     }
+#endif
     else if (name == "UNMANNED_SYSTEM_LIST_DOCKWIDGET")
     {
         createDockWidget(centerStack->currentWidget(),new UASListWidget(this),tr("Unmanned Systems"),"UNMANNED_SYSTEM_LIST_DOCKWIDGET",currentView,Qt::RightDockWidgetArea);
@@ -1945,10 +1951,12 @@ void MainWindow::loadViewState()
             {
                 controlDockWidget->hide();
             }
-            if (slugsControlDockWidget)
+#ifdef MAVLINK_ENABLED_SLUGS
+            if (slugsTabbedControlDockWidget)
             {
-                slugsControlDockWidget->hide();
+                slugsTabbedControlDockWidget->hide();
             }
+#endif
             if (listDockWidget)
             {
                 listDockWidget->show();

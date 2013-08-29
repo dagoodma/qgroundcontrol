@@ -239,7 +239,8 @@ FORMS += src/ui/MainWindow.ui \
     src/ui/JoystickAxis.ui \
     src/ui/main/QGCViewModeSelection.ui \
     src/ui/main/QGCWelcomeMainWindow.ui \
-    src/ui/SlugsControl.ui
+    src/ui/SlugsControl.ui \
+    src/ui/SlugsTabbedControl.ui
 INCLUDEPATH += src \
     src/ui \
     src/ui/linechart \
@@ -343,7 +344,6 @@ HEADERS += src/MG.h \
     src/ui/QGCWaypointListMulti.h \
     src/ui/QGCUDPLinkConfiguration.h \
     src/ui/QGCSettingsWidget.h \
-    src/ui/uas/UASControlParameters.h \
     src/uas/QGCUASParamManager.h \
     src/ui/map/QGCMapWidget.h \
     src/ui/map/MAV2DIcon.h \
@@ -402,7 +402,8 @@ HEADERS += src/MG.h \
     src/ui/JoystickAxis.h \
     src/ui/main/QGCViewModeSelection.h \
     src/ui/main/QGCWelcomeMainWindow.h \
-    src/ui/uas/SlugsControlWidget.h
+    src/ui/uas/SlugsControlWidget.h \
+    src/ui/uas/SlugsTabbedControlWidget.h
 
 # Google Earth is only supported on Mac OS and Windows with Visual Studio Compiler
 macx|macx-g++|macx-g++42|win32-msvc2008|win32-msvc2010|win32-msvc2012::HEADERS += src/ui/map3D/QGCGoogleEarthView.h
@@ -527,7 +528,6 @@ SOURCES += src/main.cc \
     src/ui/QGCWaypointListMulti.cc \
     src/ui/QGCUDPLinkConfiguration.cc \
     src/ui/QGCSettingsWidget.cc \
-    src/ui/uas/UASControlParameters.cpp \
     src/uas/QGCUASParamManager.cc \
     src/ui/map/QGCMapWidget.cc \
     src/ui/map/MAV2DIcon.cc \
@@ -583,7 +583,8 @@ SOURCES += src/main.cc \
     src/ui/JoystickAxis.cc \
     src/ui/main/QGCViewModeSelection.cc \
     src/ui/main/QGCWelcomeMainWindow.cc \
-    src/ui/uas/SlugsControlWidget.cc
+    src/ui/uas/SlugsControlWidget.cc \
+    src/ui/uas/SlugsTabbedControlWidget.cpp
 
 # Enable Google Earth only on Mac OS and Windows with Visual Studio compiler
 macx|macx-g++|macx-g++42|win32-msvc2008|win32-msvc2010|win32-msvc2012::SOURCES += src/ui/map3D/QGCGoogleEarthView.cc
