@@ -54,6 +54,10 @@ public:
     void setMidLevelCommands(double altitude, double airspeed, double turnrate);
     /** @brief Sets the selective passthrough surfaces for manual control. */
     void setPassthroughSurfaces(bool throttle, bool aileron, bool rudder, bool elevator);
+    /** @brief Enables HIL mode (autopilot connects to simulink). */
+    void startHil();
+    /** @brief Disables  HIL mode. */
+    void stopHil();
 
 public slots:
     /** @brief Receive a MAVLink message from this MAV */

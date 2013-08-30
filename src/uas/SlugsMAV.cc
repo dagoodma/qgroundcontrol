@@ -205,3 +205,20 @@ void SlugsMAV::setPassthroughSurfaces(bool throttle, bool ailerons, bool rudder,
     sendMessage(msg);
 #endif
 }
+
+void SlugsMAV::startHil()
+{
+    if (hilEnabled) return;
+    hilEnabled = true;
+    mavlink_message_t msg;
+    mavlink_msg_set_mode_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, this->getUASID(), mode | MAV_MODE_FLAG_HIL_ENABLED, navMode);
+    sendMessage(msg);
+}
+
+void SlugsMAV::stopHil()
+{
+    mavlink_message_t msg;
+    mavlink_msg_set_mode_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, this->getUASID(), mode & !MAV_MODE_FLAG_HIL_ENABLED, navMode);
+    sendMessage(msg);
+    hilEnabled = false;
+}
