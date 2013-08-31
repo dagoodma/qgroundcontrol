@@ -191,6 +191,7 @@ public:
 
     QList<QAction*> listLinkMenuActions(void);
 
+
 public slots:
     /** @brief Shows a status message on the bottom status bar */
     void showStatusMessage(const QString& status, int timeout);
@@ -272,6 +273,25 @@ public slots:
 
     /** @brief Loads and shows the HIL Configuration Widget for the given UAS*/
     void showHILConfigurationWidget(UASInterface *uas);
+
+    /** @brief Toggles HIL mode on the selected mav.
+     *  @todo Hide this from non-slugs or find a new home
+     */
+    void toggleHil();
+
+    /** @brief Updates the HIL menu item with the correct label.
+     *  @todo Hide from non-slugs autopilots.
+     */
+    void updateHilLabel(void) {
+#ifdef MAVLINK_ENABLED_SLUGS
+        SlugsMAV *slugsMav = (SlugsMAV*)UASManager::instance()->getActiveUAS();
+        if (slugsMav) {
+            QString hilState = (!slugsMav->getHilState())? "Start" : "Stop";
+            ui.actionToggleHil->setText(hilState + " HIL");
+            ui.actionToggleHil->setToolTip(hilState + "s hardware in the loop mode");
+        }
+#endif
+    }
 
     void closeEvent(QCloseEvent* event);
 
@@ -504,6 +524,9 @@ private:
     bool dockWidgetTitleBarEnabled; ///< If enabled, dock widget titlebars are displayed when NOT in advanced mode.
     Ui::MainWindow ui;
 
+    // TODO hide this from non-slugs
+    UASInterface *uas;
+
     /** @brief Set the appropriate titlebar for a given dock widget.
       * Relies on the isAdvancedMode and dockWidgetTitleBarEnabled member variables.
       */
@@ -511,6 +534,7 @@ private:
 
     QString getWindowStateKey();
     QString getWindowGeometryKey();
+
 
 };
 

@@ -124,7 +124,8 @@ MainWindow::MainWindow(QWidget *parent):
     lowPowerMode(false),
     isAdvancedMode(false),
     dockWidgetTitleBarEnabled(true),
-    customMode(CUSTOM_MODE_NONE)
+    customMode(CUSTOM_MODE_NONE),
+    uas(0)
 {
     this->setAttribute(Qt::WA_DeleteOnClose);
     loadSettings();
@@ -231,6 +232,11 @@ void MainWindow::init()
     }
 
     connect(LinkManager::instance(), SIGNAL(newLink(LinkInterface*)), this, SLOT(addLink(LinkInterface*)));
+
+    // TODO hide slugs hil from non-slugs autopilots
+
+    connect(ui.actionToggleHil,SIGNAL(triggered()),this,SLOT(toggleHil()) );
+
 
     // Connect user interface devices
     emit initStatusChanged(tr("Initializing joystick interface"), Qt::AlignLeft | Qt::AlignBottom, QColor(62, 93, 141));
@@ -1629,7 +1635,6 @@ void MainWindow::commsWidgetDestroyed(QObject *obj)
 
 void MainWindow::setActiveUAS(UASInterface* uas)
 {
-    Q_UNUSED(uas);
     // Enable and rename menu
     //    ui.menuUnmanned_System->setTitle(uas->getUASName());
     //    if (!ui.menuUnmanned_System->isEnabled()) ui.menuUnmanned_System->setEnabled(true);
@@ -1640,6 +1645,30 @@ void MainWindow::setActiveUAS(UASInterface* uas)
         win->restoreState(settings.value(getWindowStateKey()).toByteArray(), QGC::applicationVersion());
     }
 
+    // Todo hide this from non-slugs
+    disconnect(this->uas, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateHilLabel()));
+    connect(uas, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateHilLabel()));
+    updateHilLabel();
+
+    this->uas = uas;
+}
+
+void MainWindow::toggleHil() {
+#ifdef MAVLINK_ENABLED_SLUGS
+    SlugsMAV *slugsMav = (SlugsMAV*)UASManager::instance()->getActiveUAS();
+    if (!slugsMav) return;
+
+    if (!slugsMav->getHilState()) {
+        slugsMav->startHil();
+        qDebug() << "HIL mode enabled on MAV " << slugsMav->getUASID();
+    }
+    else if (slugsMav->getHilState()) {
+        slugsMav->stopHil();
+        qDebug() << "HIL mode disabled on MAV " << slugsMav->getUASID();
+    }
+
+    updateHilLabel();
+#endif
 }
 
 void MainWindow::UASSpecsChanged(int uas)

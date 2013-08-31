@@ -281,6 +281,8 @@ public:
         return nedAttGlobalOffset;
     }
 
+    bool getHilState() { return hilEnabled; }
+
 #if defined(QGC_PROTOBUF_ENABLED) && defined(QGC_USE_PIXHAWK_MESSAGES)
     px::GLOverlay getOverlay()
     {
@@ -762,10 +764,10 @@ public slots:
 
 
     /** @brief Places the UAV in Hardware-in-the-Loop simulation status **/
-    void startHil();
+    virtual void startHil();
 
     /** @brief Stops the UAV's Hardware-in-the-Loop simulation status **/
-    void stopHil();
+    virtual void stopHil();
 
 
     /** @brief Stops the robot system. If it is an MAV, the robot starts the emergency landing procedure **/

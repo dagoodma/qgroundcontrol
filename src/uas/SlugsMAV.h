@@ -58,6 +58,7 @@ public:
     void startHil();
     /** @brief Disables  HIL mode. */
     void stopHil();
+    bool getHilState() { return (mode & MAV_MODE_FLAG_HIL_ENABLED) > 0; }
 
 public slots:
     /** @brief Receive a MAVLink message from this MAV */
