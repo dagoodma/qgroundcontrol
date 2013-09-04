@@ -236,6 +236,11 @@ public:
         return bearingToWaypoint;
     }
 
+    int getNextWaypointId() const
+    {
+        return nextWaypointId;
+    }
+
 
     void setRoll(double val)
     {
@@ -441,6 +446,7 @@ protected: //COMMENTS FOR TEST UNIT
     double distToWaypoint;       ///< Distance to next waypoint
     double groundSpeed;         ///< GPS Groundspeed
     double bearingToWaypoint;    ///< Bearing to next waypoint
+    int nextWaypointId;           ///< ID of next waypoint
     UASWaypointManager waypointManager;
 
     /// ATTITUDE

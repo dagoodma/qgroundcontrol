@@ -155,6 +155,7 @@ signals:
     void waypointViewOnlyListChanged(int uasid);            ///< emits signal that the list of editable waypoints has been changed
     void waypointViewOnlyChanged(int uasid, Waypoint* wp);  ///< emits signal that a single editable waypoint has been changed
     void currentWaypointChanged(quint16);           ///< emits the new current waypoint sequence number
+    void currentWaypointLegChanged(int uasid);      ///< emits signal that current waypoint leg changed
     void updateStatusString(const QString &);       ///< emits the current status string
     void waypointDistanceChanged(double distance);   ///< Distance to next waypoint changed (in meters)
 
