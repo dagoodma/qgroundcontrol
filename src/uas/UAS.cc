@@ -114,7 +114,7 @@ UAS::UAS(MAVLinkProtocol* protocol, int id) : UASInterface(),
     nedPosGlobalOffset(0,0,0),
     nedAttGlobalOffset(0,0,0),
 
-
+    nextWaypointId(0),
     waypointManager(this),
 
     #if defined(QGC_PROTOBUF_ENABLED) && defined(QGC_USE_PIXHAWK_MESSAGES)
@@ -1283,6 +1283,7 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
             mavlink_mission_current_t wpc;
             mavlink_msg_mission_current_decode(&message, &wpc);
             waypointManager.handleWaypointCurrent(message.sysid, message.compid, &wpc);
+            nextWaypointId = wpc.seq;
         }
             break;
 
