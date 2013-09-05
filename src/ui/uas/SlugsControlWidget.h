@@ -39,6 +39,9 @@ This file is part of the QGROUNDCONTROL project
 #include <ui_SlugsControl.h>
 #include <UASInterface.h>
 #include <SlugsMAV.h>
+#include <UASManager.h>
+#include <UAS.h>
+#include "QGC.h"
 
 /**
  * @brief Widget for controlling a SLUGS MAV.
@@ -75,7 +78,17 @@ protected slots:
 
 #ifdef MAVLINK_ENABLED_SLUGS
     void waypointModeButtonClicked() { navigationModeButtonClicked(SLUGS_MODE_WAYPOINT); }
-    void isrModeButtonClicked()  { navigationModeButtonClicked(SLUGS_MODE_ISR); }
+    void isrModeButtonClicked()  {
+
+        if (!uas) return;
+        UASInterface* mav = UASManager::instance()->getUASForId(this->uas);
+        if (!mav) return;
+        SlugsMAV* slugsMav = static_cast<SlugsMAV*>(mav);
+
+        // Loiter at current location
+        slugsMav->setIsrLocation(slugsMav->getLatitude(),slugsMav->getLongitude(),slugsMav->getAltitude());
+        navigationModeButtonClicked(SLUGS_MODE_ISR);
+    }
     void selectivePassthroughModeButtonClicked()  { navigationModeButtonClicked(SLUGS_MODE_SELECTIVE_PASSTHROUGH); }
     void passthroughModeButtonClicked()  { navigationModeButtonClicked(SLUGS_MODE_PASSTHROUGH); }
     void midLevelModeButtonClicked() { navigationModeButtonClicked(SLUGS_MODE_MID_LEVEL); }

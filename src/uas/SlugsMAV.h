@@ -58,7 +58,10 @@ public:
     void startHil();
     /** @brief Disables  HIL mode. */
     void stopHil();
+    /** @brief Returns whether the HIL flag is set on mode. */
     bool getHilState() { return (mode & MAV_MODE_FLAG_HIL_ENABLED) > 0; }
+    /** @brief Sets the current ISR location. */
+    void setIsrLocation(double lat, double lon, double alt);
 
 public slots:
     /** @brief Receive a MAVLink message from this MAV */

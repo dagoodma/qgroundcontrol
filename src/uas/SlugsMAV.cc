@@ -223,3 +223,12 @@ void SlugsMAV::stopHil()
     sendMessage(msg);
     //hilEnabled = false; // this will be set on next heartbeat
 }
+
+
+void SlugsMAV::setIsrLocation(double lat, double lon, double alt) {
+    mavlink_message_t msg;
+    mavlink_msg_isr_location_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, this->getUASID(),
+                                  (float)lat, (float)lon, (float)alt,0,0,0);
+    sendMessage(msg);
+    qDebug() << "Sent ISR location to mav: lat=" << lat << ", lon=" << lon << ", alt=" << alt;
+}

@@ -38,10 +38,6 @@ This file is part of the PIXHAWK project
 #include <QPalette>
 
 #include "SlugsControlWidget.h"
-#include <UASManager.h>
-#include <UAS.h>
-#include <SlugsMAV.h>
-#include "QGC.h"
 
 SlugsControlWidget::SlugsControlWidget(QWidget *parent) : QWidget(parent),
     uas(0),

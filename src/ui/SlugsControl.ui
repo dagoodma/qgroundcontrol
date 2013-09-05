@@ -400,13 +400,13 @@
            </font>
           </property>
           <property name="toolTip">
-           <string>Circles an ISR point.</string>
+           <string>Loiters by circling current location.</string>
           </property>
           <property name="statusTip">
-           <string>Circles an ISR point.</string>
+           <string>Loiters by circling current location.</string>
           </property>
           <property name="text">
-           <string>ISR</string>
+           <string>Loiter</string>
           </property>
          </widget>
         </item>
