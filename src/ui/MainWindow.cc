@@ -545,6 +545,13 @@ void MainWindow::buildCommonWidgets()
 #endif
     }
 
+    {
+        QAction* tempAction = ui.menuTools->addAction(tr("Messages"));
+        tempAction->setCheckable(true);
+        connect(tempAction,SIGNAL(triggered(bool)), this, SLOT(showTool(bool)));
+        createDockWidget(simView, new QGCMessageView(this), tr("Messages"),"MESSAGE_DEBUG_CONSOLE_DOCKWIDGET",VIEW_SIMULATION,Qt::BottomDockWidgetArea);
+    }
+
     createDockWidget(plannerView,new UASListWidget(this),tr("Unmanned Systems"),"UNMANNED_SYSTEM_LIST_DOCKWIDGET",VIEW_MISSION,Qt::LeftDockWidgetArea);
     createDockWidget(plannerView,new QGCWaypointListMulti(this),tr("Mission Plan"),"WAYPOINT_LIST_DOCKWIDGET",VIEW_MISSION,Qt::BottomDockWidgetArea);
 
@@ -775,6 +782,10 @@ void MainWindow::loadDockWidget(QString name)
     else if (name == "WAYPOINT_LIST_DOCKWIDGET")
     {
         createDockWidget(centerStack->currentWidget(),new QGCWaypointListMulti(this),tr("Mission Plan"),"WAYPOINT_LIST_DOCKWIDGET",currentView,Qt::BottomDockWidgetArea);
+    }
+    else if (name == "MESSAGE_DEBUG_CONSOLE_DOCKWIDGET")
+    {
+        createDockWidget(centerStack->currentWidget(),new QGCMessageView(this), tr("Messages"), "MESSAGE_DEBUG_CONSOLE_DOCKWIDGET",currentView, Qt::BottomDockWidgetArea); //Qt::BottomLeftCorner);
     }
     else if (name == "MAVLINK_INSPECTOR_DOCKWIDGET")
     {
