@@ -4,7 +4,7 @@
 #include <QWidget>
 #include "ui_SlugsTabbedControl.h"
 #include "MAVLinkDecoder.h"
-#include "QGCMessageView.h"
+//#include "QGCMessageView.h"
 #include "SlugsControlWidget.h"
 //#include "UASActionsWidget.h"
 //#include "UASQuickView.h"
@@ -19,7 +19,7 @@ public:
 private:
     MAVLinkDecoder *m_decoder;
     Ui::SlugsTabbedControl ui;
-    QGCMessageView *messageView;
+    //QGCMessageView *messageView;
     SlugsControlWidget *controlWidget;
 };
 
