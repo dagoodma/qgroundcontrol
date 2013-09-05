@@ -1284,6 +1284,9 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
             mavlink_msg_mission_current_decode(&message, &wpc);
             waypointManager.handleWaypointCurrent(message.sysid, message.compid, &wpc);
             nextWaypointId = wpc.seq;
+
+            emit waypointLegChanged(getUASID());
+            qDebug() << "Current waypoint leg changed to end at waypoint: " << wpc.seq;
         }
             break;
 

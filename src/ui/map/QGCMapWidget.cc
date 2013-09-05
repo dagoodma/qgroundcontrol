@@ -357,6 +357,7 @@ void QGCMapWidget::addUAS(UASInterface* uas)
 void QGCMapWidget::activeUASSet(UASInterface* uas)
 {
     // Only execute if proper UAS is set
+    UASInterface* oldUas = this->uas;
     this->uas = uas;
 
     // Disconnect old MAV manager
@@ -367,6 +368,8 @@ void QGCMapWidget::activeUASSet(UASInterface* uas)
         disconnect(currWPManager, SIGNAL(waypointEditableChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
         disconnect(this, SIGNAL(waypointCreated(Waypoint*)), currWPManager, SLOT(addWaypointEditable(Waypoint*)));
         disconnect(this, SIGNAL(waypointChanged(Waypoint*)), currWPManager, SLOT(notifyOfChangeEditable(Waypoint*)));
+
+        disconnect((UAS*)oldUas, SIGNAL(waypointLegChanged(int)), this, SLOT(updateWaypointList(int)));
     }
 
     // Attach the new waypoint manager if a new UAS was selected. Otherwise, indicate
@@ -382,9 +385,10 @@ void QGCMapWidget::activeUASSet(UASInterface* uas)
         // Connect the waypoint manager / data storage to the UI
         connect(currWPManager, SIGNAL(waypointEditableListChanged(int)), this, SLOT(updateWaypointList(int)));
         connect(currWPManager, SIGNAL(waypointEditableChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
-        connect(currWPManager, SIGNAL(currentWaypointLegChanged(int)), this, SLOT(updateWaypointList(int)));
         connect(this, SIGNAL(waypointCreated(Waypoint*)), currWPManager, SLOT(addWaypointEditable(Waypoint*)));
         connect(this, SIGNAL(waypointChanged(Waypoint*)), currWPManager, SLOT(notifyOfChangeEditable(Waypoint*)));
+
+        connect((UAS*)uas, SIGNAL(waypointLegChanged(int)), this, SLOT(updateWaypointList(int)));
     }
     else
     {

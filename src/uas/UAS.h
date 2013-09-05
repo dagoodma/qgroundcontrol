@@ -932,6 +932,7 @@ signals:
     void distToWaypointChanged(double val,QString name);
     void groundSpeedChanged(double val, QString name);
     void bearingToWaypointChanged(double val,QString name);
+    void waypointLegChanged(int uasid);      ///< emits signal that current waypoint leg changed
 
     //void primaryAltitudeChanged(UASInterface*, double altitude, quint64 usec);
     //void gpsAltitudeChanged(UASInterface*, double altitude, quint64 usec);
