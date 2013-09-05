@@ -149,8 +149,10 @@ QGCParamWidget::QGCParamWidget(UASInterface* uas, QWidget *parent) :
     connect(this, SIGNAL(requestParameter(int,int)), uas, SLOT(requestParameter(int,int)));
     connect(&retransmissionTimer, SIGNAL(timeout()), this, SLOT(retransmissionGuardTick()));
 
-    // Get parameters
-    if (uas) requestParameterList();
+    // Get parameters on startup (unless we are slugs)
+    if (uas && mav->getAutopilotType() != MAV_AUTOPILOT_SLUGS) {
+        requestParameterList();
+    }
 }
 
 void QGCParamWidget::loadSettings()
@@ -496,7 +498,7 @@ void QGCParamWidget::addParameter(int uas, int component, int paramCount, int pa
  */
 void QGCParamWidget::addParameter(int uas, int component, QString parameterName, QVariant value)
 {
-    //qDebug() << "PARAM WIDGET GOT PARAM:" << value;
+    //qDebug() << "PARAM WIDGET GOT PARAM:" << parameterName << "=" << value;
     Q_UNUSED(uas);
     // Reference to item in tree
     QTreeWidgetItem* parameterItem = NULL;
