@@ -139,11 +139,13 @@ void QGCToolBar::createUI()
     toolBarBatteryBar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
     addWidget(toolBarBatteryBar);
 
+    /*
     toolBarBatteryVoltageLabel = new QLabel(this);
     toolBarBatteryVoltageLabel->setToolTip(tr("Battery voltage"));
     toolBarBatteryVoltageLabel->setObjectName("toolBarBatteryVoltageLabel");
     toolBarBatteryVoltageLabel->setAlignment(Qt::AlignCenter);
     addWidget(toolBarBatteryVoltageLabel);
+    */
 
     toolBarWpLabel = new QLabel(this);
     toolBarWpLabel->setToolTip(tr("Current waypoint"));
@@ -215,7 +217,7 @@ void QGCToolBar::resetToolbarUI()
     toolBarNavModeLabel->setText("----");
     toolBarBatteryBar->setValue(0);
     toolBarBatteryBar->setDisabled(true);
-    toolBarBatteryVoltageLabel->setText("xx.x V");
+    //toolBarBatteryVoltageLabel->setText("xx.x V");
     toolBarWpLabel->setText("WP--");
     toolBarDistLabel->setText("--- ---- m");
     toolBarMessageLabel->clear();
@@ -402,7 +404,11 @@ void QGCToolBar::updateView()
     // XXX add also rel altitude
     toolBarDistLabel->setText(QString("%1 m MSL").arg(altitudeMSL, 6, 'f', 2, '0'));
     toolBarWpLabel->setText(tr("WP%1").arg(wpId));
+
+    QString batteryVoltageText = tr("%1 V").arg(batteryVoltage, 4, 'f', 1, ' ');
+    //toolBarBatteryBar->setTextVisible(false);
     toolBarBatteryBar->setValue(batteryPercent);
+    toolBarBatteryBar->setFormat(batteryVoltageText);
     if (batteryPercent < 30 && toolBarBatteryBar->value() >= 30) {
         if (MainWindow::instance()->getStyle() == MainWindow::QGC_MAINWINDOW_STYLE_LIGHT)
         {
@@ -422,8 +428,7 @@ void QGCToolBar::updateView()
             toolBarBatteryBar->setStyleSheet("QProgressBar {color: #000} QProgressBar QProgressBar::chunk { background-color: #FF0}");
         }
     }
-
-    toolBarBatteryVoltageLabel->setText(tr("%1 V").arg(batteryVoltage, 4, 'f', 1, ' '));
+    //toolBarBatteryVoltageLabel->setText(tr("%1 V").arg(batteryVoltage, 4, 'f', 1, ' '));
     toolBarStateLabel->setText(QString("%1").arg(state));
     toolBarModeLabel->setText(QString("%1").arg(mode));
     toolBarNavModeLabel->setText(QString("%1").arg(navMode));
