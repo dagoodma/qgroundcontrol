@@ -18,6 +18,7 @@ private:
     Ui::SlugsTabbedControl ui;
     //QGCMessageView *messageView;
     SlugsControlWidget *controlWidget;
+    SlugsStatusWidget *statusWidget;
 };
 
 #endif // SLUGSTABBEDCONTROLWIDGET_H

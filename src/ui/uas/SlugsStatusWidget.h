@@ -43,6 +43,7 @@ public:
 public slots:
     void setUAS(UASInterface* uas);
     void receiveHeartbeat(UASInterface* uas);
+    void heartbeatTimeout(bool timeout, unsigned int ms);
 //    void updateName(const QString& name);
 //    void updateLocalPosition(UASInterface* uas, double x, double y, double z, quint64 usec);
 //    void updateGlobalPosition(UASInterface* uas, double lon, double lat, double alt, quint64 usec);
@@ -69,7 +70,6 @@ protected:
     bool timeout;
     bool iconIsRed;
     bool disconnected;
-    int timeRemaining;
     //float chargeAviLevel;
     //float chargeCriLevel;
     float ctrlLoad;
@@ -87,6 +87,8 @@ protected:
     static const int errorUpdateInterval = 200;
     bool lowPowerModeEnabled; ///< Low power mode reduces update rates
     unsigned int generalUpdateCount; ///< Skip counter for updates
+
+private:
     Ui::slugsStatus *m_ui;
     //virtual void paintEvent(QPaintEvent *);
 

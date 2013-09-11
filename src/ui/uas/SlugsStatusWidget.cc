@@ -47,11 +47,10 @@ This file is part of the QGROUNDCONTROL project
 SlugsStatusWidget::SlugsStatusWidget(QWidget *parent) :
     QWidget(parent),
     uas(0),
+    z(0),
     startTime(0),
     timeout(false),
-    iconIsRed(true),
     disconnected(true),
-    timeRemaining(0),
     totalSpeed(0),
     alt(0),
     localFrame(false),
@@ -75,6 +74,9 @@ SlugsStatusWidget::SlugsStatusWidget(QWidget *parent) :
 
     m_ui->setupUi(this);
 
+
+    refreshTimer = new QTimer(this);
+    connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
     connect(UASManager::instance(), SIGNAL(activeUASSet(UASInterface*)), this, SLOT(setUAS(UASInterface*)));
     if (UASManager::instance()->getActiveUAS())
     {
@@ -83,8 +85,12 @@ SlugsStatusWidget::SlugsStatusWidget(QWidget *parent) :
 }
 
 SlugsStatusWidget::~SlugsStatusWidget() {
-    if (refreshTimer) disconnect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
-    refreshTimer = NULL;
+    //if (refreshTimer) disconnect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
+    disconnect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
+    setUAS(NULL);
+
+
+    //delete m_ui;
 }
 
 
@@ -118,8 +124,7 @@ void SlugsStatusWidget::setUAS(UASInterface* uas) {
 //            disconnect((SlugsMAV*)(this->uas), SIGNAL(gpsFixChanged(UASInterface*, int)), this, SLOT(updateGpsFix(UASInterface*,int)));
 
         // Heartbeat fade
-        disconnect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
-        refreshTimer = NULL;
+        disconnect(this->uas, SIGNAL(heartbeatTimeout(bool, unsigned int)), this, SLOT(heartbeatTimeout(bool, unsigned int)));
 
     }
     if (uas) {
@@ -148,8 +153,8 @@ void SlugsStatusWidget::setUAS(UASInterface* uas) {
 //            connect((SlugsMAV*)(uas), SIGNAL(gpsFixChanged(UASInterface*, int)), this, SLOT(updateGpsFix(UASInterface*,int)));
 
         // Heartbeat fade
-        refreshTimer = new QTimer(this);
-        connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
+        //connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
+        connect(uas, SIGNAL(heartbeatTimeout(bool, unsigned int)), this, SLOT(heartbeatTimeout(bool, unsigned int)));
         if (lowPowerModeEnabled)
         {
             refreshTimer->start(updateInterval*3);
@@ -169,14 +174,25 @@ void SlugsStatusWidget::setUAS(UASInterface* uas) {
         //updateMode(uas->getUASID(), uas->getShortMode(), "");
         //updateState(uas, uas->getShortState(), "");
         setSystemType(uas, uas->getSystemType());
-    }
+    } // uas
 
+    this->uas = uas;
+
+}
+
+
+void SlugsStatusWidget::heartbeatTimeout(bool timeout, unsigned int ms)
+{
+    Q_UNUSED(ms);
+    this->timeout = timeout;
 }
 
 
 void SlugsStatusWidget::receiveHeartbeat(UASInterface* uas)
 {
-    heartbeatColor = uas->getColor();
+    Q_UNUSED(uas);
+    //heartbeatColor = uas->getColor();
+    heartbeatColor = Qt::green;
     QString colorstyle("QLabel { background-color: %1; }");
     m_ui->heartBeatLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
 
@@ -381,11 +397,9 @@ void SlugsStatusWidget::refresh()
 {
     if (generalUpdateCount == 4)
     {
-#if (QGC_EVENTLOOP_DEBUG)
-        // qDebug() << "EVENTLOOP:" << __FILE__ << __LINE__;
-#endif
+        // Update interface at 1/4th of speed
         generalUpdateCount = 0;
-        //// qDebug() << "UPDATING EVERYTHING";
+
         // State
         //m_ui->stateLabel->setText(state);
         //m_ui->statusTextLabel->setText(stateDesc);
@@ -406,18 +420,6 @@ void SlugsStatusWidget::refresh()
         // Thrust
         //m_ui->thrustBar->setValue(thrust * 100);
 
-        // Time Elapsed
-        //QDateTime time = MG::TIME::msecToQDateTime(uas->getUptime());
-
-        /*
-        quint64 filterTime = uas->getUptime() / 1000;
-        int sec = static_cast<int>(filterTime - static_cast<int>(filterTime / 60) * 60);
-        int min = static_cast<int>(filterTime / 60);
-        int hours = static_cast<int>(filterTime - min * 60 - sec);
-        QString timeText;
-        timeText = timeText.sprintf("%02d:%02d:%02d", hours, min, sec);
-        m_ui->timeElapsedLabel->setText(timeText);
-        */
     }
     generalUpdateCount++;
 
@@ -426,32 +428,32 @@ void SlugsStatusWidget::refresh()
         // CRITICAL CONDITION, NO HEARTBEAT
         disconnected = true;
 
-        QColor warnColor;
-        if (iconIsRed)
-        {
-            warnColor = Qt::red;
-        }
-        else
-        {
-            warnColor = Qt::darkRed;
+        QColor warnColor = Qt::red;
+
             refreshTimer->setInterval(errorUpdateInterval);
             refreshTimer->start();
-        }
-        QString style = QString("SlugsStatusWidget {background-color: %1;}").arg(warnColor.name());
-        this->setStyleSheet(style);
-        iconIsRed = !iconIsRed;
+
+        QString style = QString("QLabel {background-color: %1;}").arg(warnColor.name());
+        m_ui->heartBeatLabel->setStyleSheet(style);
     }
     else
     {
         // If we're not in low power mode, add the additional visual effect of
         // fading out the color of the heartbeat for this UAS.
-        if (!lowPowerModeEnabled)
-        {
+
+        //if (!lowPowerModeEnabled)
+        //{
             heartbeatColor = heartbeatColor.darker(110);
             QString colorstyle("QLabel {background-color: %1;}");
             m_ui->heartBeatLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
             refreshTimer->setInterval(updateInterval);
             refreshTimer->start();
-        }
+        //}
+        //*/
     }
+
+
+    QColor typeColor = (disconnected)? Qt::red : Qt::green;
+    QString typeStyle = QString("QLabel {background-color: %1;}").arg(typeColor.name());
+    m_ui->typeLabel->setStyleSheet(typeStyle);
 } // refresh()
