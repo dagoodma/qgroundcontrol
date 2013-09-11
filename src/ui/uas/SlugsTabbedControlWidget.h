@@ -4,11 +4,8 @@
 #include <QWidget>
 #include "ui_SlugsTabbedControl.h"
 #include "MAVLinkDecoder.h"
-//#include "QGCMessageView.h"
 #include "SlugsControlWidget.h"
-//#include "UASActionsWidget.h"
-//#include "UASQuickView.h"
-//#include "UASRawStatusView.h"
+#include "SlugsStatusWidget.h"
 class SlugsTabbedControlWidget : public QWidget
 {
     Q_OBJECT

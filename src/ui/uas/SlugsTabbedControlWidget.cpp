@@ -8,6 +8,8 @@ SlugsTabbedControlWidget::SlugsTabbedControlWidget(QWidget *parent) : QWidget(pa
     //ui.tabWidget->addTab(messageView,"Messages");
     ui.tabWidget->addTab(controlWidget,"Control");
 
+    //ui.statusWidget = new SlugsStatusWidget(this);
+
 }
 
 SlugsTabbedControlWidget::~SlugsTabbedControlWidget()

@@ -24,4 +24,72 @@ This file is part of the QGROUNDCONTROL project
 #ifndef SLUGSSTATUSWIDGET_H
 #define SLUGSSTATUSWIDGET_H
 
+#include <QWidget>
+#include <QString>
+#include <QTimer>
+#include <QMouseEvent>
+#include <UASInterface.h>
+#include "ui_SlugsStatus.h"
+
+
+class SlugsStatusWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    SlugsStatusWidget(QWidget *parent = 0);
+    ~SlugsStatusWidget();
+    void setSystemType(UASInterface* uas, unsigned int systemType);
+
+public slots:
+    void setUAS(UASInterface* uas);
+    void receiveHeartbeat(UASInterface* uas);
+//    void updateName(const QString& name);
+//    void updateLocalPosition(UASInterface* uas, double x, double y, double z, quint64 usec);
+//    void updateGlobalPosition(UASInterface* uas, double lon, double lat, double alt, quint64 usec);
+//    void updateGpsFix(UASInterface* uas, int fixQuality);
+//    void updateSpeed(UASInterface*, double x, double y, double z, quint64 usec);
+//    //void updateBattery(UASInterface* uas, double voltage, double current, double percent, int seconds);
+//    //void updateLoad(UASInterface* uas, double ctrlLoad, double sensLoad);
+//    //void setCriBatterySpecs();
+//    //void setAviBatterySpecs();
+    void refresh();
+    /** @brief Start widget updating */
+    //void showEvent(QShowEvent* event);
+    /** @brief Stop widget updating */
+    //void hideEvent(QHideEvent* event);
+//    void contextMenuEvent(QContextMenuEvent* event);
+
+protected:
+//    void changeEvent(QEvent *e);
+    UASInterface* uas;
+    QTimer* refreshTimer;
+    QColor heartbeatColor;
+    quint64 startTime;
+    int fixQuality;
+    bool timeout;
+    bool iconIsRed;
+    bool disconnected;
+    int timeRemaining;
+    //float chargeAviLevel;
+    //float chargeCriLevel;
+    float ctrlLoad;
+    float sensLoad;
+    //QString mode;
+    //double thrust; ///< Current vehicle thrust: 0 - 1.0 for 100% thrust
+    //QAction* setAviBatterySpecsAction;
+    //QAction* setCriBatterySpecsAction;
+    float z;
+    float totalSpeed;
+    float alt;
+    bool localFrame;
+    bool globalFrameKnown;
+    static const int updateInterval = 800;
+    static const int errorUpdateInterval = 200;
+    bool lowPowerModeEnabled; ///< Low power mode reduces update rates
+    unsigned int generalUpdateCount; ///< Skip counter for updates
+    Ui::slugsStatus *m_ui;
+    //virtual void paintEvent(QPaintEvent *);
+
+};
+
 #endif // SLUGSSTATUSWIDGET_H
