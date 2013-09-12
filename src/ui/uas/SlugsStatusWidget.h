@@ -51,8 +51,7 @@ public slots:
 //    void updateSpeed(UASInterface*, double x, double y, double z, quint64 usec);
 //    //void updateBattery(UASInterface* uas, double voltage, double current, double percent, int seconds);
 //    //void updateLoad(UASInterface* uas, double ctrlLoad, double sensLoad);
-//    //void setCriBatterySpecs();
-//    //void setAviBatterySpecs();
+//    //void setBatterySpecs();
     void refresh();
     /** @brief Start widget updating */
     //void showEvent(QShowEvent* event);
@@ -70,14 +69,10 @@ protected:
     bool timeout;
     bool iconIsRed;
     bool disconnected;
-    //float chargeAviLevel;
-    //float chargeCriLevel;
+    float chargeLevel;
     float ctrlLoad;
     float sensLoad;
-    //QString mode;
-    //double thrust; ///< Current vehicle thrust: 0 - 1.0 for 100% thrust
-    //QAction* setAviBatterySpecsAction;
-    //QAction* setCriBatterySpecsAction;
+    QAction* setBatterySpecsAction;
     float z;
     float totalSpeed;
     float alt;
@@ -90,7 +85,7 @@ protected:
 
 private:
     Ui::slugsStatus *m_ui;
-    //virtual void paintEvent(QPaintEvent *);
+    virtual void paintEvent(QPaintEvent *);
 
 };
 
