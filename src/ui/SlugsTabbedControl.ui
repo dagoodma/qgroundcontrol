@@ -17,16 +17,6 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QWidget" name="statusWidget" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>65</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
         <number>-1</number>

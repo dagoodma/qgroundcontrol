@@ -101,7 +101,7 @@ void SlugsControlWidget::setUAS(UASInterface* uas)
         disconnect(oldUAS,SIGNAL(navModeChanged(int,int,QString)), this, SLOT(updateNavMode(int,int,QString)));
         disconnect(oldUAS,SIGNAL(armingChanged(bool)),this,SLOT(updateArmDisarm(bool)));
 
-        ui.controlStatusLabel->setText(tr("UNCONNECTED"));
+        //ui.controlStatusLabel->setText(tr("UNCONNECTED"));
     }
 
     // Connect user interface controls
@@ -110,7 +110,7 @@ void SlugsControlWidget::setUAS(UASInterface* uas)
 
         // UAS signals
         connect(uas, SIGNAL(midLevelCommandsChanged(int,double,double,double)), this, SLOT(updateMidLevelParameters(int,double,double,double)));
-        connect(uas, SIGNAL(navModeChanged(int,int,QString)), this, SLOT(updateNavigationMode(int,int,QString)));
+        connect(uas, SIGNAL(navModeChanged(int,int,QString)), this, SLOT(updateNavMode(int,int,QString)));
         connect(uas,SIGNAL(armingChanged(bool)),this,SLOT(updateArmDisarm(bool)));
 
         // Select the current navigation mode button
@@ -118,11 +118,11 @@ void SlugsControlWidget::setUAS(UASInterface* uas)
             SlugsMAV *slugsUas = static_cast<SlugsMAV*>(uas);
 
             int navigationMode = slugsUas->getNavMode();
-            updateNavigationMode(uas->getUASID(), navigationMode, slugsUas->getNavModeText(navigationMode));
+            updateNavMode(uas->getUASID(), navigationMode, slugsUas->getNavModeText(navigationMode));
         }
 
 
-        ui.controlStatusLabel->setText(tr("Connected to ") + uas->getUASName());
+        //ui.controlStatusLabel->setText(tr("Connected to ") + uas->getUASName());
 
         this->uas = uas->getUASID();
 
@@ -290,7 +290,7 @@ void SlugsControlWidget::setBackgroundColor(QColor color)
  * @param mode The new navigation mode.
  * @param description Text describing the new navigation mode.
  */
-void SlugsControlWidget::updateNavigationMode(int uas, int mode,QString description)
+void SlugsControlWidget::updateNavMode(int uas, int mode,QString description)
 {
     Q_UNUSED(mode);
 

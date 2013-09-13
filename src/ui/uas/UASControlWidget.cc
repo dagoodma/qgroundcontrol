@@ -58,7 +58,7 @@ UASControlWidget::UASControlWidget(QWidget *parent) : QWidget(parent),
         MAV_MODE_FLAG_STABILIZE_ENABLED | MAV_MODE_FLAG_AUTO_ENABLED,
         MAV_MODE_FLAG_MANUAL_INPUT_ENABLED | MAV_MODE_FLAG_TEST_ENABLED,
     };
-    for (int i = 0; i < sizeof(modes) / sizeof(int); i++) {
+    for (int i = 0; i < static_cast<int>(sizeof(modes) / sizeof(int)); i++) {
         int mode = modes[i];
         ui.modeComboBox->insertItem(i, UAS::getShortModeTextFor(mode).remove(0, 2), mode);
     }

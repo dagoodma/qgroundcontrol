@@ -69,6 +69,9 @@ public slots:
 
 signals:
     void midLevelCommandsChanged(int id, double altitude, double airspeed, double turnrate);
+    void loadsChanged(int id, double ctrlLoad, double sensLoad);
+    void airSpeedChanged(int id, float airSpeed);
+    void gpsFixChanged(int id, unsigned int gpsQuality);
 
 };
 

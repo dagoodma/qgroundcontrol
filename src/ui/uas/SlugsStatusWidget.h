@@ -38,48 +38,60 @@ class SlugsStatusWidget : public QWidget
 public:
     SlugsStatusWidget(QWidget *parent = 0);
     ~SlugsStatusWidget();
-    void setSystemType(UASInterface* uas, unsigned int systemType);
 
 public slots:
     void setUAS(UASInterface* uas);
     void receiveHeartbeat(UASInterface* uas);
     void heartbeatTimeout(bool timeout, unsigned int ms);
-//    void updateName(const QString& name);
-//    void updateLocalPosition(UASInterface* uas, double x, double y, double z, quint64 usec);
-//    void updateGlobalPosition(UASInterface* uas, double lon, double lat, double alt, quint64 usec);
-//    void updateGpsFix(UASInterface* uas, int fixQuality);
-//    void updateSpeed(UASInterface*, double x, double y, double z, quint64 usec);
-//    //void updateBattery(UASInterface* uas, double voltage, double current, double percent, int seconds);
-//    //void updateLoad(UASInterface* uas, double ctrlLoad, double sensLoad);
-//    //void setBatterySpecs();
+    void setBatterySpecs();
+    void updateName(const QString& name);
+    void updateLocalPosition(UASInterface* uas, double x, double y, double z, quint64 usec);
+    void updateGlobalPosition(UASInterface* uas, double lon, double lat, double alt, quint64 usec);
+    void updateBattery(UASInterface* uas, double voltage, double current, double percent, int seconds);
+    void updateGpsFix(int id, unsigned int fixQuality);
+    void updateSpeed(int id, float airSpeed);
+    void updateLoad(int id, double ctrlLoad, double sensLoad);
     void refresh();
     /** @brief Start widget updating */
-    //void showEvent(QShowEvent* event);
+    void showEvent(QShowEvent* event);
     /** @brief Stop widget updating */
-    //void hideEvent(QHideEvent* event);
-//    void contextMenuEvent(QContextMenuEvent* event);
+    void hideEvent(QHideEvent* event);
+    void contextMenuEvent(QContextMenuEvent* event);
 
 protected:
-//    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e);
     UASInterface* uas;
     QTimer* refreshTimer;
     QColor heartbeatColor;
+    QColor gpsColor;
     quint64 startTime;
     int fixQuality;
     bool timeout;
     bool iconIsRed;
     bool disconnected;
+    bool altitudeIsRed;
+    bool speedIsRed;
+    bool altitudeIsWarning;
+    bool speedIsWarning;
     float chargeLevel;
     float ctrlLoad;
     float sensLoad;
     QAction* setBatterySpecsAction;
     float z;
-    float totalSpeed;
+    float airSpeed;
     float alt;
     bool localFrame;
     bool globalFrameKnown;
-    static const int updateInterval = 800;
+    static const int updateDisplayIntervalMultiplier = 2;
+    static const int updateInterval = 500;
+    static const int updateIntervalLowPower = 800;
     static const int errorUpdateInterval = 200;
+    static const float airSpeedLowLimit = 12; ///< Lower limit for airspeed warning(red)
+    static const float airSpeedHighLimit = 25; ///< Upper limit for airspeed warning (red)
+    static const float airSpeedLimitThreshold = 1.5; ///< Threshold from limits for warning (yellow)
+    static const float altitudeLowLimit = 50; ///< Lower limit for altitude warning (red)
+    static const float altitudeLimitThreshold = 25; ///< Threshold from limits for warning (yellow)
+    static const float altitudeHighLimit = 250; ///< Upper limit for altitude warning (red)
     bool lowPowerModeEnabled; ///< Low power mode reduces update rates
     unsigned int generalUpdateCount; ///< Skip counter for updates
 

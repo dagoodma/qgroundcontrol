@@ -132,13 +132,17 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
             // TODO handle sensor diagnostic message
             break;
         case MAVLINK_MSG_ID_CPU_LOAD:
-            // TODO handle cpu load message
+            emit loadsChanged(this->uasId,
+                              static_cast<double>(mavlink_msg_cpu_load_get_ctrlLoad(&message)),
+                              static_cast<double>(mavlink_msg_cpu_load_get_sensLoad(&message)));
             break;
         case MAVLINK_MSG_ID_SENSOR_BIAS:
             // TODO handle sensor bias message
             break;
         case MAVLINK_MSG_ID_STATUS_GPS:
             // TODO handle status gps message
+            emit gpsFixChanged(this->uasId,
+                               static_cast<unsigned int>(mavlink_msg_status_gps_get_gpsQuality(&message)));
             break;
         case MAVLINK_MSG_ID_NOVATEL_DIAG:
             // TODO handle novatel diagnostic message
@@ -150,7 +154,8 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
             // TODO handle data log message
             break;
         case MAVLINK_MSG_ID_SLUGS_NAVIGATION:
-            // TODO handle slugs nav message
+            emit airSpeedChanged(this->uasId,
+                                 mavlink_msg_slugs_navigation_get_u_m(&message));
             break;
         case MAVLINK_MSG_ID_ISR_LOCATION:
             // TODO handle isr location message

@@ -49,14 +49,18 @@ SlugsStatusWidget::SlugsStatusWidget(QWidget *parent) :
     startTime(0),
     timeout(false),
     disconnected(true),
-    totalSpeed(0),
-    alt(0),
+    altitudeIsRed(false),
+    speedIsRed(false),
+    altitudeIsWarning(false),
+    speedIsWarning(false),
+    airSpeed(0),
     z(0),
+    alt(0),
     localFrame(false),
     globalFrameKnown(false),
     lowPowerModeEnabled(true),
-    generalUpdateCount(0),
     fixQuality(0),
+    generalUpdateCount(0),
     chargeLevel(0),
     ctrlLoad(0),
     sensLoad(0),
@@ -89,28 +93,30 @@ void SlugsStatusWidget::setUAS(UASInterface* uas) {
 
     if (this->uas) {
 
-        // Setup communication
+
         // Heartbeat fade
         disconnect(this->uas, SIGNAL(heartbeatTimeout(bool, unsigned int)), this, SLOT(heartbeatTimeout(bool, unsigned int)));
         disconnect(this->uas, SIGNAL(heartbeat(UASInterface*)), this, SLOT(receiveHeartbeat(UASInterface*)));
 
         // Velocity and altitude
-//        //disconnect(this->uas, SIGNAL(localPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateLocalPosition(UASInterface*,double,double,double,quint64)));
-//        //disconnect(this->uas, SIGNAL(globalPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateGlobalPosition(UASInterface*,double,double,double,quint64)));
-//        disconnect(this->uas, SIGNAL(velocityChanged_NED(UASInterface*,double,double,double,quint64)), this, SLOT(updateSpeed(UASInterface*,double,double,double,quint64)));
+        disconnect(this->uas, SIGNAL(localPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateLocalPosition(UASInterface*,double,double,double,quint64)));
+        disconnect(this->uas, SIGNAL(globalPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateGlobalPosition(UASInterface*,double,double,double,quint64)));
+        //disconnect(this->uas, SIGNAL(velocityChanged_NED(UASInterface*,double,double,double,quint64)), this, SLOT(updateSpeed(UASInterface*,double,double,double,quint64)));
 
         // System type and battery related
-        disconnect(this->uas, SIGNAL(systemTypeSet(UASInterface*,uint)), this, SLOT(setSystemType(UASInterface*,uint)));
-        //disconnect(this->uas, SIGNAL(batteryChanged(UASInterface*, double, double, double, int)), this, SLOT(updateBattery(UASInterface*, double, double, double, int)));
+        //disconnect(this->uas, SIGNAL(systemTypeSet(UASInterface*,uint)), this, SLOT(setSystemType(UASInterface*,uint)));
+        disconnect(this->uas, SIGNAL(batteryChanged(UASInterface*, double, double, double, int)), this, SLOT(updateBattery(UASInterface*, double, double, double, int)));
         disconnect(setBatterySpecsAction, SIGNAL(triggered()), this, SLOT(setBatterySpecs()));
 
         // Name changes
-//        disconnect(uas, SIGNAL(nameChanged(QString)), this, SLOT(updateName(QString)));
+        disconnect(uas, SIGNAL(nameChanged(QString)), this, SLOT(updateName(QString)));
+        m_ui->groupBox->setTitle("");
 
         // Slugs only
         if(this->uas->getAutopilotType() == MAV_AUTOPILOT_SLUGS) {
-            disconnect((SlugsMAV*)(this->uas), SIGNAL(gpsFixChanged(UASInterface*, int)), this, SLOT(updateGpsFix(UASInterface*,int)));
-            disconnect(this->uas, SIGNAL(loadChanged(UASInterface*, double)), this, SLOT(updateLoad(UASInterface*, double)));
+            disconnect((SlugsMAV*)(this->uas), SIGNAL(gpsFixChanged(int, unsigned int)), this, SLOT(updateGpsFix(int, unsigned int)));
+            disconnect((SlugsMAV*)(this->uas), SIGNAL(loadsChanged(int, double, double)), this, SLOT(updateLoad(int, double, double)));
+            disconnect((SlugsMAV*)(this->uas), SIGNAL(airSpeedChanged(int, float)), this, SLOT(updateSpeed(int, float)));
         }
 
         // Disconnect and stop timer
@@ -125,42 +131,38 @@ void SlugsStatusWidget::setUAS(UASInterface* uas) {
         // Setup communication
 
         // Velocity and altitude
-//        //disconnect(this->uas, SIGNAL(localPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateLocalPosition(UASInterface*,double,double,double,quint64)));
-//        //disconnect(this->uas, SIGNAL(globalPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateGlobalPosition(UASInterface*,double,double,double,quint64)));
-//        disconnect(this->uas, SIGNAL(velocityChanged_NED(UASInterface*,double,double,double,quint64)), this, SLOT(updateSpeed(UASInterface*,double,double,double,quint64)));
+        connect(uas, SIGNAL(localPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateLocalPosition(UASInterface*,double,double,double,quint64)));
+        connect(uas, SIGNAL(globalPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateGlobalPosition(UASInterface*,double,double,double,quint64)));
+        //connect(uas, SIGNAL(velocityChanged_NED(UASInterface*,double,double,double,quint64)), this, SLOT(updateSpeed(UASInterface*,double,double,double,quint64)));
 
         // System type and battery related
         connect(uas, SIGNAL(systemTypeSet(UASInterface*,uint)), this, SLOT(setSystemType(UASInterface*,uint)));
-        //disconnect(this->uas, SIGNAL(batteryChanged(UASInterface*, double, double, double, int)), this, SLOT(updateBattery(UASInterface*, double, double, double, int)));
+        connect(uas, SIGNAL(batteryChanged(UASInterface*, double, double, double, int)), this, SLOT(updateBattery(UASInterface*, double, double, double, int)));
         connect(setBatterySpecsAction, SIGNAL(triggered()), this, SLOT(setBatterySpecs()));
 
         // Name changes
-//        disconnect(uas, SIGNAL(nameChanged(QString)), this, SLOT(updateName(QString)));
+        connect(uas, SIGNAL(nameChanged(QString)), this, SLOT(updateName(QString)));
+        updateName("");
 
         // Slugs only
         if(uas->getAutopilotType() == MAV_AUTOPILOT_SLUGS) {
-            connect((SlugsMAV*)(uas), SIGNAL(gpsFixChanged(UASInterface*, int)), this, SLOT(updateGpsFix(UASInterface*,int)));
-            connect(uas, SIGNAL(loadChanged(UASInterface*, double)), this, SLOT(updateLoad(UASInterface*, double)));
+            connect((SlugsMAV*)(uas), SIGNAL(gpsFixChanged(int, unsigned int)), this, SLOT(updateGpsFix(int, unsigned int)));
+            connect((SlugsMAV*)(uas), SIGNAL(loadsChanged(int, double, double)), this, SLOT(updateLoad(int, double, double)));
+            connect((SlugsMAV*)(uas), SIGNAL(airSpeedChanged(int, float)), this, SLOT(updateSpeed(int, float)));
         }
 
         // Heartbeat fade
         connect(uas, SIGNAL(heartbeat(UASInterface*)), this, SLOT(receiveHeartbeat(UASInterface*)));
         connect(uas, SIGNAL(heartbeatTimeout(bool, unsigned int)), this, SLOT(heartbeatTimeout(bool, unsigned int)));
-        if (lowPowerModeEnabled)
-        {
-            refreshTimer->start(updateInterval*3);
-        }
-        else
-        {
-            refreshTimer->start(updateInterval);
-        }
+        refreshTimer->setInterval( (lowPowerModeEnabled)? updateIntervalLowPower : updateInterval);
+        refreshTimer->start();
 
         // Style heartbeat and gps indicators
         heartbeatColor = Qt::green;
         QString colorstyle("QLabel { background-color: %1; }");
-        m_ui->typeLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
+        //m_ui->typeLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
 
-        setSystemType(uas, uas->getSystemType());
+        //setSystemType(uas, uas->getSystemType());
     } // uas
 
     this->uas = uas;
@@ -192,26 +194,26 @@ void SlugsStatusWidget::receiveHeartbeat(UASInterface* uas)
     timeout = false;
 }
 
-/*
+
 void SlugsStatusWidget::updateName(const QString& name)
 {
-    //if (uas) m_ui->nameLabel->setText(name);
-}
+    Q_UNUSED(name);
 
-void SlugsStatusWidget::updateGpsFix(UASInterface* uas, int fixQuality) {
-    if (!uas) return;
-
-    this->fixQuality = fixQuality;
-    if (fixQuality > 0) {
-        // TODO make GPS indicator green
-
-    }
-    else {
-
+    if (!uas) {
+        m_ui->groupBox->setTitle("");
+        return;
     }
 
+    if (uas->getUASName() == "")
+    {
+        m_ui->groupBox->setTitle(tr("UAS") + QString::number(uas->getUASID()));
+    }
+    else
+    {
+        m_ui->groupBox->setTitle(uas->getUASName());
+    }
 }
-*/
+
 
 /**
  * The current system type is represented through the system icon.
@@ -220,6 +222,7 @@ void SlugsStatusWidget::updateGpsFix(UASInterface* uas, int fixQuality) {
  * @param systemType type ID, following the MAVLink system type conventions
  * @see http://pixhawk.ethz.ch/software/mavlink
  */
+/*
 void SlugsStatusWidget::setSystemType(UASInterface* uas, unsigned int systemType)
 {
     if (uas && systemType && (uas == this->uas))
@@ -291,8 +294,8 @@ void SlugsStatusWidget::setSystemType(UASInterface* uas, unsigned int systemType
         }
     }
 }
+*/
 
-/*
 void SlugsStatusWidget::updateLocalPosition(UASInterface* uas, double x, double y, double z, quint64 usec)
 {
     Q_UNUSED(usec);
@@ -313,46 +316,84 @@ void SlugsStatusWidget::updateGlobalPosition(UASInterface* uas, double lon, doub
     globalFrameKnown = true;
 }
 
-void SlugsStatusWidget::updateSpeed(UASInterface*, double x, double y, double z, quint64 usec)
+void SlugsStatusWidget::updateSpeed(int id, float airSpeed)
 {
-    Q_UNUSED(usec);
-    totalSpeed = sqrt(x*x + y*y + z*z);
+    if (uas && (uas->getUASID() == id))
+    {
+        this->airSpeed = airSpeed;
+    }
 }
-*/
 
-/*
 void SlugsStatusWidget::updateBattery(UASInterface* uas, double voltage, double current, double percent, int seconds)
 {
     Q_UNUSED(voltage);
     Q_UNUSED(current);
+    Q_UNUSED(seconds);
     if (this->uas == uas)
     {
         //timeRemaining = seconds;
         chargeLevel = percent;
     }
 }
-*/
 
-/*
-void SlugsStatusWidget::updateLoad(UASInterface* uas, double ctrlLoad, double sensLoad)
+
+void SlugsStatusWidget::updateLoad(int id, double ctrlLoad, double sensLoad)
 {
-    if (this->uas == uas)
+    if (uas && (uas->getUASID() == id))
     {
         this->ctrlLoad = ctrlLoad;
         this->sensLoad = sensLoad;
     }
 }
-*/
-/*
+
+void SlugsStatusWidget::updateGpsFix(int id, unsigned int fixQuality) {
+    if (uas && (uas->getUASID() == id))
+    {
+        this->fixQuality = fixQuality;
+
+        gpsColor = (fixQuality > 0)? Qt::green : Qt::red;
+        QString colorstyle("QLabel { background-color: %1; }");
+        m_ui->gpsStatusLabel->setStyleSheet(colorstyle.arg(gpsColor.name()));
+    }
+}
+
 void SlugsStatusWidget::contextMenuEvent (QContextMenuEvent* event)
 {
     QMenu menu(this);
-    //menu.addAction(setBatterySpecsAction);
+    menu.addAction(setBatterySpecsAction);
     menu.exec(event->globalPos());
 }
-*/
 
-/*
+void SlugsStatusWidget::showEvent(QShowEvent* event)
+{
+    // React only to internal (pre-display)
+    // events
+    Q_UNUSED(event);
+    refreshTimer->start(updateInterval*10);
+}
+
+void SlugsStatusWidget::hideEvent(QHideEvent* event)
+{
+    // React only to internal (pre-display)
+    // events
+    Q_UNUSED(event);
+   // refreshTimer->stop();
+}
+
+void SlugsStatusWidget::changeEvent(QEvent *e)
+{
+    QWidget::changeEvent(e);
+    switch (e->type())
+    {
+    case QEvent::LanguageChange:
+        m_ui->retranslateUi(this);
+        break;
+    default:
+        break;
+    }
+}
+
+
 void SlugsStatusWidget::setBatterySpecs()
 {
     if (uas)
@@ -366,29 +407,98 @@ void SlugsStatusWidget::setBatterySpecs()
     }
 }
 
-*/
 
 void SlugsStatusWidget::refresh()
 {
-    if (!disconnected && generalUpdateCount == 4 && uas)
+    if (!disconnected && generalUpdateCount == updateDisplayIntervalMultiplier && uas)
     {
         // Update interface at 1/4th of speed
         generalUpdateCount = 0;
 
-        // State
-        //m_ui->stateLabel->setText(state);
-        //m_ui->statusTextLabel->setText(stateDesc);
+        // GPS fix
+        //m_ui->gpsStatusLabel
 
         // Battery
-        //m_ui->batteryBar->setValue(static_cast<int>(this->chargeLevel));
-        //m_ui->ctrlLoadBar->setValue(static_cast<int>(this->ctrlLoad));
-        //m_ui->sensLoadBar->setValue(static_cast<int>(this->sensLoad));
+        m_ui->batteryBar->setValue(static_cast<int>(chargeLevel));
+        QString batteryTipText = QString("%1 V Battery Charge").arg(chargeLevel, 1, 'f', 1);
+        m_ui->batteryBar->setToolTip(batteryTipText);
+        m_ui->batteryBar->setStatusTip(batteryTipText);
 
-        // Altitude and speed
-        //m_ui->altitudeLabel->setText(QString("%1 m").arg(alt, 6, 'f', 1, '0'));
-        //QString speed("%1 m/s");
-        //m_ui->speedLabel->setText(speed.arg(totalSpeed, 4, 'f', 1, '0'));
+        m_ui->loadCtrlBar->setValue(static_cast<int>(this->ctrlLoad));
+        QString loadCtrlTipText = QString("%1\% Control DSC Load").arg(static_cast<int>(this->ctrlLoad));
+        m_ui->loadCtrlBar->setToolTip(loadCtrlTipText);
+        m_ui->loadCtrlBar->setStatusTip(loadCtrlTipText);
 
+        m_ui->loadSensBar->setValue(static_cast<int>(this->sensLoad));
+        QString loadSensTipText = QString("%1\% Sensor DSC Load").arg(static_cast<int>(this->sensLoad));
+        m_ui->loadSensBar->setToolTip(loadSensTipText);
+        m_ui->loadSensBar->setStatusTip(loadSensTipText);
+
+        // Altitude
+        // TODO make warning limits configurable during runtime
+        float altitude = (globalFrameKnown)? this->alt : this->z;
+        int altitudePrecision = (altitude >= 100.0)? 1 : 2;
+        QString altitudeText = QString("%1").arg(altitude, 3, 'f', altitudePrecision);
+        QString altitudeTipText = QString("Altitude: %1 m").arg(altitude, 1, 'f', 2);
+        m_ui->altitudeLabel->setText(altitudeText);
+        m_ui->altitudeLabel->setToolTip(altitudeTipText);
+        m_ui->altitudeLabel->setStatusTip(altitudeTipText);
+
+        // altitude coloring (red beyond limits, yellow if close to limits, and green otherwise)
+        QColor altitudeColor = Qt::green;
+        if (altitude <= altitudeLowLimit || altitude >= altitudeHighLimit) {
+            altitudeColor = (altitudeIsRed)? Qt::green : Qt::red;
+            altitudeIsWarning = true;
+        }
+        else {
+            altitudeIsWarning = false;
+        }
+        if ((altitude > altitudeLowLimit && altitude <= (altitudeLowLimit + altitudeLimitThreshold))
+            || (altitude < altitudeHighLimit && altitude >= (altitudeHighLimit + altitudeLimitThreshold)))
+            altitudeColor = QColor(255, 127, 0); // orange
+        QString altitudeStyle = QString("QLabel {background-color: %1;}").arg(altitudeColor.name());
+        m_ui->altitudeLabel->setStyleSheet(altitudeStyle);
+        altitudeIsRed = altitudeColor == Qt::red;
+
+        // Airspeed
+        // TODO make warning limits configurable during runtime
+        int speedPrecision = (airSpeed >= 100.0)? 1 : 2;
+        QString speedText = QString("%1").arg(airSpeed, 3, 'f',speedPrecision);
+        QString speedTipText = QString("Airspeed: %1 m/s").arg(airSpeed, 1, 'f', 2);
+        m_ui->speedLabel->setText(speedText);
+        m_ui->speedLabel->setToolTip(speedTipText);
+        m_ui->speedLabel->setStatusTip(speedTipText);
+
+        // airSpeed coloring (red beyond limits, yellow if close to limits, and green otherwise)
+        QColor speedColor = Qt::green;
+        if (airSpeed <= airSpeedLowLimit || airSpeed >= airSpeedHighLimit) {
+            speedColor = (speedIsRed)? Qt::green : Qt::red;
+            speedIsWarning = true;
+        }
+        else {
+            speedIsWarning = false;
+        }
+        if ((airSpeed > airSpeedLowLimit && airSpeed <= (airSpeedLowLimit + airSpeedLimitThreshold))
+            || (airSpeed < airSpeedHighLimit && airSpeed >= (airSpeedHighLimit + airSpeedLimitThreshold)))
+            speedColor =  QColor(255, 127, 0); // orange
+        QString speedStyle = QString("QLabel {background-color: %1;}").arg(speedColor.name());
+        m_ui->speedLabel->setStyleSheet(speedStyle);
+        speedIsRed = speedColor == Qt::red;
+
+    }
+    else {
+
+        if (speedIsWarning && !speedIsRed) {
+            QColor speedColor = Qt::red;
+            QString speedStyle = QString("QLabel {background-color: %1;}").arg(speedColor.name());
+            m_ui->speedLabel->setStyleSheet(speedStyle);
+        }
+
+        if (altitudeIsWarning && !altitudeIsRed) {
+            QColor altitudeColor = Qt::red;
+            QString altitudeStyle = QString("QLabel {background-color: %1;}").arg(altitudeColor.name());
+            m_ui->altitudeLabel->setStyleSheet(altitudeStyle);
+        }
     }
     generalUpdateCount++;
 
@@ -412,18 +522,18 @@ void SlugsStatusWidget::refresh()
 
         //if (!lowPowerModeEnabled)
         //{
-        heartbeatColor = heartbeatColor.darker(110);
+        heartbeatColor = heartbeatColor.darker(135);
         QString colorstyle("QLabel {background-color: %1;}");
         m_ui->heartBeatLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
-        refreshTimer->setInterval(updateInterval);
+        refreshTimer->setInterval( (lowPowerModeEnabled)? updateIntervalLowPower : updateInterval);
         refreshTimer->start();
         //}
     }
 
-
-    QColor typeColor = (disconnected)? Qt::red : Qt::green;
-    QString typeStyle = QString("QLabel {background-color: %1;}").arg(typeColor.name());
-    m_ui->typeLabel->setStyleSheet(typeStyle);
+    // TODO set status background to red
+    //QColor typeColor = (disconnected)? Qt::red : Qt::green;
+    //QString typeStyle = QString("QLabel {background-color: %1;}").arg(typeColor.name());
+    //m_ui->typeLabel->setStyleSheet(typeStyle);
 } // refresh()
 
 

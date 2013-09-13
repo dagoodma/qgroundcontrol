@@ -74,7 +74,7 @@ protected slots:
     /** @brief Sets the navigation mode and trasmits it to the MAV. */
     void navigationModeButtonClicked(int mode);
     /** @brief Sets the navigation mode and styles the corresponding button. */
-    void updateNavigationMode(int uas, int mode,QString description);
+    void updateNavMode(int uas, int mode,QString description);
 
 #ifdef MAVLINK_ENABLED_SLUGS
     void waypointModeButtonClicked() { navigationModeButtonClicked(SLUGS_MODE_WAYPOINT); }
