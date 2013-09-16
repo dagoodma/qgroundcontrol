@@ -81,7 +81,7 @@ QString SlugsMAV::getSlugsNavModeText(int mode) {
         return QString("WAYPOINT");
         break;
     case SLUGS_MODE_ISR:
-        return QString("ISR");
+        return QString("LOITER");
         break;
     case SLUGS_MODE_LINE_PATROL:
         return QString("LINE_PATROL");
