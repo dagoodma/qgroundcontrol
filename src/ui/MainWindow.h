@@ -69,7 +69,7 @@ This file is part of the QGROUNDCONTROL project
 #include "QGCToolBar.h"
 #include "LogCompressor.h"
 
-#ifdef MAVLINK_ENABLED_SLUGS
+#if defined(MAVLINK_ENABLED_SLUGS) && !defined(_SLUGSCONTROLWIDGET_H_)
 #include "SlugsTabbedControlWidget.h"
 #endif
 #include "UASControlParameters.h"

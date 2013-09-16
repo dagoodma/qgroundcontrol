@@ -562,6 +562,12 @@ UASView QLabel#heartBeatLabel, UASView QLabel#typeLabel {
     padding: 2px;
 }
 
+SlugsControlWidget QPushButton.navModeButtonPressed {
+    color: #000;
+    background-color: #fff;
+}
+
+
 SlugsStatusWidget {
     background: #D0D0D0;
     border: 1px solid #666;

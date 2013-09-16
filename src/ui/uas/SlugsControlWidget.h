@@ -33,7 +33,8 @@ This file is part of the QGROUNDCONTROL project
 #define _SLUGSCONTROLWIDGET_H_
 
 #include <QWidget>
-#include <QLineEdit>
+#include "MainWindow.h"
+#include <QMap>
 #include <QString>
 #include <QPushButton>
 #include <ui_SlugsControl.h>
@@ -41,7 +42,7 @@ This file is part of the QGROUNDCONTROL project
 #include <SlugsMAV.h>
 #include <UASManager.h>
 #include <UAS.h>
-#include "QGC.h"
+//#include "QGC.h"
 
 /**
  * @brief Widget for controlling a SLUGS MAV.
@@ -95,18 +96,18 @@ protected slots:
     void linePatrolModeButtonClicked() { navigationModeButtonClicked(SLUGS_MODE_LINE_PATROL); }
 #endif
 
-//protected slots:
-    ///** @brief Set the background color for the widget */
-    //void setBackgroundColor(QColor color);
-
 protected:
     int uas;                    ///< Reference to the current uas
-    unsigned int uasNavigationModeSent;   ///< Current navigation mode sent
+    int uasNavigationMode; ///< Current navigation mode
+    int uasNavigationModeSent;   ///< Current navigation mode sent
     bool uasMidLevelRequestSent;    ///< Request for mid-level commands sent
     //bool engineOn;              ///< Engine state
 
 private:
     Ui::slugsControl ui;
+    //MainWindow* mainWindow;
+    QMap<int, QPushButton*> navModeButtons;
+
 
 };
 

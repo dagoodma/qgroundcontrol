@@ -30,22 +30,30 @@ This file is part of the PIXHAWK project
  */
 
 #include <QString>
-#include <QTimer>
-#include <QLabel>
-#include <QFileDialog>
+//#include <QTimer>
 #include <QDebug>
-#include <QProcess>
+#include <QLabel>
+//#include <QFileDialog>
+#include <QDebug>
+#include <QMap>
 #include <QPalette>
+
+#include "MainWindow.h"
 
 #include "SlugsControlWidget.h"
 
-SlugsControlWidget::SlugsControlWidget(QWidget *parent) : QWidget(parent),
+SlugsControlWidget::SlugsControlWidget(QWidget *parent) :
+    QWidget(parent),
+    //mainWindow((MainWindow*)(parent->parent())),
     uas(0),
     uasNavigationModeSent(0),
+    uasNavigationMode(0),
     uasMidLevelRequestSent(false)
     //engineOn(false)
 {
     ui.setupUi(this);
+
+    ui.linePatrolModeButton->hide();
 
     // Arm/disarm
     connect(ui.armDisarmButton,SIGNAL(clicked()),this,SLOT(armDisarmButtonClicked()));
@@ -66,7 +74,6 @@ SlugsControlWidget::SlugsControlWidget(QWidget *parent) : QWidget(parent),
     connect(ui.midLevelModeButton, SIGNAL(clicked()), this, SLOT(midLevelModeButtonClicked()));
     connect(ui.linePatrolModeButton, SIGNAL(clicked()), this, SLOT(linePatrolModeButtonClicked()));
 
-    QPushButton* navModeButtons[SLUGS_MODE_ENUM_END];
     navModeButtons[SLUGS_MODE_WAYPOINT] = ui.waypointModeButton;
     navModeButtons[SLUGS_MODE_ISR] = ui.isrModeButton;
     navModeButtons[SLUGS_MODE_SELECTIVE_PASSTHROUGH] = ui.selectivePassthroughModeButton;
@@ -262,11 +269,11 @@ void SlugsControlWidget::setPassthroughButtonClicked() {
 }
 
 
-/*
 /**
  * Set the background color based on the MAV color. If the MAV is selected as the
  * currently actively controlled system, the frame color is highlighted
- * /
+ */
+/*
 void SlugsControlWidget::setBackgroundColor(QColor color)
 {
     // UAS color
@@ -292,8 +299,6 @@ void SlugsControlWidget::setBackgroundColor(QColor color)
  */
 void SlugsControlWidget::updateNavMode(int uas, int mode,QString description)
 {
-    Q_UNUSED(mode);
-
     if (uas != this->uas) return;
 
     // TODO Show the button for the current navigation mode as selected
@@ -301,7 +306,34 @@ void SlugsControlWidget::updateNavMode(int uas, int mode,QString description)
 #ifdef MAVLINK_ENABLED_SLUGS
     if (mode == uasNavigationModeSent)
         ui.lastActionLabel->setText(QString("Set navigation mode to %1").arg(description));
+
+
+    if (navModeButtons.contains(mode)) {
+        QString buttonText = ((QPushButton*)navModeButtons.value(mode))->text();
+        qDebug() << QString("Nav mode button %1 was pressed: %2").arg(mode).arg(buttonText);
+
+        if (navModeButtons.contains(uasNavigationMode))
+            qDebug() << QString("The old class is: %1").arg(navModeButtons.value(uasNavigationMode)->metaObject()->className());
+
+        MainWindow::QGC_MAINWINDOW_STYLE style = MainWindow::instance()->getStyle();
+        //QString buttonPressedStyle = "QPushButton { text-shadow: -1px -1px 1px #fff, 1px 1px 1px #000; }";
+
+        //MainWindow::QGC_MAINWINDOW_STYLE style = mainWindow->getStyle();
+        QString pressedStyle = (style == MainWindow::QGC_MAINWINDOW_STYLE_DARK)?
+                    "QPushButton { color: #000; background-color: #fff; }"
+                  : "QPushButton { color: #fff; background-color: #000; }"; //QColor(80,80,80) : QColor(40,40,40);
+
+        //QColor pressedColor = QColor(65,65,80);
+        //QString buttonPressedStyle = "QPushButton { background-color: %1; }";
+        if (navModeButtons.contains(uasNavigationMode)) {
+            navModeButtons.value(uasNavigationMode)->setStyleSheet("");
+        }
+        navModeButtons.value(mode)->setStyleSheet(pressedStyle);
+
+    }
+
 #endif
+    uasNavigationMode = mode;
     uasNavigationModeSent = 0;
 }
 
