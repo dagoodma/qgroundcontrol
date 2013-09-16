@@ -82,9 +82,9 @@ protected:
     float alt;
     bool localFrame;
     bool globalFrameKnown;
-    static const int updateDisplayIntervalMultiplier = 2;
-    static const int updateInterval = 500;
-    static const int updateIntervalLowPower = 800;
+    static const int updateDisplayIntervalMultiplier = 4;
+    static const int updateInterval = 200;
+    static const int updateIntervalLowPower = 200;
     static const int errorUpdateInterval = 200;
     static const float airSpeedLowLimit = 12; ///< Lower limit for airspeed warning(red)
     static const float airSpeedHighLimit = 25; ///< Upper limit for airspeed warning (red)

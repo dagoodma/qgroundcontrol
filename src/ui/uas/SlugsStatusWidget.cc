@@ -418,6 +418,11 @@ void SlugsStatusWidget::refresh()
         // GPS fix
         //m_ui->gpsStatusLabel
 
+        // Heartbeat fading
+        heartbeatColor = heartbeatColor.darker(135);
+        QString colorstyle("QLabel {background-color: %1;}");
+        m_ui->heartBeatLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
+
         // Battery
         m_ui->batteryBar->setValue(static_cast<int>(chargeLevel));
         QString batteryTipText = QString("%1 V Battery Charge").arg(chargeLevel, 1, 'f', 1);
@@ -446,19 +451,15 @@ void SlugsStatusWidget::refresh()
 
         // altitude coloring (red beyond limits, yellow if close to limits, and green otherwise)
         QColor altitudeColor = Qt::green;
-        if (altitude <= altitudeLowLimit || altitude >= altitudeHighLimit) {
-            altitudeColor = (altitudeIsRed)? Qt::green : Qt::red;
-            altitudeIsWarning = true;
-        }
-        else {
-            altitudeIsWarning = false;
-        }
+        altitudeIsWarning = (altitude <= altitudeLowLimit || altitude >= altitudeHighLimit);
+
         if ((altitude > altitudeLowLimit && altitude <= (altitudeLowLimit + altitudeLimitThreshold))
             || (altitude < altitudeHighLimit && altitude >= (altitudeHighLimit + altitudeLimitThreshold)))
             altitudeColor = QColor(255, 127, 0); // orange
-        QString altitudeStyle = QString("QLabel {background-color: %1;}").arg(altitudeColor.name());
-        m_ui->altitudeLabel->setStyleSheet(altitudeStyle);
-        altitudeIsRed = altitudeColor == Qt::red;
+        if (!altitudeIsWarning) {
+            QString altitudeStyle = QString("QLabel {background-color: %1;}").arg(altitudeColor.name());
+            m_ui->altitudeLabel->setStyleSheet(altitudeStyle);
+        }
 
         // Airspeed
         // TODO make warning limits configurable during runtime
@@ -471,71 +472,53 @@ void SlugsStatusWidget::refresh()
 
         // airSpeed coloring (red beyond limits, yellow if close to limits, and green otherwise)
         QColor speedColor = Qt::green;
-        if (airSpeed <= airSpeedLowLimit || airSpeed >= airSpeedHighLimit) {
-            speedColor = (speedIsRed)? Qt::green : Qt::red;
-            speedIsWarning = true;
-        }
-        else {
-            speedIsWarning = false;
-        }
+        speedIsWarning = (airSpeed <= airSpeedLowLimit || airSpeed >= airSpeedHighLimit);
+
         if ((airSpeed > airSpeedLowLimit && airSpeed <= (airSpeedLowLimit + airSpeedLimitThreshold))
             || (airSpeed < airSpeedHighLimit && airSpeed >= (airSpeedHighLimit + airSpeedLimitThreshold)))
             speedColor =  QColor(255, 127, 0); // orange
-        QString speedStyle = QString("QLabel {background-color: %1;}").arg(speedColor.name());
-        m_ui->speedLabel->setStyleSheet(speedStyle);
-        speedIsRed = speedColor == Qt::red;
-
-    }
-    else {
-
-        if (speedIsWarning && !speedIsRed) {
-            QColor speedColor = Qt::red;
+        if (!speedIsWarning) {
             QString speedStyle = QString("QLabel {background-color: %1;}").arg(speedColor.name());
             m_ui->speedLabel->setStyleSheet(speedStyle);
         }
 
-        if (altitudeIsWarning && !altitudeIsRed) {
-            QColor altitudeColor = Qt::red;
-            QString altitudeStyle = QString("QLabel {background-color: %1;}").arg(altitudeColor.name());
-            m_ui->altitudeLabel->setStyleSheet(altitudeStyle);
-        }
     }
     generalUpdateCount++;
 
+    // Speed warning indicator blink
+    if (speedIsWarning) {
+        QColor speedColor = (speedIsRed)? Qt::green : Qt::red;
+        QString speedStyle = QString("QLabel {background-color: %1;}").arg(speedColor.name());
+        m_ui->speedLabel->setStyleSheet(speedStyle);
+        speedIsRed = speedColor == Qt::red;
+    }
+    // Altitude warning indicator blink
+    if(altitudeIsWarning) {
+        QColor altitudeColor = (altitudeIsRed)? Qt::green : Qt::red;
+        QString altitudeStyle = QString("QLabel {background-color: %1;}").arg(altitudeColor.name());
+        m_ui->altitudeLabel->setStyleSheet(altitudeStyle);
+        altitudeIsRed = altitudeColor == Qt::red;
+    }
+
+    // Heartbeat timeout check
     if (timeout)
     {
         // CRITICAL CONDITION, NO HEARTBEAT
         disconnected = true;
 
         QColor warnColor = Qt::red;
+        QString style = QString("QLabel {background-color: %1;}").arg(warnColor.name());
+        m_ui->heartBeatLabel->setStyleSheet(style);
 
         refreshTimer->setInterval(errorUpdateInterval);
         refreshTimer->start();
-
-        QString style = QString("QLabel {background-color: %1;}").arg(warnColor.name());
-        m_ui->heartBeatLabel->setStyleSheet(style);
     }
     else
     {
-        // If we're not in low power mode, add the additional visual effect of
-        // fading out the color of the heartbeat for this UAS.
-
-        //if (!lowPowerModeEnabled)
-        //{
-        heartbeatColor = heartbeatColor.darker(135);
-        QString colorstyle("QLabel {background-color: %1;}");
-        m_ui->heartBeatLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
         refreshTimer->setInterval( (lowPowerModeEnabled)? updateIntervalLowPower : updateInterval);
         refreshTimer->start();
-        //}
     }
-
-    // TODO set status background to red
-    //QColor typeColor = (disconnected)? Qt::red : Qt::green;
-    //QString typeStyle = QString("QLabel {background-color: %1;}").arg(typeColor.name());
-    //m_ui->typeLabel->setStyleSheet(typeStyle);
-} // refresh()
-
+}
 
 
 /**
