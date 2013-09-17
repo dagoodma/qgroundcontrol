@@ -45,6 +45,8 @@ protected:
     QVBoxLayout* initialLayout;
     QGCUnconnectedInfoWidget *connectWidget;
     QAction* clearAction;
+    //QAction* copyTextAction;
+    //QAction* selectAllTextAction;
     
 private:
     Ui::QGCMessageView *ui;
