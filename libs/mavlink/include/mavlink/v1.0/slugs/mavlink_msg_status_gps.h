@@ -89,7 +89,7 @@ static inline uint16_t mavlink_msg_status_gps_pack(uint8_t system_id, uint8_t co
  * @brief Pack a status_gps message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param csFails Number of times checksum has failed
  * @param gpsQuality The quality indicator, 0=fix not available or invalid, 1=GPS fix, 2=C/A differential GPS, 6=Dead reckoning mode, 7=Manual input mode (fixed position), 8=Simulator mode, 9= WAAS a
@@ -137,7 +137,7 @@ static inline uint16_t mavlink_msg_status_gps_pack_chan(uint8_t system_id, uint8
 }
 
 /**
- * @brief Encode a status_gps struct into a message
+ * @brief Encode a status_gps struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -147,6 +147,20 @@ static inline uint16_t mavlink_msg_status_gps_pack_chan(uint8_t system_id, uint8
 static inline uint16_t mavlink_msg_status_gps_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_status_gps_t* status_gps)
 {
 	return mavlink_msg_status_gps_pack(system_id, component_id, msg, status_gps->csFails, status_gps->gpsQuality, status_gps->msgsType, status_gps->posStatus, status_gps->magVar, status_gps->magDir, status_gps->modeInd);
+}
+
+/**
+ * @brief Encode a status_gps struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param status_gps C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_status_gps_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_status_gps_t* status_gps)
+{
+	return mavlink_msg_status_gps_pack_chan(system_id, component_id, chan, msg, status_gps->csFails, status_gps->gpsQuality, status_gps->msgsType, status_gps->posStatus, status_gps->magVar, status_gps->magDir, status_gps->modeInd);
 }
 
 /**

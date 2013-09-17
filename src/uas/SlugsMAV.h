@@ -52,6 +52,10 @@ public:
     void requestMidLevelCommands();
     /** @brief Sets mid-level commands. */
     void setMidLevelCommands(double altitude, double airspeed, double turnrate);
+    /** @brief Reads mid-level commands from EEPROM. */
+    void readMidLevelCommandsFromEeprom();
+    /** @brief Writes mid-level commands to EEPROM. */
+    void writeMidLevelCommandsToEeprom();
     /** @brief Sets the selective passthrough surfaces for manual control. */
     void setPassthroughSurfaces(bool throttle, bool aileron, bool rudder, bool elevator);
     /** @brief Enables HIL mode (autopilot connects to simulink). */

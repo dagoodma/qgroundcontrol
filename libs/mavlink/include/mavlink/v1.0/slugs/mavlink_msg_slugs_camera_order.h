@@ -79,7 +79,7 @@ static inline uint16_t mavlink_msg_slugs_camera_order_pack(uint8_t system_id, ui
  * @brief Pack a slugs_camera_order message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param target The system reporting the action
  * @param pan Order the mount to pan: -1 left, 0 No pan motion, +1 right
@@ -121,7 +121,7 @@ static inline uint16_t mavlink_msg_slugs_camera_order_pack_chan(uint8_t system_i
 }
 
 /**
- * @brief Encode a slugs_camera_order struct into a message
+ * @brief Encode a slugs_camera_order struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -131,6 +131,20 @@ static inline uint16_t mavlink_msg_slugs_camera_order_pack_chan(uint8_t system_i
 static inline uint16_t mavlink_msg_slugs_camera_order_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_slugs_camera_order_t* slugs_camera_order)
 {
 	return mavlink_msg_slugs_camera_order_pack(system_id, component_id, msg, slugs_camera_order->target, slugs_camera_order->pan, slugs_camera_order->tilt, slugs_camera_order->zoom, slugs_camera_order->moveHome);
+}
+
+/**
+ * @brief Encode a slugs_camera_order struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param slugs_camera_order C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_slugs_camera_order_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_slugs_camera_order_t* slugs_camera_order)
+{
+	return mavlink_msg_slugs_camera_order_pack_chan(system_id, component_id, chan, msg, slugs_camera_order->target, slugs_camera_order->pan, slugs_camera_order->tilt, slugs_camera_order->zoom, slugs_camera_order->moveHome);
 }
 
 /**

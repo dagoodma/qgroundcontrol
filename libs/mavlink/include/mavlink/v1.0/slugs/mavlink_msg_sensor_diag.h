@@ -74,7 +74,7 @@ static inline uint16_t mavlink_msg_sensor_diag_pack(uint8_t system_id, uint8_t c
  * @brief Pack a sensor_diag message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param float1 Float field 1
  * @param float2 Float field 2
@@ -113,7 +113,7 @@ static inline uint16_t mavlink_msg_sensor_diag_pack_chan(uint8_t system_id, uint
 }
 
 /**
- * @brief Encode a sensor_diag struct into a message
+ * @brief Encode a sensor_diag struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -123,6 +123,20 @@ static inline uint16_t mavlink_msg_sensor_diag_pack_chan(uint8_t system_id, uint
 static inline uint16_t mavlink_msg_sensor_diag_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_sensor_diag_t* sensor_diag)
 {
 	return mavlink_msg_sensor_diag_pack(system_id, component_id, msg, sensor_diag->float1, sensor_diag->float2, sensor_diag->int1, sensor_diag->char1);
+}
+
+/**
+ * @brief Encode a sensor_diag struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param sensor_diag C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_sensor_diag_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_sensor_diag_t* sensor_diag)
+{
+	return mavlink_msg_sensor_diag_pack_chan(system_id, component_id, chan, msg, sensor_diag->float1, sensor_diag->float2, sensor_diag->int1, sensor_diag->char1);
 }
 
 /**

@@ -61,6 +61,8 @@ SlugsControlWidget::SlugsControlWidget(QWidget *parent) :
     // Mid-level commands tab
     connect(ui.getMidLevelButton, SIGNAL(clicked()), this, SLOT(getMidLevelButtonClicked()));
     connect(ui.setMidLevelButton, SIGNAL(clicked()), this, SLOT(setMidLevelButtonClicked()));
+    connect(ui.writeMidLevelButton, SIGNAL(clicked()), this, SLOT(writeMidLevelButtonClicked()));
+    connect(ui.readMidLevelButton, SIGNAL(clicked()), this, SLOT(readMidLevelButtonClicked()));
 
     // Selective passthrough control surfaces tab
     connect(ui.setPassthroughButton, SIGNAL(clicked()), this, SLOT(setPassthroughButtonClicked()));
@@ -242,6 +244,35 @@ void SlugsControlWidget::setMidLevelButtonClicked() {
         ui.lastActionLabel->setText(QString("Sent new mid-level commands"));
         uasMidLevelRequestSent = false;
     }
+#endif
+}
+
+void SlugsControlWidget::writeMidLevelButtonClicked() {
+#ifdef MAVLINK_ENABLED_SLUGS
+    if (!uas) return;
+
+    UASInterface* mav = UASManager::instance()->getUASForId(this->uas);
+    if (!mav) return;
+
+    SlugsMAV* slugsMav = static_cast<SlugsMAV*>(mav);
+
+    slugsMav->writeMidLevelCommandsToEeprom();
+
+    ui.lastActionLabel->setText(QString("Requested to write mid-level commands to EEPROM"));
+#endif
+}
+
+void SlugsControlWidget::readMidLevelButtonClicked() {
+#ifdef MAVLINK_ENABLED_SLUGS
+    if (!uas) return;
+
+    UASInterface* mav = UASManager::instance()->getUASForId(this->uas);
+    if (!mav) return;
+
+    SlugsMAV* slugsMav = static_cast<SlugsMAV*>(mav);
+
+    slugsMav->readMidLevelCommandsFromEeprom();
+    ui.lastActionLabel->setText(QString("Requested to read mid-level commands from EEPROM"));
 #endif
 }
 

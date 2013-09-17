@@ -114,7 +114,7 @@ static inline uint16_t mavlink_msg_gps_date_time_pack(uint8_t system_id, uint8_t
  * @brief Pack a gps_date_time message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param year Year reported by Gps 
  * @param month Month reported by Gps 
@@ -177,7 +177,7 @@ static inline uint16_t mavlink_msg_gps_date_time_pack_chan(uint8_t system_id, ui
 }
 
 /**
- * @brief Encode a gps_date_time struct into a message
+ * @brief Encode a gps_date_time struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -187,6 +187,20 @@ static inline uint16_t mavlink_msg_gps_date_time_pack_chan(uint8_t system_id, ui
 static inline uint16_t mavlink_msg_gps_date_time_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_gps_date_time_t* gps_date_time)
 {
 	return mavlink_msg_gps_date_time_pack(system_id, component_id, msg, gps_date_time->year, gps_date_time->month, gps_date_time->day, gps_date_time->hour, gps_date_time->min, gps_date_time->sec, gps_date_time->clockStat, gps_date_time->visSat, gps_date_time->useSat, gps_date_time->GppGl, gps_date_time->sigUsedMask, gps_date_time->percentUsed);
+}
+
+/**
+ * @brief Encode a gps_date_time struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param gps_date_time C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_gps_date_time_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_gps_date_time_t* gps_date_time)
+{
+	return mavlink_msg_gps_date_time_pack_chan(system_id, component_id, chan, msg, gps_date_time->year, gps_date_time->month, gps_date_time->day, gps_date_time->hour, gps_date_time->min, gps_date_time->sec, gps_date_time->clockStat, gps_date_time->visSat, gps_date_time->useSat, gps_date_time->GppGl, gps_date_time->sigUsedMask, gps_date_time->percentUsed);
 }
 
 /**

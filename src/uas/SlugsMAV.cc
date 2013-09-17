@@ -195,6 +195,28 @@ void SlugsMAV::requestMidLevelCommands() {
 #endif
 }
 
+
+void SlugsMAV::readMidLevelCommandsFromEeprom() {
+#ifdef MAVLINK_ENABLED_SLUGS
+
+    mavlink_message_t msg;
+    mavlink_msg_command_long_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, (uint8_t)uasId, 0,
+                                  MAV_CMD_MIDLEVEL_STORAGE,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+    sendMessage(msg);
+    qDebug() << "Requesting to read mid-level commands from EEPROM for system " << uasId;
+#endif
+}
+
+void SlugsMAV::writeMidLevelCommandsToEeprom() {
+#ifdef MAVLINK_ENABLED_SLUGS
+    mavlink_message_t msg;
+    mavlink_msg_command_long_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, (uint8_t)uasId, 0,
+                                  MAV_CMD_MIDLEVEL_STORAGE,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+    sendMessage(msg);
+    qDebug() << "Requesting to write mid-level commands to EEPROM for system " << uasId;
+#endif
+}
+
 /**
  * @param altitude To hold in meters.
  * @param airspeed To hold in meters per second.
@@ -254,9 +276,11 @@ void SlugsMAV::stopHil()
 
 
 void SlugsMAV::setIsrLocation(double lat, double lon, double alt) {
+#ifdef MAVLINK_ENABLED_SLUGS
     mavlink_message_t msg;
     mavlink_msg_isr_location_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, this->getUASID(),
                                   (float)lat, (float)lon, (float)alt,0,0,0);
     sendMessage(msg);
     qDebug() << "Sent ISR location to mav: lat=" << lat << ", lon=" << lon << ", alt=" << alt;
+#endif
 }

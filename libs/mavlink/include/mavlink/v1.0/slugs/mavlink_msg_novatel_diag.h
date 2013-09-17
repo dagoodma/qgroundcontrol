@@ -89,7 +89,7 @@ static inline uint16_t mavlink_msg_novatel_diag_pack(uint8_t system_id, uint8_t 
  * @brief Pack a novatel_diag message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param timeStatus The Time Status. See Table 8 page 27 Novatel OEMStar Manual
  * @param receiverStatus Status Bitfield. See table 69 page 350 Novatel OEMstar Manual
@@ -137,7 +137,7 @@ static inline uint16_t mavlink_msg_novatel_diag_pack_chan(uint8_t system_id, uin
 }
 
 /**
- * @brief Encode a novatel_diag struct into a message
+ * @brief Encode a novatel_diag struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -147,6 +147,20 @@ static inline uint16_t mavlink_msg_novatel_diag_pack_chan(uint8_t system_id, uin
 static inline uint16_t mavlink_msg_novatel_diag_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_novatel_diag_t* novatel_diag)
 {
 	return mavlink_msg_novatel_diag_pack(system_id, component_id, msg, novatel_diag->timeStatus, novatel_diag->receiverStatus, novatel_diag->solStatus, novatel_diag->posType, novatel_diag->velType, novatel_diag->posSolAge, novatel_diag->csFails);
+}
+
+/**
+ * @brief Encode a novatel_diag struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param novatel_diag C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_novatel_diag_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_novatel_diag_t* novatel_diag)
+{
+	return mavlink_msg_novatel_diag_pack_chan(system_id, component_id, chan, msg, novatel_diag->timeStatus, novatel_diag->receiverStatus, novatel_diag->solStatus, novatel_diag->posType, novatel_diag->velType, novatel_diag->posSolAge, novatel_diag->csFails);
 }
 
 /**

@@ -69,7 +69,7 @@ static inline uint16_t mavlink_msg_volt_sensor_pack(uint8_t system_id, uint8_t c
  * @brief Pack a volt_sensor message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param r2Type It is the value of reading 2: 0 - Current, 1 - Foreward Sonar, 2 - Back Sonar, 3 - RPM
  * @param voltage Voltage in uS of PWM. 0 uS = 0V, 20 uS = 21.5V 
@@ -105,7 +105,7 @@ static inline uint16_t mavlink_msg_volt_sensor_pack_chan(uint8_t system_id, uint
 }
 
 /**
- * @brief Encode a volt_sensor struct into a message
+ * @brief Encode a volt_sensor struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -115,6 +115,20 @@ static inline uint16_t mavlink_msg_volt_sensor_pack_chan(uint8_t system_id, uint
 static inline uint16_t mavlink_msg_volt_sensor_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_volt_sensor_t* volt_sensor)
 {
 	return mavlink_msg_volt_sensor_pack(system_id, component_id, msg, volt_sensor->r2Type, volt_sensor->voltage, volt_sensor->reading2);
+}
+
+/**
+ * @brief Encode a volt_sensor struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param volt_sensor C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_volt_sensor_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_volt_sensor_t* volt_sensor)
+{
+	return mavlink_msg_volt_sensor_pack_chan(system_id, component_id, chan, msg, volt_sensor->r2Type, volt_sensor->voltage, volt_sensor->reading2);
 }
 
 /**

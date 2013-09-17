@@ -84,7 +84,7 @@ static inline uint16_t mavlink_msg_sensor_bias_pack(uint8_t system_id, uint8_t c
  * @brief Pack a sensor_bias message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param axBias Accelerometer X bias (m/s)
  * @param ayBias Accelerometer Y bias (m/s)
@@ -129,7 +129,7 @@ static inline uint16_t mavlink_msg_sensor_bias_pack_chan(uint8_t system_id, uint
 }
 
 /**
- * @brief Encode a sensor_bias struct into a message
+ * @brief Encode a sensor_bias struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -139,6 +139,20 @@ static inline uint16_t mavlink_msg_sensor_bias_pack_chan(uint8_t system_id, uint
 static inline uint16_t mavlink_msg_sensor_bias_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_sensor_bias_t* sensor_bias)
 {
 	return mavlink_msg_sensor_bias_pack(system_id, component_id, msg, sensor_bias->axBias, sensor_bias->ayBias, sensor_bias->azBias, sensor_bias->gxBias, sensor_bias->gyBias, sensor_bias->gzBias);
+}
+
+/**
+ * @brief Encode a sensor_bias struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param sensor_bias C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_sensor_bias_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_sensor_bias_t* sensor_bias)
+{
+	return mavlink_msg_sensor_bias_pack_chan(system_id, component_id, chan, msg, sensor_bias->axBias, sensor_bias->ayBias, sensor_bias->azBias, sensor_bias->gxBias, sensor_bias->gyBias, sensor_bias->gzBias);
 }
 
 /**

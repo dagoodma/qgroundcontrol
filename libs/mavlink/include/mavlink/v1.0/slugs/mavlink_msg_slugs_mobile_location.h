@@ -69,7 +69,7 @@ static inline uint16_t mavlink_msg_slugs_mobile_location_pack(uint8_t system_id,
  * @brief Pack a slugs_mobile_location message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param target The system reporting the action
  * @param latitude Mobile Latitude
@@ -105,7 +105,7 @@ static inline uint16_t mavlink_msg_slugs_mobile_location_pack_chan(uint8_t syste
 }
 
 /**
- * @brief Encode a slugs_mobile_location struct into a message
+ * @brief Encode a slugs_mobile_location struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -115,6 +115,20 @@ static inline uint16_t mavlink_msg_slugs_mobile_location_pack_chan(uint8_t syste
 static inline uint16_t mavlink_msg_slugs_mobile_location_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_slugs_mobile_location_t* slugs_mobile_location)
 {
 	return mavlink_msg_slugs_mobile_location_pack(system_id, component_id, msg, slugs_mobile_location->target, slugs_mobile_location->latitude, slugs_mobile_location->longitude);
+}
+
+/**
+ * @brief Encode a slugs_mobile_location struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param slugs_mobile_location C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_slugs_mobile_location_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_slugs_mobile_location_t* slugs_mobile_location)
+{
+	return mavlink_msg_slugs_mobile_location_pack_chan(system_id, component_id, chan, msg, slugs_mobile_location->target, slugs_mobile_location->latitude, slugs_mobile_location->longitude);
 }
 
 /**

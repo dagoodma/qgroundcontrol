@@ -69,7 +69,7 @@ static inline uint16_t mavlink_msg_cpu_load_pack(uint8_t system_id, uint8_t comp
  * @brief Pack a cpu_load message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param sensLoad Sensor DSC Load
  * @param ctrlLoad Control DSC Load
@@ -105,7 +105,7 @@ static inline uint16_t mavlink_msg_cpu_load_pack_chan(uint8_t system_id, uint8_t
 }
 
 /**
- * @brief Encode a cpu_load struct into a message
+ * @brief Encode a cpu_load struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -115,6 +115,20 @@ static inline uint16_t mavlink_msg_cpu_load_pack_chan(uint8_t system_id, uint8_t
 static inline uint16_t mavlink_msg_cpu_load_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_cpu_load_t* cpu_load)
 {
 	return mavlink_msg_cpu_load_pack(system_id, component_id, msg, cpu_load->sensLoad, cpu_load->ctrlLoad, cpu_load->batVolt);
+}
+
+/**
+ * @brief Encode a cpu_load struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param cpu_load C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_cpu_load_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_cpu_load_t* cpu_load)
+{
+	return mavlink_msg_cpu_load_pack_chan(system_id, component_id, chan, msg, cpu_load->sensLoad, cpu_load->ctrlLoad, cpu_load->batVolt);
 }
 
 /**

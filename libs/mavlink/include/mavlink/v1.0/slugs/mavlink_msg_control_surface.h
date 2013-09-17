@@ -74,7 +74,7 @@ static inline uint16_t mavlink_msg_control_surface_pack(uint8_t system_id, uint8
  * @brief Pack a control_surface message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param target The system setting the commands
  * @param idSurface ID control surface send 0: throttle 1: aileron 2: elevator 3: rudder
@@ -113,7 +113,7 @@ static inline uint16_t mavlink_msg_control_surface_pack_chan(uint8_t system_id, 
 }
 
 /**
- * @brief Encode a control_surface struct into a message
+ * @brief Encode a control_surface struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -123,6 +123,20 @@ static inline uint16_t mavlink_msg_control_surface_pack_chan(uint8_t system_id, 
 static inline uint16_t mavlink_msg_control_surface_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_control_surface_t* control_surface)
 {
 	return mavlink_msg_control_surface_pack(system_id, component_id, msg, control_surface->target, control_surface->idSurface, control_surface->mControl, control_surface->bControl);
+}
+
+/**
+ * @brief Encode a control_surface struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param control_surface C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_control_surface_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_control_surface_t* control_surface)
+{
+	return mavlink_msg_control_surface_pack_chan(system_id, component_id, chan, msg, control_surface->target, control_surface->idSurface, control_surface->mControl, control_surface->bControl);
 }
 
 /**

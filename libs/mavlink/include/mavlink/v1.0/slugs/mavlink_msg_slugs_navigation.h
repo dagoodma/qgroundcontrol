@@ -4,14 +4,14 @@
 
 typedef struct __mavlink_slugs_navigation_t
 {
- float u_m; ///< Measured Airspeed prior to the Nav Filter
+ float u_m; ///< Measured Airspeed prior to the nav filter in m/s
  float phi_c; ///< Commanded Roll
  float theta_c; ///< Commanded Pitch
  float psiDot_c; ///< Commanded Turn rate
  float ay_body; ///< Y component of the body acceleration
  float totalDist; ///< Total Distance to Run on this leg of Navigation
  float dist2Go; ///< Remaining distance to Run on this leg of Navigation
- uint16_t h_c; ///< Orderly Height
+ uint16_t h_c; ///< Commanded altitude in 0.1 m
  uint8_t fromWP; ///< Origin WP
  uint8_t toWP; ///< Destination WP
 } mavlink_slugs_navigation_t;
@@ -47,7 +47,7 @@ typedef struct __mavlink_slugs_navigation_t
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param msg The MAVLink message to compress the data into
  *
- * @param u_m Measured Airspeed prior to the Nav Filter
+ * @param u_m Measured Airspeed prior to the nav filter in m/s
  * @param phi_c Commanded Roll
  * @param theta_c Commanded Pitch
  * @param psiDot_c Commanded Turn rate
@@ -56,7 +56,7 @@ typedef struct __mavlink_slugs_navigation_t
  * @param dist2Go Remaining distance to Run on this leg of Navigation
  * @param fromWP Origin WP
  * @param toWP Destination WP
- * @param h_c Orderly Height
+ * @param h_c Commanded altitude in 0.1 m
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_slugs_navigation_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
@@ -104,9 +104,9 @@ static inline uint16_t mavlink_msg_slugs_navigation_pack(uint8_t system_id, uint
  * @brief Pack a slugs_navigation message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
- * @param u_m Measured Airspeed prior to the Nav Filter
+ * @param u_m Measured Airspeed prior to the nav filter in m/s
  * @param phi_c Commanded Roll
  * @param theta_c Commanded Pitch
  * @param psiDot_c Commanded Turn rate
@@ -115,7 +115,7 @@ static inline uint16_t mavlink_msg_slugs_navigation_pack(uint8_t system_id, uint
  * @param dist2Go Remaining distance to Run on this leg of Navigation
  * @param fromWP Origin WP
  * @param toWP Destination WP
- * @param h_c Orderly Height
+ * @param h_c Commanded altitude in 0.1 m
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_slugs_navigation_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
@@ -161,7 +161,7 @@ static inline uint16_t mavlink_msg_slugs_navigation_pack_chan(uint8_t system_id,
 }
 
 /**
- * @brief Encode a slugs_navigation struct into a message
+ * @brief Encode a slugs_navigation struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -174,10 +174,24 @@ static inline uint16_t mavlink_msg_slugs_navigation_encode(uint8_t system_id, ui
 }
 
 /**
+ * @brief Encode a slugs_navigation struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param slugs_navigation C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_slugs_navigation_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_slugs_navigation_t* slugs_navigation)
+{
+	return mavlink_msg_slugs_navigation_pack_chan(system_id, component_id, chan, msg, slugs_navigation->u_m, slugs_navigation->phi_c, slugs_navigation->theta_c, slugs_navigation->psiDot_c, slugs_navigation->ay_body, slugs_navigation->totalDist, slugs_navigation->dist2Go, slugs_navigation->fromWP, slugs_navigation->toWP, slugs_navigation->h_c);
+}
+
+/**
  * @brief Send a slugs_navigation message
  * @param chan MAVLink channel to send the message
  *
- * @param u_m Measured Airspeed prior to the Nav Filter
+ * @param u_m Measured Airspeed prior to the nav filter in m/s
  * @param phi_c Commanded Roll
  * @param theta_c Commanded Pitch
  * @param psiDot_c Commanded Turn rate
@@ -186,7 +200,7 @@ static inline uint16_t mavlink_msg_slugs_navigation_encode(uint8_t system_id, ui
  * @param dist2Go Remaining distance to Run on this leg of Navigation
  * @param fromWP Origin WP
  * @param toWP Destination WP
- * @param h_c Orderly Height
+ * @param h_c Commanded altitude in 0.1 m
  */
 #ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS
 
@@ -239,7 +253,7 @@ static inline void mavlink_msg_slugs_navigation_send(mavlink_channel_t chan, flo
 /**
  * @brief Get field u_m from slugs_navigation message
  *
- * @return Measured Airspeed prior to the Nav Filter
+ * @return Measured Airspeed prior to the nav filter in m/s
  */
 static inline float mavlink_msg_slugs_navigation_get_u_m(const mavlink_message_t* msg)
 {
@@ -329,7 +343,7 @@ static inline uint8_t mavlink_msg_slugs_navigation_get_toWP(const mavlink_messag
 /**
  * @brief Get field h_c from slugs_navigation message
  *
- * @return Orderly Height
+ * @return Commanded altitude in 0.1 m
  */
 static inline uint16_t mavlink_msg_slugs_navigation_get_h_c(const mavlink_message_t* msg)
 {

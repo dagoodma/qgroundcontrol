@@ -69,7 +69,7 @@ static inline uint16_t mavlink_msg_slugs_configuration_camera_pack(uint8_t syste
  * @brief Pack a slugs_configuration_camera message on a channel
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
- * @param chan The MAVLink channel this message was sent over
+ * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param target The system setting the commands
  * @param idOrder ID 0: brightness 1: aperture 2: iris 3: ICR 4: backlight
@@ -105,7 +105,7 @@ static inline uint16_t mavlink_msg_slugs_configuration_camera_pack_chan(uint8_t 
 }
 
 /**
- * @brief Encode a slugs_configuration_camera struct into a message
+ * @brief Encode a slugs_configuration_camera struct
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -115,6 +115,20 @@ static inline uint16_t mavlink_msg_slugs_configuration_camera_pack_chan(uint8_t 
 static inline uint16_t mavlink_msg_slugs_configuration_camera_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_slugs_configuration_camera_t* slugs_configuration_camera)
 {
 	return mavlink_msg_slugs_configuration_camera_pack(system_id, component_id, msg, slugs_configuration_camera->target, slugs_configuration_camera->idOrder, slugs_configuration_camera->order);
+}
+
+/**
+ * @brief Encode a slugs_configuration_camera struct on a channel
+ *
+ * @param system_id ID of this system
+ * @param component_id ID of this component (e.g. 200 for IMU)
+ * @param chan The MAVLink channel this message will be sent over
+ * @param msg The MAVLink message to compress the data into
+ * @param slugs_configuration_camera C-struct to read the message contents from
+ */
+static inline uint16_t mavlink_msg_slugs_configuration_camera_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_slugs_configuration_camera_t* slugs_configuration_camera)
+{
+	return mavlink_msg_slugs_configuration_camera_pack_chan(system_id, component_id, chan, msg, slugs_configuration_camera->target, slugs_configuration_camera->idOrder, slugs_configuration_camera->order);
 }
 
 /**

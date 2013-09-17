@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>296</width>
-    <height>494</height>
+    <height>515</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -383,6 +383,36 @@
            </property>
            <property name="text">
             <string>Get</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="5" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QPushButton" name="writeMidLevelButton">
+           <property name="toolTip">
+            <string>Copy current mid-level commands from non-permanent memory of the aircraft to permanent memory. Set your mid-level commands first before writing.</string>
+           </property>
+           <property name="statusTip">
+            <string>Copy current mid-level commands from non-permanent memory of the aircraft to permanent memory. Set your mid-level commands first before writing.</string>
+           </property>
+           <property name="text">
+            <string>Write (ROM)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="readMidLevelButton">
+           <property name="toolTip">
+            <string>Copy mid-level commands from permanent memory to non-permanent memory of aircraft. DOES NOT update the mid-level commands in this view, click Get after reading them to get them.</string>
+           </property>
+           <property name="statusTip">
+            <string>Copy mid-level commands from permanent memory to non-permanent memory of aircraft. DOES NOT update the mid-level commands in this view, click Get after reading them to get them.</string>
+           </property>
+           <property name="text">
+            <string>Read (ROM)</string>
            </property>
           </widget>
          </item>

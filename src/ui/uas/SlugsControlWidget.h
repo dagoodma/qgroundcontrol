@@ -68,6 +68,10 @@ protected slots:
     void getMidLevelButtonClicked();
     /** @brief Sends specifed mid-level commands to the MAV. */
     void setMidLevelButtonClicked();
+    /** @brief Request to write mid-level commands from volatile to non-volatile memory. */
+    void writeMidLevelButtonClicked();
+    /** @brief  Request to read mid-level commands from non-volatile memory and load into volatile memory. */
+    void readMidLevelButtonClicked();
     /** @brief Sets the mid-level parameters received from the MAV. */
     void updateMidLevelParameters(int uas, double altitude, double airspeed, double turnrate);
     /** @brief Sends selected control surfaces to MAV for selective passthrough mode. */
