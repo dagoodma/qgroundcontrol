@@ -258,7 +258,7 @@ void SlugsControlWidget::writeMidLevelButtonClicked() {
 
     slugsMav->writeMidLevelCommandsToEeprom();
 
-    ui.lastActionLabel->setText(QString("Requested to write mid-level commands to EEPROM"));
+    ui.lastActionLabel->setText(QString("Write mid-level commands to EEPROM"));
 #endif
 }
 
@@ -272,7 +272,7 @@ void SlugsControlWidget::readMidLevelButtonClicked() {
     SlugsMAV* slugsMav = static_cast<SlugsMAV*>(mav);
 
     slugsMav->readMidLevelCommandsFromEeprom();
-    ui.lastActionLabel->setText(QString("Requested to read mid-level commands from EEPROM"));
+    ui.lastActionLabel->setText(QString("Read mid-level commands from EEPROM"));
 #endif
 }
 

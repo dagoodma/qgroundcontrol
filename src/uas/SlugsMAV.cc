@@ -211,7 +211,7 @@ void SlugsMAV::writeMidLevelCommandsToEeprom() {
 #ifdef MAVLINK_ENABLED_SLUGS
     mavlink_message_t msg;
     mavlink_msg_command_long_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, (uint8_t)uasId, 0,
-                                  MAV_CMD_MIDLEVEL_STORAGE,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+                                  MAV_CMD_MIDLEVEL_STORAGE,0,1.0,0.0,0.0,0.0,0.0,0.0,0.0);
     sendMessage(msg);
     qDebug() << "Requesting to write mid-level commands to EEPROM for system " << uasId;
 #endif
