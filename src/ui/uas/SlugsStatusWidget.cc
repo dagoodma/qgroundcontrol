@@ -65,6 +65,12 @@ SlugsStatusWidget::SlugsStatusWidget(QWidget *parent) :
     ctrlLoad(0),
     sensLoad(0),
     setBatterySpecsAction(new QAction(tr("Set Battery Options"), this)),
+    airSpeedLowLimit(12),
+    airSpeedHighLimit(25),
+    airSpeedLimitThreshold(1.5),
+    altitudeLowLimit(50),
+    altitudeLimitThreshold(25),
+    altitudeHighLimit(250),
     m_ui(new Ui::slugsStatus)
 {
 

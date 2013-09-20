@@ -86,12 +86,13 @@ protected:
     static const int updateInterval = 200;
     static const int updateIntervalLowPower = 200;
     static const int errorUpdateInterval = 200;
-    static const float airSpeedLowLimit = 12; ///< Lower limit for airspeed warning(red)
-    static const float airSpeedHighLimit = 25; ///< Upper limit for airspeed warning (red)
-    static const float airSpeedLimitThreshold = 1.5; ///< Threshold from limits for warning (yellow)
-    static const float altitudeLowLimit = 50; ///< Lower limit for altitude warning (red)
-    static const float altitudeLimitThreshold = 25; ///< Threshold from limits for warning (yellow)
-    static const float altitudeHighLimit = 250; ///< Upper limit for altitude warning (red)
+    // These are set in constructor
+    float airSpeedLowLimit; ///< Lower limit for airspeed warning(red)
+    float airSpeedHighLimit; ///< Upper limit for airspeed warning (red)
+    float airSpeedLimitThreshold; ///< Threshold from limits for warning (yellow)
+    float altitudeLowLimit; ///< Lower limit for altitude warning (red)
+    float altitudeLimitThreshold; ///< Threshold from limits for warning (yellow)
+    float altitudeHighLimit; ///< Upper limit for altitude warning (red)
     bool lowPowerModeEnabled; ///< Low power mode reduces update rates
     unsigned int generalUpdateCount; ///< Skip counter for updates
 
