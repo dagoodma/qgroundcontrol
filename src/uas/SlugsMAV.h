@@ -77,6 +77,9 @@ signals:
     void airSpeedChanged(int id, float airSpeed);
     void gpsFixChanged(int id, unsigned int gpsQuality);
 
+private:
+    unsigned int gpsFixQuality;
+
 };
 
 #endif // _SLUGSMAV_H_

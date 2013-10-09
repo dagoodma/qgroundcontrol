@@ -26,7 +26,8 @@ This file is part of the QGROUNDCONTROL project
 #include <QDebug>
 
 SlugsMAV::SlugsMAV(MAVLinkProtocol* mavlink, int id) :
-    UAS(mavlink, id)
+    UAS(mavlink, id),
+    gpsFixQuality(0)
 {
     qDebug() << "Spawning a SLUGS MAV.";
 }
@@ -125,8 +126,16 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
     UAS::receiveMessage(link, message);// Let UAS handle the default message set
 
     if (message.sysid == uasId) {
-#ifdef MAVLINK_ENABLED_SLUGS
         switch (message.msgid) {
+        // --------------- Common Message Handling ---------------------
+        case MAVLINK_MSG_ID_GPS_RAW_INT:
+            if (mavlink_msg_gps_raw_int_get_fix_type(&message) != gpsFixQuality) {
+                gpsFixQuality = mavlink_msg_gps_raw_int_get_fix_type(&message);
+                emit gpsFixChanged(this->uasId,gpsFixQuality);
+            }
+
+            break;
+#ifdef MAVLINK_ENABLED_SLUGS
         // --------------- Custom Slugs Message Handling ---------------
         case MAVLINK_MSG_ID_SENSOR_DIAG:
             // TODO handle sensor diagnostic message
@@ -141,8 +150,9 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
             break;
         case MAVLINK_MSG_ID_STATUS_GPS:
             // TODO handle status gps message
-            emit gpsFixChanged(this->uasId,
+            /*emit gpsFixChanged(this->uasId,
                                static_cast<unsigned int>(mavlink_msg_status_gps_get_gpsQuality(&message)));
+            */
             break;
         case MAVLINK_MSG_ID_NOVATEL_DIAG:
             // TODO handle novatel diagnostic message
