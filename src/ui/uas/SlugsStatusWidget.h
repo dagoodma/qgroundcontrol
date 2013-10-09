@@ -73,7 +73,8 @@ protected:
     bool speedIsRed;
     bool altitudeIsWarning;
     bool speedIsWarning;
-    float chargeLevel;
+    float batteryCharge;
+    float batteryVoltage;
     float ctrlLoad;
     float sensLoad;
     QAction* setBatterySpecsAction;

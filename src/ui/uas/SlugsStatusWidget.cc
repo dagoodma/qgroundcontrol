@@ -61,7 +61,8 @@ SlugsStatusWidget::SlugsStatusWidget(QWidget *parent) :
     lowPowerModeEnabled(true),
     fixQuality(0),
     generalUpdateCount(0),
-    chargeLevel(0),
+    batteryCharge(0),
+    batteryVoltage(0),
     ctrlLoad(0),
     sensLoad(0),
     setBatterySpecsAction(new QAction(tr("Set Battery Options"), this)),
@@ -144,6 +145,7 @@ void SlugsStatusWidget::setUAS(UASInterface* uas) {
         // System type and battery related
         //connect(uas, SIGNAL(systemTypeSet(UASInterface*,uint)), this, SLOT(setSystemType(UASInterface*,uint)));
         connect(uas, SIGNAL(batteryChanged(UASInterface*, double, double, double, int)), this, SLOT(updateBattery(UASInterface*, double, double, double, int)));
+
         connect(setBatterySpecsAction, SIGNAL(triggered()), this, SLOT(setBatterySpecs()));
 
         // Name changes
@@ -338,7 +340,8 @@ void SlugsStatusWidget::updateBattery(UASInterface* uas, double voltage, double 
     if (this->uas == uas)
     {
         //timeRemaining = seconds;
-        chargeLevel = percent;
+        batteryCharge = percent;
+        batteryVoltage = voltage;
     }
 }
 
@@ -430,8 +433,8 @@ void SlugsStatusWidget::refresh()
         m_ui->heartBeatLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
 
         // Battery
-        m_ui->batteryBar->setValue(static_cast<int>(chargeLevel));
-        QString batteryTipText = QString("%1 V Battery Charge").arg(chargeLevel, 1, 'f', 1);
+        m_ui->batteryBar->setValue(static_cast<int>(batteryCharge));
+        QString batteryTipText = QString("%1 V Battery Charge").arg(batteryVoltage, 1, 'f', 1);
         m_ui->batteryBar->setToolTip(batteryTipText);
         m_ui->batteryBar->setStatusTip(batteryTipText);
 
