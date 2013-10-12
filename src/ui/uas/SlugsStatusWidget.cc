@@ -59,7 +59,7 @@ SlugsStatusWidget::SlugsStatusWidget(QWidget *parent) :
     localFrame(false),
     globalFrameKnown(false),
     lowPowerModeEnabled(true),
-    fixQuality(0),
+    gpsFixQuality(0),
     generalUpdateCount(0),
     batteryCharge(0),
     batteryVoltage(0),
@@ -72,18 +72,17 @@ SlugsStatusWidget::SlugsStatusWidget(QWidget *parent) :
     altitudeLowLimit(50),
     altitudeLimitThreshold(25),
     altitudeHighLimit(250),
-    m_ui(new Ui::slugsStatus)
+    m_ui(new Ui::slugsStatus),
+    isReturning(false),
+    link(0)
 {
 
     m_ui->setupUi(this);
 
     refreshTimer = new QTimer(this);
     connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
+    setUAS(UASManager::instance()->getActiveUAS());
     connect(UASManager::instance(), SIGNAL(activeUASSet(UASInterface*)), this, SLOT(setUAS(UASInterface*)));
-    if (UASManager::instance()->getActiveUAS())
-    {
-        setUAS(UASManager::instance()->getActiveUAS());
-    }
 }
 
 SlugsStatusWidget::~SlugsStatusWidget() {
@@ -98,9 +97,12 @@ SlugsStatusWidget::~SlugsStatusWidget() {
 
 void SlugsStatusWidget::setUAS(UASInterface* uas) {
 
+    // Do nothing if system is the same
+    if (this->uas == uas || uas == NULL)
+        return;
+
     if (this->uas) {
-
-
+        qDebug() << "Disconnecting old UAS in status widget.";
         // Heartbeat fade
         disconnect(this->uas, SIGNAL(heartbeatTimeout(bool, unsigned int)), this, SLOT(heartbeatTimeout(bool, unsigned int)));
         disconnect(this->uas, SIGNAL(heartbeat(UASInterface*)), this, SLOT(receiveHeartbeat(UASInterface*)));
@@ -126,16 +128,16 @@ void SlugsStatusWidget::setUAS(UASInterface* uas) {
             disconnect((SlugsMAV*)(this->uas), SIGNAL(airSpeedChanged(int, float)), this, SLOT(updateSpeed(int, float)));
         }
 
-        // Disconnect and stop timer
-        if (!uas) {
-            disconnected = true;
-            refresh();
-            refreshTimer->stop();
-        }
+        // Link
+        link = 0;
 
     }
+
+    this->uas = uas;
     if (uas) {
         // Setup communication
+        qDebug() << "Setting new UAS in status widget.";
+        disconnected = false;
 
         // Velocity and altitude
         connect(uas, SIGNAL(localPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateLocalPosition(UASInterface*,double,double,double,quint64)));
@@ -165,15 +167,24 @@ void SlugsStatusWidget::setUAS(UASInterface* uas) {
         refreshTimer->setInterval( (lowPowerModeEnabled)? updateIntervalLowPower : updateInterval);
         refreshTimer->start();
 
-        // Style heartbeat and gps indicators
-        heartbeatColor = Qt::green;
-        QString colorstyle("QLabel { background-color: %1; }");
-        //m_ui->typeLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
+        // Link
+        QList<LinkInterface*>* x = uas->getLinks();
+        if (x->size())
+        {
+            LinkInterface* li = x->at(0);
+            link = li;
+        }
 
-        //setSystemType(uas, uas->getSystemType());
     } // uas
+    else {
 
-    this->uas = uas;
+        // Disconnect and stop timer
+        disconnected = true;
+        refresh();
+        refreshTimer->stop();
+        qDebug() << "UAS disconnected.";
+    }
+
 
 }
 
@@ -187,18 +198,22 @@ void SlugsStatusWidget::heartbeatTimeout(bool timeout, unsigned int ms)
 
 void SlugsStatusWidget::receiveHeartbeat(UASInterface* uas)
 {
-    Q_UNUSED(uas);
     //heartbeatColor = uas->getColor();
     heartbeatColor = Qt::green;
+
+
+    // Heartbeat from groundstation (set to orange if returning to base)
+    if (uas->getAutopilotType() == MAV_AUTOPILOT_SLUGS) {
+        SlugsMAV* mav = (SlugsMAV*)uas;
+        isReturning = mav->IsReturning();
+    }
+
+    heartbeatColor = (isReturning)? QColor(255,115,25) : Qt::green;
     QString colorstyle("QLabel { background-color: %1; }");
     m_ui->heartBeatLabel->setStyleSheet(colorstyle.arg(heartbeatColor.name()));
 
-    // If we're returning from a disconnection, recolor things properly.
-    if (disconnected)
-    {
-        //updateActiveUAS(this->uas, this->isActive);
-        disconnected = false;
-    }
+
+    disconnected = false;
     timeout = false;
 }
 
@@ -221,88 +236,6 @@ void SlugsStatusWidget::updateName(const QString& name)
         m_ui->groupBox->setTitle(uas->getUASName());
     }
 }
-
-
-/**
- * The current system type is represented through the system icon.
- *
- * @param uas Source system, has to be the same as this->uas
- * @param systemType type ID, following the MAVLink system type conventions
- * @see http://pixhawk.ethz.ch/software/mavlink
- */
-/*
-void SlugsStatusWidget::setSystemType(UASInterface* uas, unsigned int systemType)
-{
-    if (uas && systemType && (uas == this->uas))
-    {
-        // Set matching icon
-        switch (systemType)
-        {
-        case MAV_TYPE_GENERIC:
-            m_ui->typeLabel->setPixmap(QPixmap(":/files/images/mavs/generic.svg"));
-            break;
-        case MAV_TYPE_FIXED_WING:
-            m_ui->typeLabel->setPixmap(QPixmap(":/files/images/mavs/fixed-wing.svg"));
-            break;
-        case MAV_TYPE_QUADROTOR:
-            m_ui->typeLabel->setPixmap(QPixmap(":/files/images/mavs/quadrotor.svg"));
-            break;
-        case MAV_TYPE_COAXIAL:
-            m_ui->typeLabel->setPixmap(QPixmap(":/files/images/mavs/coaxial.svg"));
-            break;
-        case MAV_TYPE_HELICOPTER:
-            m_ui->typeLabel->setPixmap(QPixmap(":/files/images/mavs/helicopter.svg"));
-            break;
-        case MAV_TYPE_ANTENNA_TRACKER:
-            m_ui->typeLabel->setPixmap(QPixmap(":/files/images/mavs/unknown.svg"));
-            break;
-        case MAV_TYPE_GCS: {
-                // A groundstation is a special system type, update widget
-                QString result;
-                //m_ui->nameLabel->setText(tr("GCS ") + result.sprintf("%03d", uas->getUASID()));
-                m_ui->typeLabel->setPixmap(QPixmap(":/files/images/mavs/groundstation.svg"));
-            }
-            break;
-        case MAV_TYPE_AIRSHIP:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/airship.svg"));
-            break;
-        case MAV_TYPE_FREE_BALLOON:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/free-balloon.svg"));
-            break;
-        case MAV_TYPE_ROCKET:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/rocket.svg"));
-            break;
-        case MAV_TYPE_GROUND_ROVER:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/ground-rover.svg"));
-            break;
-        case MAV_TYPE_SURFACE_BOAT:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/surface-boat.svg"));
-            break;
-        case MAV_TYPE_SUBMARINE:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/submarine.svg"));
-            break;
-        case MAV_TYPE_HEXAROTOR:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/hexarotor.svg"));
-            break;
-        case MAV_TYPE_OCTOROTOR:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/octorotor.svg"));
-            break;
-        case MAV_TYPE_TRICOPTER:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/tricopter.svg"));
-            break;
-        case MAV_TYPE_FLAPPING_WING:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/flapping-wing.svg"));
-            break;
-        case MAV_TYPE_KITE:
-            m_ui->typeLabel->setPixmap(QPixmap(":files/images/mavs/kite.svg"));
-            break;
-        default:
-            m_ui->typeLabel->setPixmap(QPixmap(":/files/images/mavs/unknown.svg"));
-            break;
-        }
-    }
-}
-*/
 
 void SlugsStatusWidget::updateLocalPosition(UASInterface* uas, double x, double y, double z, quint64 usec)
 {
@@ -334,7 +267,6 @@ void SlugsStatusWidget::updateSpeed(int id, float airSpeed)
 
 void SlugsStatusWidget::updateBattery(UASInterface* uas, double voltage, double current, double percent, int seconds)
 {
-    Q_UNUSED(voltage);
     Q_UNUSED(current);
     Q_UNUSED(seconds);
     if (this->uas == uas)
@@ -355,12 +287,12 @@ void SlugsStatusWidget::updateLoad(int id, double ctrlLoad, double sensLoad)
     }
 }
 
-void SlugsStatusWidget::updateGpsFix(int id, unsigned int fixQuality) {
+void SlugsStatusWidget::updateGpsFix(int id, unsigned int gpsFixQuality) {
     if (uas && (uas->getUASID() == id))
     {
-        this->fixQuality = fixQuality;
+        this->gpsFixQuality = gpsFixQuality;
 
-        gpsColor = (fixQuality > 0)? Qt::green : Qt::red;
+        gpsColor = (gpsFixQuality > 0)? Qt::green : Qt::red;
         QString colorstyle("QLabel { background-color: %1; }");
         m_ui->gpsStatusLabel->setStyleSheet(colorstyle.arg(gpsColor.name()));
     }
@@ -419,13 +351,11 @@ void SlugsStatusWidget::setBatterySpecs()
 
 void SlugsStatusWidget::refresh()
 {
-    if (!disconnected && generalUpdateCount == updateDisplayIntervalMultiplier && uas)
+
+    if (!disconnected && generalUpdateCount >= updateDisplayIntervalMultiplier && uas)
     {
         // Update interface at 1/4th of speed
         generalUpdateCount = 0;
-
-        // GPS fix
-        //m_ui->gpsStatusLabel
 
         // Heartbeat fading
         heartbeatColor = heartbeatColor.darker(135);
@@ -464,7 +394,7 @@ void SlugsStatusWidget::refresh()
 
         if ((altitude > altitudeLowLimit && altitude <= (altitudeLowLimit + altitudeLimitThreshold))
             || (altitude < altitudeHighLimit && altitude >= (altitudeHighLimit + altitudeLimitThreshold)))
-            altitudeColor = QColor(255, 127, 0); // orange
+            altitudeColor = QColor(255, 127, 0); //
         if (!altitudeIsWarning) {
             QString altitudeStyle = QString("QLabel {background-color: %1;}").arg(altitudeColor.name());
             m_ui->altitudeLabel->setStyleSheet(altitudeStyle);
@@ -494,6 +424,19 @@ void SlugsStatusWidget::refresh()
     }
     generalUpdateCount++;
 
+    // Gps status
+
+    // GPS fix (todo: get string names for fix types)
+    // set the color
+    gpsColor = (gpsFixQuality > 0)? Qt::green : Qt::red;
+    QString colorstyle("QLabel { background-color: %1; }");
+    m_ui->gpsStatusLabel->setStyleSheet(colorstyle.arg(gpsColor.name()));
+    // set the tool tip text
+    QString gpsLabelText = QString("GPS fix quality: %1").arg(gpsFixQuality);
+    m_ui->gpsStatusLabel->setToolTip(gpsLabelText);
+    m_ui->gpsStatusLabel->setStatusTip(gpsLabelText);
+
+
     // Speed warning indicator blink
     if (speedIsWarning) {
         QColor speedColor = (speedIsRed)? Qt::green : Qt::red;
@@ -519,6 +462,10 @@ void SlugsStatusWidget::refresh()
         QString style = QString("QLabel {background-color: %1;}").arg(warnColor.name());
         m_ui->heartBeatLabel->setStyleSheet(style);
 
+        QString heartbeatStatusText("<b>MAV communication</b>: no connection");
+        m_ui->heartBeatLabel->setToolTip(heartbeatStatusText);
+        m_ui->heartBeatLabel->setStatusTip(heartbeatStatusText);
+
         refreshTimer->setInterval(errorUpdateInterval);
         refreshTimer->start();
     }
@@ -526,6 +473,44 @@ void SlugsStatusWidget::refresh()
     {
         refreshTimer->setInterval( (lowPowerModeEnabled)? updateIntervalLowPower : updateInterval);
         refreshTimer->start();
+
+        QString heartbeatStatusText("<b>MAV communication</b>: %1");
+        if (isReturning) {
+            heartbeatStatusText = heartbeatStatusText.arg("lost ground station heartbeat. Ensure heartbeat is emitted and then set navigation mode.");
+        }
+        else {
+            heartbeatStatusText = heartbeatStatusText.arg("is working.");
+        }
+
+        // Link quality
+        if (link)
+        {
+            ProtocolInterface* p = LinkManager::instance()->getProtocolForLink(link);
+
+            // Build the tooltip out of the protocol parsing data: received, dropped, and parsing errors.
+            QString displayString("");
+            int c;
+            if ((c = p->getReceivedPacketCount(link)) != -1)
+            {
+                displayString += QString(tr("<br/>Received: %2")).arg(QString::number(c));
+            }
+            if ((c = p->getDroppedPacketCount(link)) != -1)
+            {
+                displayString += QString(tr("<br/>Dropped: %2")).arg(QString::number(c));
+            }
+            if ((c = p->getParsingErrorCount(link)) != -1)
+            {
+                displayString += QString(tr("<br/>Errors: %2")).arg(QString::number(c));
+            }
+            if (!displayString.isEmpty())
+            {
+                heartbeatStatusText = QString("%1<br/><br/><b>%2</b>").arg(heartbeatStatusText).arg(link->getName())
+                        + displayString;
+            }
+        }
+        m_ui->heartBeatLabel->setToolTip(heartbeatStatusText);
+        m_ui->heartBeatLabel->setStatusTip(heartbeatStatusText);
+
     }
 }
 

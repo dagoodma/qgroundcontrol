@@ -27,7 +27,8 @@ This file is part of the QGROUNDCONTROL project
 
 SlugsMAV::SlugsMAV(MAVLinkProtocol* mavlink, int id) :
     UAS(mavlink, id),
-    gpsFixQuality(0)
+    gpsFixQuality(0),
+    isReturning(false)
 {
     qDebug() << "Spawning a SLUGS MAV.";
 }
@@ -133,6 +134,9 @@ void SlugsMAV::receiveMessage(LinkInterface* link, mavlink_message_t message)
                 gpsFixQuality = mavlink_msg_gps_raw_int_get_fix_type(&message);
                 emit gpsFixChanged(this->uasId,gpsFixQuality);
             }
+            break;
+        case MAVLINK_MSG_ID_HEARTBEAT:
+            isReturning = (mavlink_msg_heartbeat_get_custom_mode(&message) == SLUGS_MODE_RETURNING);
 
             break;
 #ifdef MAVLINK_ENABLED_SLUGS

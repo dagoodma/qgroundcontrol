@@ -339,9 +339,25 @@ void SlugsControlWidget::updateNavMode(int uas, int mode,QString description)
         ui.lastActionLabel->setText(QString("Set navigation mode to %1").arg(description));
 
 
-    if (navModeButtons.contains(mode)) {
+    UASInterface* mav = UASManager::instance()->getUASForId(this->uas);
+    if (!mav || mav->getAutopilotType() != MAV_AUTOPILOT_SLUGS) {
+        // TODO show error popup
+       return;
+    }
+
+    SlugsMAV* slugsMav = static_cast<SlugsMAV*>(mav);
+    if (slugsMav->IsReturning()) {
+        // TODO flash something on the status widget (make all buttons blink)
+        qDebug() << QString("MAV lost ground station heartbeat and is returning home.");
+        // deselect the button that was pressed
+        if (navModeButtons.contains(uasNavigationMode)) {
+            navModeButtons.value(uasNavigationMode)->setStyleSheet("");
+        }
+    }
+    else if (navModeButtons.contains(mode) ) {
         QString buttonText = ((QPushButton*)navModeButtons.value(mode))->text();
         qDebug() << QString("Nav mode button %1 was pressed: %2").arg(mode).arg(buttonText);
+
 
         if (navModeButtons.contains(uasNavigationMode))
             qDebug() << QString("The old class is: %1").arg(navModeButtons.value(uasNavigationMode)->metaObject()->className());
@@ -361,7 +377,7 @@ void SlugsControlWidget::updateNavMode(int uas, int mode,QString description)
         }
         navModeButtons.value(mode)->setStyleSheet(pressedStyle);
 
-    }
+    } // else if (navModeButtons.contains(mode) )
 
 #endif
     uasNavigationMode = mode;

@@ -30,6 +30,8 @@ This file is part of the QGROUNDCONTROL project
 #include <QMouseEvent>
 #include <UASInterface.h>
 #include "ui_SlugsStatus.h"
+#include "ProtocolInterface.h"
+#include "LinkManager.h"
 
 
 class SlugsStatusWidget : public QWidget
@@ -48,7 +50,7 @@ public slots:
     void updateLocalPosition(UASInterface* uas, double x, double y, double z, quint64 usec);
     void updateGlobalPosition(UASInterface* uas, double lon, double lat, double alt, quint64 usec);
     void updateBattery(UASInterface* uas, double voltage, double current, double percent, int seconds);
-    void updateGpsFix(int id, unsigned int fixQuality);
+    void updateGpsFix(int id, unsigned int gpsFixQuality);
     void updateSpeed(int id, float airSpeed);
     void updateLoad(int id, double ctrlLoad, double sensLoad);
     void refresh();
@@ -65,7 +67,8 @@ protected:
     QColor heartbeatColor;
     QColor gpsColor;
     quint64 startTime;
-    int fixQuality;
+    int gpsFixQuality;
+    bool isReturning;
     bool timeout;
     bool iconIsRed;
     bool disconnected;
@@ -96,6 +99,7 @@ protected:
     float altitudeHighLimit; ///< Upper limit for altitude warning (red)
     bool lowPowerModeEnabled; ///< Low power mode reduces update rates
     unsigned int generalUpdateCount; ///< Skip counter for updates
+    LinkInterface* link;
 
 private:
     Ui::slugsStatus *m_ui;

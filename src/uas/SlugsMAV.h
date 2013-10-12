@@ -66,6 +66,10 @@ public:
     bool getHilState() { return (mode & MAV_MODE_FLAG_HIL_ENABLED) > 0; }
     /** @brief Sets the current ISR location. */
     void setIsrLocation(double lat, double lon, double alt);
+    /** @brief Whether the MAV is returning to base or not. */
+    bool IsReturning() {
+        return isReturning;
+    }
 
 public slots:
     /** @brief Receive a MAVLink message from this MAV */
@@ -79,6 +83,7 @@ signals:
 
 private:
     unsigned int gpsFixQuality;
+    bool isReturning;
 
 };
 
