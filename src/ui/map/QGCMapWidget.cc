@@ -354,6 +354,7 @@ void QGCMapWidget::addUAS(UASInterface* uas)
 void QGCMapWidget::activeUASSet(UASInterface* uas)
 {
     // Only execute if proper UAS is set
+    UASInterface* oldUas = this->uas;
     this->uas = uas;
 
     // Disconnect old MAV manager
@@ -364,6 +365,8 @@ void QGCMapWidget::activeUASSet(UASInterface* uas)
         disconnect(currWPManager, SIGNAL(waypointEditableChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
         disconnect(this, SIGNAL(waypointCreated(Waypoint*)), currWPManager, SLOT(addWaypointEditable(Waypoint*)));
         disconnect(this, SIGNAL(waypointChanged(Waypoint*)), currWPManager, SLOT(notifyOfChangeEditable(Waypoint*)));
+
+        disconnect((UAS*)oldUas, SIGNAL(waypointLegChanged(int)), this, SLOT(updateWaypointList(int)));
     }
 
     // Attach the new waypoint manager if a new UAS was selected. Otherwise, indicate
@@ -381,6 +384,8 @@ void QGCMapWidget::activeUASSet(UASInterface* uas)
         connect(currWPManager, SIGNAL(waypointEditableChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
         connect(this, SIGNAL(waypointCreated(Waypoint*)), currWPManager, SLOT(addWaypointEditable(Waypoint*)));
         connect(this, SIGNAL(waypointChanged(Waypoint*)), currWPManager, SLOT(notifyOfChangeEditable(Waypoint*)));
+
+        connect((UAS*)uas, SIGNAL(waypointLegChanged(int)), this, SLOT(updateWaypointList(int)));
     }
     else
     {
@@ -689,6 +694,8 @@ void QGCMapWidget::updateWaypoint(int uas, Waypoint* wp)
                 // Create icon for new WP
                 QColor wpColor(Qt::red);
                 if (uasInstance) wpColor = uasInstance->getColor();
+                //if (((UAS*)uasInstance)->getNextWaypointId() == wp->getId()) wpColor = QColor(Qt::yellow);
+
                 Waypoint2DIcon* icon = new Waypoint2DIcon(map, this, wp, wpColor, wpindex);
                 ConnectWP(icon);
                 icon->setParentItem(map);
@@ -706,7 +713,12 @@ void QGCMapWidget::updateWaypoint(int uas, Waypoint* wp)
                     // If we got a valid graphics item, continue
                     if (prevIcon)
                     {
-                        mapcontrol::WaypointLineItem* line = new mapcontrol::WaypointLineItem(prevIcon, icon, wpColor, map);
+                        // Highlight current leg as yellow
+                        QColor wpLineColor = (((UAS*)uasInstance)->getNextWaypointId() == wp->getId())? QColor(Qt::yellow) :
+                            (uasInstance)? uasInstance->getColor()
+                                         : QColor(Qt::red);
+
+                        mapcontrol::WaypointLineItem* line = new mapcontrol::WaypointLineItem(prevIcon, icon, wpLineColor, map);
                         line->setParentItem(map);
                         QGraphicsItemGroup* group = waypointLines.value(uas, NULL);
                         if (group)
@@ -832,9 +844,12 @@ void QGCMapWidget::updateWaypointList(int uas)
             if (prevIcon && currIcon)
             {
                 // If we got a valid graphics item, continue
-                QColor wpColor(Qt::red);
-                if (uasInstance) wpColor = uasInstance->getColor();
-                mapcontrol::WaypointLineItem* line = new mapcontrol::WaypointLineItem(prevIcon, currIcon, wpColor, map);
+                // Highlight current leg as yellow or leg from first to second waypoint
+                QColor wpLineColor = (((UAS*)uasInstance)->getNextWaypointId() == wp->getId())?
+                            QColor(Qt::yellow) : (uasInstance)?
+                                uasInstance->getColor() : QColor(Qt::red);
+
+                mapcontrol::WaypointLineItem* line = new mapcontrol::WaypointLineItem(prevIcon, currIcon, wpLineColor, map);
                 line->setParentItem(map);
                 QGraphicsItemGroup* group = waypointLines.value(uas, NULL);
                 if (group)

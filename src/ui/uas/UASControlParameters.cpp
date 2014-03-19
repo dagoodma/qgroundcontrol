@@ -61,21 +61,6 @@ void UASControlParameters::changedMode(int mode)
     case (uint8_t)MAV_MODE_MANUAL_DISARMED:
         modeTemp = "D/MANUAL MODE";
         break;
-#ifdef MAVLINK_ENABLED_SLUGS
-    case (uint8_t)MAV_MODE_AUTO:
-        modeTemp = "WAYPOINT MODE";
-        break;
-    case (uint8_t)MAV_MODE_GUIDED:
-        modeTemp = "MID-L CMDS MODE";
-        break;
-
-    case (uint8_t)MAV_MODE_TEST1:
-        modeTemp = "PASST MODE";
-        break;
-    case (uint8_t)MAV_MODE_TEST2:
-        modeTemp = "SEL PT MODE";
-        break;
-#endif
     default:
         modeTemp = "UNKNOWN MODE";
         break;

@@ -65,12 +65,11 @@ This file is part of the QGROUNDCONTROL project
 #include "QGCGoogleEarthView.h"
 #endif
 #include "QGCToolBar.h"
-#include "SlugsDataSensorView.h"
 #include "LogCompressor.h"
 
-#include "SlugsHilSim.h"
-
-#include "SlugsPadCameraControl.h"
+#if defined(MAVLINK_ENABLED_SLUGS) && !defined(_SLUGSCONTROLWIDGET_H_)
+#include "SlugsTabbedControlWidget.h"
+#endif
 #include "UASControlParameters.h"
 #include "QGCMAVLinkInspector.h"
 #include "QGCMAVLinkLogPlayer.h"
@@ -188,6 +187,7 @@ public:
 
     QList<QAction*> listLinkMenuActions();
 
+
 public slots:
     /** @brief Shows a status message on the bottom status bar */
     void showStatusMessage(const QString& status, int timeout);
@@ -278,6 +278,25 @@ public slots:
 
     /** @brief Loads and shows the HIL Configuration Widget for the given UAS*/
     void showHILConfigurationWidget(UASInterface *uas);
+
+    /** @brief Toggles HIL mode on the selected mav.
+     *  @todo Hide this from non-slugs or find a new home
+     */
+    #ifdef MAVLINK_ENABLED_SLUGS
+    void toggleHil();
+
+    /** @brief Updates the HIL menu item with the correct label.
+     *  @todo Hide from non-slugs autopilots.
+     */
+    void updateHilLabel(void) {
+        SlugsMAV *slugsMav = (SlugsMAV*)UASManager::instance()->getActiveUAS();
+        if (slugsMav) {
+            QString hilState = (!slugsMav->getHilState())? "Start" : "Stop";
+            ui.actionToggleHil->setText(hilState + " HIL");
+            ui.actionToggleHil->setToolTip(hilState + "s hardware in the loop mode");
+        }
+    }
+    #endif
 
     void closeEvent(QCloseEvent* event);
 
@@ -426,6 +445,9 @@ protected:
 
     // Dock widgets
     QPointer<QDockWidget> controlDockWidget;
+    #ifdef MAVLINK_ENABLED_SLUGS
+    QPointer<QDockWidget> slugsTabbedControlDockWidget;
+    #endif
     QPointer<QDockWidget> controlParameterWidget;
     QPointer<QDockWidget> infoDockWidget;
     QPointer<QDockWidget> cameraDockWidget;
@@ -448,9 +470,6 @@ protected:
     QPointer<QDockWidget> hsiDockWidget;
     QPointer<QDockWidget> rcViewDockWidget;
     QPointer<QDockWidget> hudDockWidget;
-    QPointer<QDockWidget> slugsDataWidget;
-    QPointer<QDockWidget> slugsHilSimWidget;
-    QPointer<QDockWidget> slugsCamControlWidget;
 
     QPointer<QGCToolBar> toolBar;
     QPointer<QGCStatusBar> customStatusBar;
@@ -508,6 +527,10 @@ private:
     QMap<QString,QString> customWidgetNameToFilenameMap;
     MenuActionHelper *menuActionHelper;
     Ui::MainWindow ui;
+
+    #ifdef MAVLINK_ENABLED_SLUGS
+    UASInterface *uas;
+    #endif
 
     /** @brief Set the appropriate titlebar for a given dock widget.
       * Relies on the isAdvancedMode and dockWidgetTitleBarEnabled member variables.

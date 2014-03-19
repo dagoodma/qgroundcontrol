@@ -21,111 +21,73 @@ This file is part of the QGROUNDCONTROL project
 
 ======================================================================*/
 
-#ifndef SLUGSMAV_H
-#define SLUGSMAV_H
+#ifndef _SLUGSMAV_H_
+#define _SLUGSMAV_H_
 
 #include "UAS.h"
 #include "mavlink.h"
 #include <QTimer>
 
-#define SLUGS_UPDATE_RATE   200   // in ms
+#ifdef MAVLINK_ENABLED_SLUGS
+#include "slugs/slugs.h"
+#endif
+
 class SlugsMAV : public UAS
 {
     Q_OBJECT
     Q_INTERFACES(UASInterface)
 
-    enum SLUGS_ACTION {
-        SLUGS_ACTION_NONE,
-        SLUGS_ACTION_SUCCESS,
-        SLUGS_ACTION_FAIL,
-        SLUGS_ACTION_EEPROM,
-        SLUGS_ACTION_MODE_CHANGE,
-        SLUGS_ACTION_MODE_REPORT,
-        SLUGS_ACTION_PT_CHANGE,
-        SLUGS_ACTION_PT_REPORT,
-        SLUGS_ACTION_PID_CHANGE,
-        SLUGS_ACTION_PID_REPORT,
-        SLUGS_ACTION_WP_CHANGE,
-        SLUGS_ACTION_WP_REPORT,
-        SLUGS_ACTION_MLC_CHANGE,
-        SLUGS_ACTION_MLC_REPORT
-    };
-
-
 public:
     SlugsMAV(MAVLinkProtocol* mavlink, int id = 0);
+    //~SlugsMAV(void);
+    /** @brief Gets current navigation mode value. */
+    int getNavMode();
+    /** @brief Sets the SLUGS navigation mode. */
+    void setNavMode(int navNavMode);
+    /** @brief Returns the name of the SLUGS navigation mode. */
+    QString getNavModeText(int mode);
+    /** @brief Helper for getNavModeTex. */
+    static QString getSlugsNavModeText(int mode);
+    /** @brief Sends a request for current mid-level commands. */
+    void requestMidLevelCommands();
+    /** @brief Sets mid-level commands. */
+    void setMidLevelCommands(double altitude, double airspeed, double turnrate);
+    /** @brief Reads mid-level commands from EEPROM. */
+    void readMidLevelCommandsFromEeprom();
+    /** @brief Writes mid-level commands to EEPROM. */
+    void writeMidLevelCommandsToEeprom();
+    /** @brief Sets the selective passthrough surfaces for manual control. */
+    void setPassthroughSurfaces(bool throttle, bool aileron, bool rudder, bool elevator);
+    /** @brief Enables HIL mode (autopilot connects to simulink). */
+    void startHil();
+    /** @brief Disables  HIL mode. */
+    void stopHil();
+    /** @brief Returns whether the HIL flag is set on mode. */
+    bool getHilState() { return hilEnabled; }
+    /** @brief Sets the current ISR location. */
+    void setIsrLocation(double lat, double lon, double alt);
+    /** @brief Whether the MAV is returning to base or not. */
+    bool IsReturning() {
+        return isReturning;
+    }
 
 public slots:
     /** @brief Receive a MAVLink message from this MAV */
     void receiveMessage(LinkInterface* link, mavlink_message_t message);
 
-    void emitSignals (void);
-
 signals:
+    void midLevelCommandsChanged(int id, double altitude, double airspeed, double turnrate);
+    void loadsChanged(int id, double ctrlLoad, double sensLoad);
+    void airSpeedChanged(int id, float airSpeed);
+    void gpsFixChanged(int id, unsigned int gpsQuality);
 
-    void slugsRawImu(int uasId, const mavlink_raw_imu_t& rawData);
-    void slugsGPSCogSog(int uasId, double cog, double sog);
-
-#ifdef MAVLINK_ENABLED_SLUGS
-
-    void slugsCPULoad(int systemId, const mavlink_cpu_load_t& cpuLoad);
-    void slugsAirData(int systemId, const mavlink_air_data_t& airData);
-    void slugsSensorBias(int systemId, const mavlink_sensor_bias_t& sensorBias);
-    void slugsDiagnostic(int systemId, const mavlink_diagnostic_t& diagnostic);
-    void slugsNavegation(int systemId, const mavlink_slugs_navigation_t& slugsNavigation);
-    void slugsDataLog(int systemId, const mavlink_data_log_t& dataLog);
-    void slugsGPSDateTime(int systemId, const mavlink_gps_date_time_t& gpsDateTime);
-    void slugsActionAck(int systemId, const mavlink_action_ack_t& actionAck);
-
-    void slugsBootMsg(int uasId, mavlink_boot_t& boot);
-    void slugsAttitude(int uasId, mavlink_attitude_t& attitude);
-
-    void slugsScaled(int uasId, const mavlink_scaled_imu_t& scaled);
-    void slugsServo(int uasId, const mavlink_servo_output_raw_t& servo);
-    void slugsChannels(int uasId, const mavlink_rc_channels_raw_t& channels);
-
-#endif
-
-protected:
-    unsigned char updateRoundRobin;
-    QTimer* widgetTimer;
-    mavlink_raw_imu_t mlRawImuData;
-
-#ifdef MAVLINK_ENABLED_SLUGS
-    mavlink_gps_raw_t mlGpsData;
-    mavlink_attitude_t mlAttitude;
-    mavlink_cpu_load_t mlCpuLoadData;
-    mavlink_air_data_t mlAirData;
-    mavlink_sensor_bias_t mlSensorBiasData;
-    mavlink_diagnostic_t mlDiagnosticData;
-    mavlink_boot_t mlBoot;
-    mavlink_gps_date_time_t mlGpsDateTime;
-    mavlink_mid_lvl_cmds_t mlMidLevelCommands;
-    mavlink_set_mode_t mlApMode;
-
-    mavlink_slugs_navigation_t mlNavigation;
-    mavlink_data_log_t mlDataLog;
-    mavlink_ctrl_srfc_pt_t mlPassthrough;
-    mavlink_action_ack_t mlActionAck;
-
-    mavlink_slugs_action_t mlAction;
-
-    mavlink_scaled_imu_t mlScaled;
-    mavlink_servo_output_raw_t mlServo;
-    mavlink_rc_channels_raw_t mlChannels;
-
-
-    // Standart messages MAVLINK used by SLUGS
 private:
-
-
-    void emitGpsSignals (void);
-    void emitPidSignal(void);
-
-    int uasId;
-
-#endif // if SLUGS
+    unsigned int gpsFixQuality;
+    bool isReturning;
+    bool mode;
+    bool hilEnabled;
 
 };
 
-#endif // SLUGSMAV_H
+#endif // _SLUGSMAV_H_
+

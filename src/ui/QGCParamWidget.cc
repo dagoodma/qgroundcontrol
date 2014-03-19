@@ -57,6 +57,11 @@ QGCParamWidget::QGCParamWidget(QWidget *parent) :
 {
 
 
+    // Get parameters on startup (unless we are slugs since param SM is buggy)
+    if (uas && mav->getAutopilotType() != MAV_AUTOPILOT_SLUGS) {
+        requestParameterList();
+    }
+
 }
 
 

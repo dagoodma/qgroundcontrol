@@ -37,6 +37,30 @@ QGCSensorSettingsWidget::QGCSensorSettingsWidget(UASInterface* uas, QWidget *par
     ui(new Ui::QGCSensorSettingsWidget)
 {
     ui->setupUi(this);
+
+#ifdef MAVLINK_ENABLED_SLUGS
+    ui->groupBox_3->hide();
+    ui->spinBox_controller->hide();
+    ui->spinBox_extended->hide();
+    ui->spinBox_extra1->hide();
+    ui->spinBox_extra2->hide();
+    ui->spinBox_extra3->hide();
+    ui->spinBox_position->hide();
+    //ui->spinBox_rawSensor->hide();
+    //ui->spinBox_rc->hide();
+    ui->label_2->hide();
+    ui->label_3->hide();
+    ui->label_4->hide();
+    ui->label_6->hide();
+    ui->label_7->hide();
+    ui->label_8->hide();
+
+    // Raw sensor becomes attitude rate (50 Hz), and Rc becomes other (5 Hz)
+    ui->label->setText("Attitude");
+    ui->label_5->setText("Other");
+
+    ui->gridLayout_2->setContentsMargins(6, 2, 6, 6);
+#else
     // Set up delay timers
      delayedSendRawSensorTimer.setInterval(800);
      delayedSendControllerTimer.setInterval(800);
@@ -74,6 +98,7 @@ QGCSensorSettingsWidget::QGCSensorSettingsWidget(UASInterface* uas, QWidget *par
 
     // Hide the calibration stuff - done in custom widgets anyway
     ui->groupBox_3->hide();
+#endif
 }
 
 void QGCSensorSettingsWidget::delayedSendRawSensor(int rate)

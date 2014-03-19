@@ -2,6 +2,7 @@
 
 #include <QMenu>
 #include <QScrollBar>
+#include <QScrollArea>
 
 
 #include "GAudioOutput.h"
@@ -14,6 +15,8 @@ QGCMessageView::QGCMessageView(QWidget *parent) :
     QWidget(parent),
     activeUAS(NULL),
     clearAction(new QAction(tr("Clear Text"), this)),
+    //copyTextAction(new QAction(tr("Copy"), this)),
+    //selectAllTextAction(new QAction(tr("Select All"), this)),
     ui(new Ui::QGCMessageView)
 {
     setObjectName("QUICKVIEW_MESSAGE_CONSOLE");
@@ -25,6 +28,13 @@ QGCMessageView::QGCMessageView(QWidget *parent) :
     connectWidget = new QGCUnconnectedInfoWidget(this);
     ui->horizontalLayout->addWidget(connectWidget);
     ui->plainTextEdit->hide();
+    ui->scrollArea->setContextMenuPolicy(Qt::ActionsContextMenu);
+    //ui->scrollArea->addAction(copyTextAction);
+    ui->scrollArea->addAction(clearAction);
+    //ui->scrollArea->addAction(selectAllTextAction);
+
+    //connect(selectAllAction,SIGNAL(triggered()),ui->plainTextEdit,SLOT(selectAll()));
+    //connect(copyTextAction,SIGNAL(triggered()),ui->plainTextEdit,SLOT(copy()));
 
     setActiveUAS(UASManager::instance()->getActiveUAS());
     connect(UASManager::instance(), SIGNAL(activeUASSet(UASInterface*)), this, SLOT(setActiveUAS(UASInterface*)));

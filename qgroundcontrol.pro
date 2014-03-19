@@ -299,9 +299,13 @@ FORMS += \
     src/ui/QMap3D.ui \
     src/ui/QGCWebView.ui \
     src/ui/map3D/QGCGoogleEarthView.ui \
-    src/ui/SlugsDataSensorView.ui \
-    src/ui/SlugsHilSim.ui \
-    src/ui/SlugsPadCameraControl.ui \
+# TODO delete these files
+#    src/ui/SlugsDataSensorView.ui \
+#    src/ui/SlugsHilSim.ui \
+#    src/ui/SlugsPadCameraControl.ui \
+    src/ui/SlugsControl.ui \
+    src/ui/SlugsTabbedControl.ui \
+    src/ui/SlugsStatus.ui \
     src/ui/uas/QGCUnconnectedInfoWidget.ui \
     src/ui/designer/QGCToolWidget.ui \
     src/ui/designer/QGCParamSlider.ui \
@@ -459,9 +463,13 @@ HEADERS += \
     src/comm/QGCMAVLink.h \
     src/ui/QGCWebView.h \
     src/ui/map3D/QGCWebPage.h \
-    src/ui/SlugsDataSensorView.h \
-    src/ui/SlugsHilSim.h \
-    src/ui/SlugsPadCameraControl.h \
+# TODO delete these
+#    src/ui/SlugsDataSensorView.h \
+#    src/ui/SlugsHilSim.h \
+#    src/ui/SlugsPadCameraControl.h \
+    src/ui/uas/SlugsControlWidget.h \
+    src/ui/uas/SlugsTabbedControlWidget.h \
+    src/ui/uas/SlugsStatusWidget.h \
     src/ui/QGCMainWindowAPConfigurator.h \
     src/comm/MAVLinkSwarmSimulationLink.h \
     src/ui/uas/QGCUnconnectedInfoWidget.h \
@@ -646,9 +654,13 @@ SOURCES += \
     src/ui/RadioCalibration/RadioCalibrationData.cc \
     src/ui/QGCWebView.cc \
     src/ui/map3D/QGCWebPage.cc \
-    src/ui/SlugsDataSensorView.cc \
-    src/ui/SlugsHilSim.cc \
-    src/ui/SlugsPadCameraControl.cpp \
+# TODO delete these
+#    src/ui/SlugsDataSensorView.cc \
+#    src/ui/SlugsHilSim.cc \
+#    src/ui/SlugsPadCameraControl.cpp \
+    src/ui/uas/SlugsControlWidget.cc \
+    src/ui/uas/SlugsTabbedControlWidget.cpp \
+    src/ui/uas/SlugsStatusWidget.cc \
     src/ui/QGCMainWindowAPConfigurator.cc \
     src/comm/MAVLinkSwarmSimulationLink.cc \
     src/ui/uas/QGCUnconnectedInfoWidget.cc \
@@ -715,6 +727,7 @@ SOURCES += \
     src/ui/QGCTabbedInfoView.cpp \
     src/ui/UASRawStatusView.cpp \
     src/ui/PrimaryFlightDisplay.cc \
+    src/ui/uas/QGCMessageView.cc \
     src/ui/JoystickButton.cc \
     src/ui/JoystickAxis.cc \
     src/ui/uas/QGCMessageView.cc \

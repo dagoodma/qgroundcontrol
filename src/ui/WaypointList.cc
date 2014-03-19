@@ -211,8 +211,9 @@ void WaypointList::setUAS(UASInterface* uas)
     //connect(WPM,SIGNAL(loadWPFile()),this,SLOT(setIsLoadFileWP()));
     //connect(WPM,SIGNAL(readGlobalWPFromUAS(bool)),this,SLOT(setIsReadGlobalWP(bool)));
 
-    // Update list
-    read();
+    // Update list (unless autopilot is SLUGS)
+    if (uas->getAutopilotType() != MAV_AUTOPILOT_SLUGS)
+        read();
 }
 
 void WaypointList::saveWaypoints()

@@ -59,6 +59,10 @@ public slots:
     void updateState(UASInterface* system, QString name, QString description);
     /** @brief Set the system mode */
     void updateMode(int system, QString name, QString description);
+    /** @brief Set the navigation mode */
+    #ifdef MAVLINK_ENABLED_SLUGS
+    void updateNavMode(int system, int mode, QString name);
+    #endif
     /** @brief Update the system name */
     void updateName(const QString& name);
     /** @brief Set the MAV system type */
@@ -118,6 +122,9 @@ protected:
     QLabel* toolBarSafetyLabel;
     QLabel* toolBarModeLabel;
     QLabel* toolBarStateLabel;
+    #ifdef MAVLINK_ENABLED_SLUGS
+    QLabel* toolBarNavModeLabel;
+    #endif
     QLabel* toolBarWpLabel;
     QLabel* toolBarMessageLabel;
     QPushButton* connectButton;
@@ -139,6 +146,9 @@ protected:
     float altitudeRel;
     QString state;
     QString mode;
+    #ifdef MAVLINK_ENABLED_SLUGS
+    QString navMode;
+    #endif
     QString systemName;
     QString lastSystemMessage;
     quint64 lastSystemMessageTimeMs;

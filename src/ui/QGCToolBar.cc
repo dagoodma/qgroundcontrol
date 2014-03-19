@@ -130,6 +130,15 @@ void QGCToolBar::createUI()
 //    toolBarStateLabel->setAlignment(Qt::AlignCenter);
 //    addWidget(toolBarStateLabel);
 
+    // Load SLUGS-specific navigation mode label
+    #ifdef MAVLINK_ENABLED_SLUGS
+    toolBarNavModeLabel = new QLabel(this);
+    toolBarNavModeLabel->setMaximumWidth(0);
+    toolBarNavModeLabel->setObjectName("toolBarNavModeLabel");
+    toolBarNavModeLabel->setAlignment(Qt::AlignCenter);
+    addWidget(toolBarNavModeLabel);
+    #endif
+
     toolBarBatteryBar = new QProgressBar(this);
     toolBarBatteryBar->setMinimum(0);
     toolBarBatteryBar->setMaximum(100);
@@ -139,12 +148,18 @@ void QGCToolBar::createUI()
     toolBarBatteryBar->setObjectName("toolBarBatteryBar");
     toolBarBatteryBar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
     toolBarBatteryBarAction = addWidget(toolBarBatteryBar);
-
+    
     toolBarBatteryVoltageLabel = new QLabel(this);
     toolBarBatteryVoltageLabel->setToolTip(tr("Battery voltage"));
     toolBarBatteryVoltageLabel->setObjectName("toolBarBatteryVoltageLabel");
     toolBarBatteryVoltageLabel->setAlignment(Qt::AlignCenter);
     toolBarBatteryVoltageAction = addWidget(toolBarBatteryVoltageLabel);
+
+    // Disable battery voltage in toolbar if we're using SLUGS
+    #ifdef MAVLINK_ENABLED_SLUGS
+    toolBarBatteryBar->setVisible(false);
+    toolBarBatteryVoltageLabel->setVisible(false);
+    #endif
 
     toolBarWpLabel = new QLabel(this);
     toolBarWpLabel->setToolTip(tr("Current waypoint"));
@@ -245,6 +260,10 @@ void QGCToolBar::resetToolbarUI()
     toolBarSafetyLabel->setText("----");
     toolBarModeLabel->setText("------");
 //    toolBarStateLabel->setText("------");
+    #ifdef MAVLINK_ENABLED_SLUGS
+    toolBarNavModeLabel->setText("-----");
+    toolBarNavModeLabel->hide(); // wait for slugs autopilot to be connected
+    #endif
     toolBarBatteryBar->setValue(0);
     toolBarBatteryBar->setDisabled(true);
     toolBarBatteryVoltageLabel->setText("xx.x V");
@@ -365,6 +384,9 @@ void QGCToolBar::setActiveUAS(UASInterface* active)
     {
         disconnect(mav, SIGNAL(statusChanged(UASInterface*,QString,QString)), this, SLOT(updateState(UASInterface*,QString,QString)));
         disconnect(mav, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateMode(int,QString,QString)));
+        #ifdef MAVLINK_ENABLED_SLUGS
+        disconnect(mav, SIGNAL(navModeChanged(int,int,QString)), this, SLOT(updateNavMode(int,int,QString)));
+        #endif
         disconnect(mav, SIGNAL(nameChanged(QString)), this, SLOT(updateName(QString)));
         disconnect(mav, SIGNAL(systemTypeSet(UASInterface*,uint)), this, SLOT(setSystemType(UASInterface*,uint)));
         disconnect(mav, SIGNAL(textMessageReceived(int,int,int,QString)), this, SLOT(receiveTextMessage(int,int,int,QString)));
@@ -390,6 +412,9 @@ void QGCToolBar::setActiveUAS(UASInterface* active)
     {
         connect(mav, SIGNAL(statusChanged(UASInterface*,QString,QString)), this, SLOT(updateState(UASInterface*, QString,QString)));
         connect(mav, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateMode(int,QString,QString)));
+        #ifdef MAVLINK_ENABLED_SLUGS
+        connect(mav, SIGNAL(navModeChanged(int,int,QString)), this, SLOT(updateNavMode(int,int,QString)));
+        #endif
         connect(mav, SIGNAL(nameChanged(QString)), this, SLOT(updateName(QString)));
         connect(mav, SIGNAL(systemTypeSet(UASInterface*,uint)), this, SLOT(setSystemType(UASInterface*,uint)));
         connect(mav, SIGNAL(textMessageReceived(int,int,int,QString)), this, SLOT(receiveTextMessage(int,int,int,QString)));
@@ -419,6 +444,17 @@ void QGCToolBar::setActiveUAS(UASInterface* active)
         lastSystemMessageTimeMs = 0;
         toolBarBatteryBar->setEnabled(true);
         setSystemType(mav, mav->getSystemType());
+
+        // Show navigation mode if using SLUGS autopilot
+        #ifdef MALINK_ENABLED_SLUGS
+        if (mav->getAutopilotType() == MAV_AUTOPILOT_SLUGS) {
+            SlugsMAV* slugsMav = static_cast<SlugsMAV*>(mav);
+            toolBarNavModeLabel->setMaximumWidth(125);
+            toolBarNavModeLabel->setToolTip(tr("Vehicle navigation mode"));
+            toolBarNavModeLabel->setText(slugsMav->getNavModeText(slugsMav->getNavMode()));
+            toolBarNavModeLabel->show();
+        }
+        #endif
     }
     else
     {
@@ -472,6 +508,11 @@ void QGCToolBar::updateView()
 
 //    toolBarStateLabel->setText(QString("%1").arg(state));
     toolBarModeLabel->setText(QString("%1").arg(mode));
+
+    #ifdef MAVLINK_ENABLED_SLUGS
+    toolBarNavModeLabel->setText(QString("%1").arg(navMode));
+    #endif
+
     toolBarNameLabel->setText(systemName);
     // expire after 15 seconds
 
@@ -547,6 +588,18 @@ void QGCToolBar::updateMode(int system, QString name, QString description)
     /* important, immediately update */
     updateView();
 }
+
+#ifdef MAVLINK_ENABLED_SLUGS
+void QGCToolBar::updateNavMode(int system, int mode, QString name)
+{
+    Q_UNUSED(system);
+    Q_UNUSED(mode);
+    if (navMode != name) changed = true;
+    navMode = name;
+    /* important, immediately update */
+    updateView();
+}
+#endif
 
 void QGCToolBar::updateName(const QString& name)
 {

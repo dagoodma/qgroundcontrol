@@ -60,7 +60,9 @@ UAS::UAS(MAVLinkProtocol* protocol, int id) : UASInterface(),
     systemIsArmed(false),
     base_mode(0),
     custom_mode(0),
-    // custom_mode not initialized
+    #ifdef MAVLINK_ENABLED_SLUGS
+    navMode(-1),
+    #endif
     status(-1),
     // shortModeText not initialized
     // shortStateText not initialized
@@ -566,7 +568,7 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
             QString audiostring = QString("System %1").arg(uasId);
             QString stateAudio = "";
             QString modeAudio = "";
-            QString navModeAudio = "";
+            //QString navModeAudio = "";
             bool statechanged = false;
             bool modechanged = false;
 
@@ -603,12 +605,22 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
 
                 modeAudio = " is now in " + audiomodeText;
             }
+            #ifdef MAVLINK_ENABLED_SLUGS
+            if (navMode != state.custom_mode)
+            {
+                emit navModeChanged(uasId, state.custom_mode, getNavModeText(state.custom_mode));
+                navMode = state.custom_mode;
+                //navModeAudio = tr(" changed nav mode to ") + tr("FIXME");
+            }
+            #endif
 
             // AUDIO
+            // TODO add slugs navmode auto alerts
             if (modechanged && statechanged)
             {
                 // Output both messages
                 audiostring += modeAudio + " and " + stateAudio;
+
             }
             else if (modechanged || statechanged)
             {
@@ -1183,6 +1195,14 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
             mavlink_mission_current_t wpc;
             mavlink_msg_mission_current_decode(&message, &wpc);
             waypointManager.handleWaypointCurrent(message.sysid, message.compid, &wpc);
+
+            // Connect waypoints with legs for SLUGS
+            // TODO intergrate this in for non-slugs as an option
+            #ifdef MAVLINK_ENABLED_SLUGS
+            nextWaypointId = wpc.seq;
+            emit waypointLegChanged(getUASID());
+            qDebug() << "Current waypoint leg changed to end at waypoint: " << wpc.seq;
+            #endif
         }
             break;
 

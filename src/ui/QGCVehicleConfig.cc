@@ -788,8 +788,8 @@ void QGCVehicleConfig::loadConfig()
            paramMgr->setParamDescriptions(paramTooltips);
     }
     doneLoadingConfig = true;
-    //Config is finished, lets do a parameter request to ensure none are missed if someone else started requesting before we were finished.
-    paramMgr->requestParameterListIfEmpty();
+    if (mav->getAutopilotType() != MAV_AUTOPILOT_SLUGS)
+        mav->requestParameters(); //Config is finished, lets do a parameter request to ensure none are missed if someone else started requesting before we were finished.
 }
 
 void QGCVehicleConfig::setActiveUAS(UASInterface* active)
@@ -865,8 +865,11 @@ void QGCVehicleConfig::setActiveUAS(UASInterface* active)
     // Reset current state
     resetCalibrationRC();
 
-    requestCalibrationRC();
-    mav->requestParameter(0, "RC_TYPE");
+    // Don't request RC parameters for SLUGS autopilots on startup
+    if (mav->getAutopilotType() != MAV_AUTOPILOT_SLUGS) {
+        requestCalibrationRC();
+        mav->requestParameter(0, "RC_TYPE");
+    }
 
     chanCount = 0;
 

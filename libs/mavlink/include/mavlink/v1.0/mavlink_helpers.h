@@ -333,7 +333,7 @@ MAVLINK_HELPER uint8_t mavlink_parse_char(uint8_t chan, uint8_t c, mavlink_messa
 			}
 	        }
 #endif
-		rxmsg->msgid = c;
+        rxmsg->msgid = c;
 		mavlink_update_checksum(rxmsg, c);
 		if (rxmsg->len == 0)
 		{

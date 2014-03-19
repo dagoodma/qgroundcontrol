@@ -261,6 +261,11 @@ public:
         return bearingToWaypoint;
     }
 
+    int getNextWaypointId() const
+    {
+        return nextWaypointId;
+    }
+
 
     void setRoll(double val)
     {
@@ -470,6 +475,7 @@ protected: //COMMENTS FOR TEST UNIT
     double airSpeed;             ///< Airspeed
     double groundSpeed;          ///< Groundspeed
     double bearingToWaypoint;    ///< Bearing to next waypoint
+    int nextWaypointId;           ///< ID of next waypoint
     UASWaypointManager waypointManager;
 
     /// ATTITUDE
@@ -535,6 +541,10 @@ public:
     float getChargeLevel();
     /** @brief Get the human-readable status message for this code */
     void getStatusForCode(int statusCode, QString& uasState, QString& stateDescription);
+    /** @brief Get the human-readable navigation mode translation for this mode */
+    #ifdef MAVLINK_ENABLED_SLUGS
+    virtual QString getNavModeText(int mode);
+    #endif
     /** @brief Check if vehicle is in autonomous mode */
     bool isAuto();
     /** @brief Check if vehicle is armed */
@@ -793,10 +803,10 @@ public slots:
 
 
     /** @brief Places the UAV in Hardware-in-the-Loop simulation status **/
-    void startHil();
+    virtual void startHil();
 
     /** @brief Stops the UAV's Hardware-in-the-Loop simulation status **/
-    void stopHil();
+    virtual void stopHil();
 
 
     /** @brief Stops the robot system. If it is an MAV, the robot starts the emergency landing procedure **/
@@ -961,6 +971,8 @@ signals:
     void groundSpeedChanged(double val, QString name);
     void airSpeedChanged(double val, QString name);
     void bearingToWaypointChanged(double val,QString name);
+    void waypointLegChanged(int uasid);      ///< emits signal that current waypoint leg changed
+
 protected:
     /** @brief Get the UNIX timestamp in milliseconds, enter microseconds */
     quint64 getUnixTime(quint64 time=0);
@@ -983,6 +995,10 @@ protected:
     quint64 lastSendTimeGPS;     ///< Last HIL GPS message sent
     quint64 lastSendTimeSensors;
     QList<QAction*> actions; ///< A list of actions that this UAS can perform.
+
+    #ifdef MAVLINK_ENABLED_SLUGS
+    uint32_t navMode;             ///< The current navigation mode of the MAV
+    #endif
 
 
 protected slots:

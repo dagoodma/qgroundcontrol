@@ -83,7 +83,9 @@ This file is part of the QGROUNDCONTROL project
 
 // FIXME Move
 #include "PxQuadMAV.h"
+#ifdef MAVLINK_ENABLED_SLUGS
 #include "SlugsMAV.h"
+#endif
 
 #include "LogCompressor.h"
 
@@ -256,6 +258,11 @@ void MainWindow::init()
     }
 
     connect(LinkManager::instance(), SIGNAL(newLink(LinkInterface*)), this, SLOT(addLink(LinkInterface*)));
+
+    // Slugs HIL toggle hidden from other autopilots
+    #ifdef MAVLINK_ENABLED_SLUGS
+    connect(ui.actionToggleHil,SIGNAL(triggered()),this,SLOT(toggleHil()) );
+    #endif
 
     if (getCustomMode() == CUSTOM_MODE_APM) {
         // Add the APM 'toolbar'
@@ -608,6 +615,22 @@ void MainWindow::buildCommonWidgets()
     // Dock widgets
     createDockWidget(simView,new UASControlWidget(this),tr("Control"),"UNMANNED_SYSTEM_CONTROL_DOCKWIDGET",VIEW_SIMULATION,Qt::LeftDockWidgetArea);
 
+    {
+#ifdef MAVLINK_ENABLED_SLUGS
+        QAction* tempAction = ui.menuTools->addAction(tr("SLUGS View"));
+        tempAction->setCheckable(true);
+        connect(tempAction,SIGNAL(triggered(bool)),this, SLOT(showTool(bool)));
+        createDockWidget(simView,new SlugsTabbedControlWidget(this),tr("SLUGS View"),"UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET",VIEW_SIMULATION,Qt::LeftDockWidgetArea);
+#endif
+    }
+
+    {
+        QAction* tempAction = ui.menuTools->addAction(tr("Messages"));
+        tempAction->setCheckable(true);
+        connect(tempAction,SIGNAL(triggered(bool)), this, SLOT(showTool(bool)));
+        createDockWidget(simView, new QGCMessageView(this), tr("Messages"),"MESSAGE_DEBUG_CONSOLE_DOCKWIDGET",VIEW_SIMULATION,Qt::BottomDockWidgetArea);
+    }
+
     createDockWidget(plannerView,new UASListWidget(this),tr("Unmanned Systems"),"UNMANNED_SYSTEM_LIST_DOCKWIDGET",VIEW_MISSION,Qt::LeftDockWidgetArea);
     createDockWidget(plannerView,new QGCWaypointListMulti(this),tr("Mission Plan"),"WAYPOINT_LIST_DOCKWIDGET",VIEW_MISSION,Qt::BottomDockWidgetArea);
 
@@ -747,6 +770,12 @@ void MainWindow::loadDockWidget(const QString& name)
     {
         createDockWidget(centerStack->currentWidget(),new UASControlWidget(this),tr("Control"),"UNMANNED_SYSTEM_CONTROL_DOCKWIDGET",currentView,Qt::LeftDockWidgetArea);
     }
+#ifdef MAVLINK_ENABLED_SLUGS
+    else if (name == "UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET")
+    {
+        createDockWidget(centerStack->currentWidget(),new SlugsTabbedControlWidget(this),tr("SLUGS View"),"UNMANNED_SLUGS_SYSTEM_CONTROL_DOCKWIDGET",currentView,Qt::LeftDockWidgetArea);
+    }
+#endif
     else if (name == "UNMANNED_SYSTEM_LIST_DOCKWIDGET")
     {
         createDockWidget(centerStack->currentWidget(),new UASListWidget(this),tr("Unmanned Systems"),"UNMANNED_SYSTEM_LIST_DOCKWIDGET",currentView,Qt::RightDockWidgetArea);
@@ -754,6 +783,10 @@ void MainWindow::loadDockWidget(const QString& name)
     else if (name == "WAYPOINT_LIST_DOCKWIDGET")
     {
         createDockWidget(centerStack->currentWidget(),new QGCWaypointListMulti(this),tr("Mission Plan"),"WAYPOINT_LIST_DOCKWIDGET",currentView,Qt::BottomDockWidgetArea);
+    }
+    else if (name == "MESSAGE_DEBUG_CONSOLE_DOCKWIDGET")
+    {
+        createDockWidget(centerStack->currentWidget(),new QGCMessageView(this), tr("Messages"), "MESSAGE_DEBUG_CONSOLE_DOCKWIDGET",currentView, Qt::BottomDockWidgetArea); //Qt::BottomLeftCorner);
     }
     else if (name == "MAVLINK_INSPECTOR_DOCKWIDGET")
     {
@@ -1558,7 +1591,9 @@ void MainWindow::commsWidgetDestroyed(QObject *obj)
 
 void MainWindow::setActiveUAS(UASInterface* uas)
 {
+    #ifndef MAVLINK_ENABLED_SLUGS
     Q_UNUSED(uas);
+    #endif
     // Enable and rename menu
     //    ui.menuUnmanned_System->setTitle(uas->getUASName());
     //    if (!ui.menuUnmanned_System->isEnabled()) ui.menuUnmanned_System->setEnabled(true);
@@ -1569,7 +1604,31 @@ void MainWindow::setActiveUAS(UASInterface* uas)
         win->restoreState(settings.value(getWindowStateKey()).toByteArray(), QGC::applicationVersion());
     }
 
+    #ifdef MAVLINK_ENABLED_SLUGS
+    disconnect(this->uas, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateHilLabel()));
+    connect(uas, SIGNAL(modeChanged(int,QString,QString)), this, SLOT(updateHilLabel()));
+    updateHilLabel();
+    this->uas = uas;
+    #endif
 }
+
+#ifdef MAVLINK_ENABLED_SLUGS
+void MainWindow::toggleHil() {
+    SlugsMAV *slugsMav = (SlugsMAV*)UASManager::instance()->getActiveUAS();
+    if (!slugsMav) return;
+
+    if (!slugsMav->getHilState()) {
+        slugsMav->startHil();
+        qDebug() << "HIL mode enabled on MAV " << slugsMav->getUASID();
+    }
+    else if (slugsMav->getHilState()) {
+        slugsMav->stopHil();
+        qDebug() << "HIL mode disabled on MAV " << slugsMav->getUASID();
+    }
+
+    updateHilLabel();
+}
+#endif
 
 void MainWindow::UASSpecsChanged(int uas)
 {
@@ -1894,6 +1953,12 @@ void MainWindow::loadViewState()
             {
                 controlDockWidget->hide();
             }
+#ifdef MAVLINK_ENABLED_SLUGS
+            if (slugsTabbedControlDockWidget)
+            {
+                slugsTabbedControlDockWidget->hide();
+            }
+#endif
             if (listDockWidget)
             {
                 listDockWidget->show();

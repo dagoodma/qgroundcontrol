@@ -60,6 +60,7 @@
     </property>
     <addaction name="actionJoystick_Settings"/>
     <addaction name="actionSimulate"/>
+    <addaction name="actionToggleHil"/>
     <addaction name="separator"/>
     <addaction name="actionMuteAudioOutput"/>
     <addaction name="actionJoystickSettings"/>
@@ -514,6 +515,12 @@
     <string>Local 3D View</string>
    </property>
   </action>
+  <action name="actionToggleHil">
+    <property name="text">
+        <string>Start HIL</string>
+    </property>
+  </action>
+
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

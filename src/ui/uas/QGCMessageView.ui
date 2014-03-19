@@ -28,6 +28,9 @@
    </property>
    <item>
     <widget class="QScrollArea" name="scrollArea">
+     <property name="contextMenuPolicy">
+      <enum>Qt::ActionsContextMenu</enum>
+     </property>
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
@@ -40,12 +43,18 @@
         <height>273</height>
        </rect>
       </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::ActionsContextMenu</enum>
+      </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <property name="margin">
         <number>0</number>
        </property>
        <item>
         <widget class="QPlainTextEdit" name="plainTextEdit">
+         <property name="contextMenuPolicy">
+          <enum>Qt::ActionsContextMenu</enum>
+         </property>
          <property name="readOnly">
           <bool>true</bool>
          </property>

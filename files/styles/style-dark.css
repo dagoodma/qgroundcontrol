@@ -143,6 +143,11 @@ QGCToolBar QLabel#toolBarStateLabel {
     font-size: 15pt;
 }
 
+QGCToolBar QLabel#toolBarNavModeLabel {
+    color: #FFFFFF;
+    font-size: 15pt;
+}
+
 QGCToolBar QLabel#toolBarBatteryVoltageLabel {
     color: #0F0;
     font-size: 15pt;
@@ -666,6 +671,34 @@ UASView QLabel#heartBeatLabel, UASView QLabel#typeLabel {
     border-radius: 5px;
     padding: 2px;
 }
+
+*[class=navModeButtonPressed] {
+    color: #fff;
+    background-color: #000;
+}
+
+SlugsStatusWidget {
+    background: #444;
+    border: 1px solid #888;
+    border-radius: 7px;
+}
+
+SlugsStatusWidget QLabel#heartBeatLabel, SlugsStatusWidget QLabel#gpsStatusLabel, SlugsStatusWidget QLabel#typeLabel, SlugsStatusWidget QLabel#speedLabel, SlugsStatusWidget QLabel#altitudeLabel {
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 1px;
+    font-size: 9px;
+}
+
+SlugsStatusWidget QLabel#loadBarText, SlugsStatusWidget QLabel#batteryBarText, SlugsStatusWidget QLabel#heartBeatText, SlugsStatusWidget QLabel#gpsStatusText, SlugsStatusWidget QLabel#altitudeText, SlugsStatusWidget QLabel#speedText {
+    font-size: 8px;
+}
+
+SlugsStatusWidget QLabel#loadSensBarText, SlugsStatusWidget QLabel#loadCtrlBarText {
+    font-size: 7px;
+    color: #CCC;
+}
+
 
 QGCUnconnectedInfoWidget QPushButton#connectButton {
     min-height: 150px;
