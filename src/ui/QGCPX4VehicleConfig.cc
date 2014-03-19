@@ -362,7 +362,8 @@ void QGCPX4VehicleConfig::toggleSpektrumPairing(bool enabled)
 {
     Q_UNUSED(enabled);
     
-    if (!ui->dsm2RadioButton->isChecked() && !ui->dsmxRadioButton && !ui->dsmx8RadioButton) {
+    if (!ui->dsm2RadioButton->isChecked() && !ui->dsmxRadioButton->isChecked()
+            && !ui->dsmx8RadioButton->isChecked()) {
         // Reject
         QMessageBox warnMsgBox;
         warnMsgBox.setText(tr("Please select a Spektrum Protocol Version"));
@@ -649,6 +650,9 @@ void QGCPX4VehicleConfig::stopCalibrationRC()
         QMessageBox::information(0,"Uploading the RC Calibration","The configuration will now be uploaded and permanently stored.");
         writeCalibrationRC();
     }
+
+    // Read calibration back to update widget states and validate
+    paramMgr->requestParameterList();
 }
 
 void QGCPX4VehicleConfig::loadQgcConfig(bool primary)

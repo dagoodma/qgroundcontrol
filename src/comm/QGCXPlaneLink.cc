@@ -48,10 +48,12 @@ QGCXPlaneLink::QGCXPlaneLink(UASInterface* mav, QString remoteHost, QHostAddress
     socket(NULL),
     process(NULL),
     terraSync(NULL),
+    barometerOffsetkPa(15.0f),
     airframeID(QGCXPlaneLink::AIRFRAME_UNKNOWN),
     xPlaneConnected(false),
     xPlaneVersion(0),
     simUpdateLast(QGC::groundTimeMilliseconds()),
+    simUpdateFirst(0),
     simUpdateLastText(QGC::groundTimeMilliseconds()),
     simUpdateHz(0),
     _sensorHilEnabled(true)
@@ -452,6 +454,10 @@ void QGCXPlaneLink::readBytes()
     {
         xPlaneConnected = true;
 
+        if (oldConnectionState != xPlaneConnected) {
+            simUpdateFirst = QGC::groundTimeMilliseconds();
+        }
+
         for (unsigned i = 0; i < nsegs; i++)
         {
             // Get index
@@ -642,6 +648,11 @@ void QGCXPlaneLink::readBytes()
         qDebug() << "UNKNOWN PACKET:" << data;
     }
 
+    // Wait for 0.5s before actually using the data, so that all fields are filled
+    if (QGC::groundTimeMilliseconds() - simUpdateFirst < 500) {
+        return;
+    }
+
     // Send updated state
     if (emitUpdate && (QGC::groundTimeMilliseconds() - simUpdateLast) > 3)
     {
@@ -667,8 +678,8 @@ void QGCXPlaneLink::readBytes()
             /* current pressure at MSL in kPa */
             double p1 = 1013.25 / 10.0;
 
-            /* measured pressure in hPa */
-            double p = abs_pressure / 10.0;
+            /* measured pressure in hPa, plus offset to simulate weather effects / offsets */
+            double p = abs_pressure / 10.0 + barometerOffsetkPa;
 
             /*
              * Solve:
