@@ -118,16 +118,10 @@ void UASControlParameters::setCommands()
 {
 #ifdef MAVLINK_ENABLED_SLUGS
     if(this->activeUAS) {
-        UAS* myUas= static_cast<UAS*>(this->activeUAS);
+        SlugsMAV* myUas= static_cast<SlugsMAV*>(this->activeUAS);
 
-        mavlink_message_t msg;
+        myUas->setMidLevelCommands(ui->sbHeight->value(), ui->sbAirSpeed->value(), ui->sbTurnRate->value());
 
-        tempCmds.uCommand = ui->sbAirSpeed->value();
-        tempCmds.hCommand = ui->sbHeight->value();
-        tempCmds.rCommand = ui->sbTurnRate->value();
-
-        mavlink_msg_mid_lvl_cmds_encode(MG::SYSTEM::ID, MG::SYSTEM::COMPID, &msg, &this->tempCmds);
-        myUas->sendMessage(msg);
     }
 #endif
 }
@@ -143,36 +137,11 @@ void UASControlParameters::setPassthrough()
 {
 #ifdef MAVLINK_ENABLED_SLUGS
     if(this->activeUAS) {
-        UAS* myUas= static_cast<UAS*>(this->activeUAS);
+        SlugsMAV* myUas= static_cast<SlugsMAV*>(this->activeUAS);
 
-        mavlink_message_t msg;
+        myUas->setPassthroughSurfaces(ui->cbThrottle->isChecked(), ui->cbAilerons->isChecked(),
+                                      ui->cbRudder->isChecked(), ui->cbElevator->isChecked());
 
-        int8_t tmpBit=0;
-
-        if(ui->cxdle_c->isChecked()) { //left elevator command
-            tmpBit+=8;
-        }
-        if(ui->cxdr_c->isChecked()) { //rudder command
-            tmpBit+=16;
-        }
-
-        if(ui->cxdla_c->isChecked()) { //left aileron command
-            tmpBit+=64;
-        }
-        if(ui->cxdt_c->isChecked()) { //throttle command
-            tmpBit+=128;
-        }
-
-        generic_16bit r;
-        r.b[1] = 0;
-        r.b[0] = tmpBit;//255;
-
-        tempCtrl.target= this->activeUAS->getUASID();
-        tempCtrl.bitfieldPt= (uint16_t)r.s;
-
-        mavlink_msg_ctrl_srfc_pt_encode(MG::SYSTEM::ID, MG::SYSTEM::COMPID, &msg, &this->tempCtrl);
-        myUas->sendMessage(msg);
-        //qDebug()<<tempCtrl.bitfieldPt;
     }
 #endif
 }

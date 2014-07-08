@@ -42,8 +42,7 @@
  */
 MAVLinkProtocol::MAVLinkProtocol() :
     heartbeatTimer(new QTimer(this)),
-    //heartbeatRate(MAVLINK_HEARTBEAT_DEFAULT_RATE),
-    heartbeatRate(5),
+    heartbeatRate(MAVLINK_HEARTBEAT_DEFAULT_RATE),
     m_heartbeatsEnabled(false),
     m_multiplexingEnabled(false),
     m_authEnabled(false),

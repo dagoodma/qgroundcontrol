@@ -1,0 +1,37 @@
+/* Navigation Mode (Custom Mode) Label on Tool Bar */
+
+QGCToolBar QLabel#toolBarNavModeLabel {
+    color: #FFFFFF;
+    font-size: 15pt;
+}
+
+/* Slugs Status Widget styles */
+
+*[class=navModeButtonPressed] {
+    color: #fff;
+    background-color: #000;
+}
+
+SlugsStatusWidget {
+    background: #444;
+    border: 1px solid #888;
+    border-radius: 7px;
+}
+
+SlugsStatusWidget QLabel#heartBeatLabel, SlugsStatusWidget QLabel#gpsStatusLabel, SlugsStatusWidget QLabel#typeLabel, SlugsStatusWidget QLabel#speedLabel, SlugsStatusWidget QLabel#altitudeLabel {
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 1px;
+    font-size: 9px;
+}
+
+SlugsStatusWidget QLabel#loadBarText, SlugsStatusWidget QLabel#batteryBarText, SlugsStatusWidget QLabel#heartBeatText, SlugsStatusWidget QLabel#gpsStatusText, SlugsStatusWidget QLabel#altitudeText, SlugsStatusWidget QLabel#speedText {
+    font-size: 8px;
+}
+
+SlugsStatusWidget QLabel#loadSensBarText, SlugsStatusWidget QLabel#loadCtrlBarText {
+    font-size: 7px;
+    color: #CCC;
+}
+
+

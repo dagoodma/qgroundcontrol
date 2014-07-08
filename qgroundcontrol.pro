@@ -758,3 +758,5 @@ SOURCES += \
     src/ui/px4_configuration/QGCPX4SensorCalibration.cc \
     src/ui/designer/QGCXYPlot.cc \
     src/ui/menuactionhelper.cpp
+
+OTHER_FILES +=

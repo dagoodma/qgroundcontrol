@@ -84,7 +84,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -186,28 +186,28 @@
        <item row="0" column="0">
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <widget class="QCheckBox" name="cxdle_c">
+          <widget class="QCheckBox" name="cbElevator">
            <property name="text">
             <string>Elevator</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="cxdr_c">
+          <widget class="QCheckBox" name="cbRudder">
            <property name="text">
             <string>Rudder</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="cxdt_c">
+          <widget class="QCheckBox" name="cbThrottle">
            <property name="text">
             <string>Throttle</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="cxdla_c">
+          <widget class="QCheckBox" name="cbAilerons">
            <property name="text">
             <string>Ailerons</string>
            </property>
