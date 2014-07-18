@@ -212,6 +212,50 @@ static inline void mavlink_msg_novatel_diag_send(mavlink_channel_t chan, uint8_t
 #endif
 }
 
+#if MAVLINK_MSG_ID_NOVATEL_DIAG_LEN <= MAVLINK_MAX_PAYLOAD_LEN
+/*
+  This varient of _send() can be used to save stack space by re-using
+  memory from the receive buffer.  The caller provides a
+  mavlink_message_t which is the size of a full mavlink message. This
+  is usually the receive buffer for the channel, and allows a reply to an
+  incoming message with minimum stack space usage.
+ */
+static inline void mavlink_msg_novatel_diag_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t timeStatus, uint32_t receiverStatus, uint8_t solStatus, uint8_t posType, uint8_t velType, float posSolAge, uint16_t csFails)
+{
+#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
+	char *buf = (char *)msgbuf;
+	_mav_put_uint32_t(buf, 0, receiverStatus);
+	_mav_put_float(buf, 4, posSolAge);
+	_mav_put_uint16_t(buf, 8, csFails);
+	_mav_put_uint8_t(buf, 10, timeStatus);
+	_mav_put_uint8_t(buf, 11, solStatus);
+	_mav_put_uint8_t(buf, 12, posType);
+	_mav_put_uint8_t(buf, 13, velType);
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_NOVATEL_DIAG, buf, MAVLINK_MSG_ID_NOVATEL_DIAG_LEN, MAVLINK_MSG_ID_NOVATEL_DIAG_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_NOVATEL_DIAG, buf, MAVLINK_MSG_ID_NOVATEL_DIAG_LEN);
+#endif
+#else
+	mavlink_novatel_diag_t *packet = (mavlink_novatel_diag_t *)msgbuf;
+	packet->receiverStatus = receiverStatus;
+	packet->posSolAge = posSolAge;
+	packet->csFails = csFails;
+	packet->timeStatus = timeStatus;
+	packet->solStatus = solStatus;
+	packet->posType = posType;
+	packet->velType = velType;
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_NOVATEL_DIAG, (const char *)packet, MAVLINK_MSG_ID_NOVATEL_DIAG_LEN, MAVLINK_MSG_ID_NOVATEL_DIAG_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_NOVATEL_DIAG, (const char *)packet, MAVLINK_MSG_ID_NOVATEL_DIAG_LEN);
+#endif
+#endif
+}
+#endif
+
 #endif
 
 // MESSAGE NOVATEL_DIAG UNPACKING

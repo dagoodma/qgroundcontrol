@@ -212,6 +212,50 @@ static inline void mavlink_msg_status_gps_send(mavlink_channel_t chan, uint16_t 
 #endif
 }
 
+#if MAVLINK_MSG_ID_STATUS_GPS_LEN <= MAVLINK_MAX_PAYLOAD_LEN
+/*
+  This varient of _send() can be used to save stack space by re-using
+  memory from the receive buffer.  The caller provides a
+  mavlink_message_t which is the size of a full mavlink message. This
+  is usually the receive buffer for the channel, and allows a reply to an
+  incoming message with minimum stack space usage.
+ */
+static inline void mavlink_msg_status_gps_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint16_t csFails, uint8_t gpsQuality, uint8_t msgsType, uint8_t posStatus, float magVar, int8_t magDir, uint8_t modeInd)
+{
+#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
+	char *buf = (char *)msgbuf;
+	_mav_put_float(buf, 0, magVar);
+	_mav_put_uint16_t(buf, 4, csFails);
+	_mav_put_uint8_t(buf, 6, gpsQuality);
+	_mav_put_uint8_t(buf, 7, msgsType);
+	_mav_put_uint8_t(buf, 8, posStatus);
+	_mav_put_int8_t(buf, 9, magDir);
+	_mav_put_uint8_t(buf, 10, modeInd);
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_STATUS_GPS, buf, MAVLINK_MSG_ID_STATUS_GPS_LEN, MAVLINK_MSG_ID_STATUS_GPS_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_STATUS_GPS, buf, MAVLINK_MSG_ID_STATUS_GPS_LEN);
+#endif
+#else
+	mavlink_status_gps_t *packet = (mavlink_status_gps_t *)msgbuf;
+	packet->magVar = magVar;
+	packet->csFails = csFails;
+	packet->gpsQuality = gpsQuality;
+	packet->msgsType = msgsType;
+	packet->posStatus = posStatus;
+	packet->magDir = magDir;
+	packet->modeInd = modeInd;
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_STATUS_GPS, (const char *)packet, MAVLINK_MSG_ID_STATUS_GPS_LEN, MAVLINK_MSG_ID_STATUS_GPS_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_STATUS_GPS, (const char *)packet, MAVLINK_MSG_ID_STATUS_GPS_LEN);
+#endif
+#endif
+}
+#endif
+
 #endif
 
 // MESSAGE STATUS_GPS UNPACKING

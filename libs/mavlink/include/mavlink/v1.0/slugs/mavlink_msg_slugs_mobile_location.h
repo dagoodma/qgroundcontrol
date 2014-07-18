@@ -168,6 +168,42 @@ static inline void mavlink_msg_slugs_mobile_location_send(mavlink_channel_t chan
 #endif
 }
 
+#if MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION_LEN <= MAVLINK_MAX_PAYLOAD_LEN
+/*
+  This varient of _send() can be used to save stack space by re-using
+  memory from the receive buffer.  The caller provides a
+  mavlink_message_t which is the size of a full mavlink message. This
+  is usually the receive buffer for the channel, and allows a reply to an
+  incoming message with minimum stack space usage.
+ */
+static inline void mavlink_msg_slugs_mobile_location_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t target, float latitude, float longitude)
+{
+#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
+	char *buf = (char *)msgbuf;
+	_mav_put_float(buf, 0, latitude);
+	_mav_put_float(buf, 4, longitude);
+	_mav_put_uint8_t(buf, 8, target);
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION, buf, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION_LEN, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION, buf, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION_LEN);
+#endif
+#else
+	mavlink_slugs_mobile_location_t *packet = (mavlink_slugs_mobile_location_t *)msgbuf;
+	packet->latitude = latitude;
+	packet->longitude = longitude;
+	packet->target = target;
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION, (const char *)packet, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION_LEN, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION, (const char *)packet, MAVLINK_MSG_ID_SLUGS_MOBILE_LOCATION_LEN);
+#endif
+#endif
+}
+#endif
+
 #endif
 
 // MESSAGE SLUGS_MOBILE_LOCATION UNPACKING

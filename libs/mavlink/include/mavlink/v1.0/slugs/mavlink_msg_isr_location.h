@@ -212,6 +212,50 @@ static inline void mavlink_msg_isr_location_send(mavlink_channel_t chan, uint8_t
 #endif
 }
 
+#if MAVLINK_MSG_ID_ISR_LOCATION_LEN <= MAVLINK_MAX_PAYLOAD_LEN
+/*
+  This varient of _send() can be used to save stack space by re-using
+  memory from the receive buffer.  The caller provides a
+  mavlink_message_t which is the size of a full mavlink message. This
+  is usually the receive buffer for the channel, and allows a reply to an
+  incoming message with minimum stack space usage.
+ */
+static inline void mavlink_msg_isr_location_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t target, float latitude, float longitude, float height, uint8_t option1, uint8_t option2, uint8_t option3)
+{
+#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
+	char *buf = (char *)msgbuf;
+	_mav_put_float(buf, 0, latitude);
+	_mav_put_float(buf, 4, longitude);
+	_mav_put_float(buf, 8, height);
+	_mav_put_uint8_t(buf, 12, target);
+	_mav_put_uint8_t(buf, 13, option1);
+	_mav_put_uint8_t(buf, 14, option2);
+	_mav_put_uint8_t(buf, 15, option3);
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_ISR_LOCATION, buf, MAVLINK_MSG_ID_ISR_LOCATION_LEN, MAVLINK_MSG_ID_ISR_LOCATION_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_ISR_LOCATION, buf, MAVLINK_MSG_ID_ISR_LOCATION_LEN);
+#endif
+#else
+	mavlink_isr_location_t *packet = (mavlink_isr_location_t *)msgbuf;
+	packet->latitude = latitude;
+	packet->longitude = longitude;
+	packet->height = height;
+	packet->target = target;
+	packet->option1 = option1;
+	packet->option2 = option2;
+	packet->option3 = option3;
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_ISR_LOCATION, (const char *)packet, MAVLINK_MSG_ID_ISR_LOCATION_LEN, MAVLINK_MSG_ID_ISR_LOCATION_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_ISR_LOCATION, (const char *)packet, MAVLINK_MSG_ID_ISR_LOCATION_LEN);
+#endif
+#endif
+}
+#endif
+
 #endif
 
 // MESSAGE ISR_LOCATION UNPACKING

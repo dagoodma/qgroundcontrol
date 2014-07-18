@@ -168,6 +168,42 @@ static inline void mavlink_msg_cpu_load_send(mavlink_channel_t chan, uint8_t sen
 #endif
 }
 
+#if MAVLINK_MSG_ID_CPU_LOAD_LEN <= MAVLINK_MAX_PAYLOAD_LEN
+/*
+  This varient of _send() can be used to save stack space by re-using
+  memory from the receive buffer.  The caller provides a
+  mavlink_message_t which is the size of a full mavlink message. This
+  is usually the receive buffer for the channel, and allows a reply to an
+  incoming message with minimum stack space usage.
+ */
+static inline void mavlink_msg_cpu_load_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t sensLoad, uint8_t ctrlLoad, uint16_t batVolt)
+{
+#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
+	char *buf = (char *)msgbuf;
+	_mav_put_uint16_t(buf, 0, batVolt);
+	_mav_put_uint8_t(buf, 2, sensLoad);
+	_mav_put_uint8_t(buf, 3, ctrlLoad);
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_CPU_LOAD, buf, MAVLINK_MSG_ID_CPU_LOAD_LEN, MAVLINK_MSG_ID_CPU_LOAD_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_CPU_LOAD, buf, MAVLINK_MSG_ID_CPU_LOAD_LEN);
+#endif
+#else
+	mavlink_cpu_load_t *packet = (mavlink_cpu_load_t *)msgbuf;
+	packet->batVolt = batVolt;
+	packet->sensLoad = sensLoad;
+	packet->ctrlLoad = ctrlLoad;
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_CPU_LOAD, (const char *)packet, MAVLINK_MSG_ID_CPU_LOAD_LEN, MAVLINK_MSG_ID_CPU_LOAD_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_CPU_LOAD, (const char *)packet, MAVLINK_MSG_ID_CPU_LOAD_LEN);
+#endif
+#endif
+}
+#endif
+
 #endif
 
 // MESSAGE CPU_LOAD UNPACKING

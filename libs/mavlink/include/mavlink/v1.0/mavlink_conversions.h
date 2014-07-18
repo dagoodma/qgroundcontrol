@@ -1,10 +1,16 @@
 #ifndef  _MAVLINK_CONVERSIONS_H_
 #define  _MAVLINK_CONVERSIONS_H_
 
+/* enable math defines on Windows */
+#ifdef _MSC_VER
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#endif
 #include <math.h>
 
 #ifndef M_PI_2
-    #define M_PI_2 ((float)asin(1.0f))
+    #define M_PI_2 ((float)asin(1))
 #endif
 
 /**
@@ -71,7 +77,7 @@ MAVLINK_HELPER void mavlink_quaternion_to_euler(const float quaternion[4], float
 {
     float dcm[3][3];
     mavlink_quaternion_to_dcm(quaternion, dcm);
-    mavlink_dcm_to_euler(dcm, roll, pitch, yaw);
+    mavlink_dcm_to_euler((const float(*)[3])dcm, roll, pitch, yaw);
 }
 
 MAVLINK_HELPER void mavlink_euler_to_quaternion(float roll, float pitch, float yaw, float quaternion[4])

@@ -179,6 +179,44 @@ static inline void mavlink_msg_sensor_diag_send(mavlink_channel_t chan, float fl
 #endif
 }
 
+#if MAVLINK_MSG_ID_SENSOR_DIAG_LEN <= MAVLINK_MAX_PAYLOAD_LEN
+/*
+  This varient of _send() can be used to save stack space by re-using
+  memory from the receive buffer.  The caller provides a
+  mavlink_message_t which is the size of a full mavlink message. This
+  is usually the receive buffer for the channel, and allows a reply to an
+  incoming message with minimum stack space usage.
+ */
+static inline void mavlink_msg_sensor_diag_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  float float1, float float2, int16_t int1, int8_t char1)
+{
+#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
+	char *buf = (char *)msgbuf;
+	_mav_put_float(buf, 0, float1);
+	_mav_put_float(buf, 4, float2);
+	_mav_put_int16_t(buf, 8, int1);
+	_mav_put_int8_t(buf, 10, char1);
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SENSOR_DIAG, buf, MAVLINK_MSG_ID_SENSOR_DIAG_LEN, MAVLINK_MSG_ID_SENSOR_DIAG_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SENSOR_DIAG, buf, MAVLINK_MSG_ID_SENSOR_DIAG_LEN);
+#endif
+#else
+	mavlink_sensor_diag_t *packet = (mavlink_sensor_diag_t *)msgbuf;
+	packet->float1 = float1;
+	packet->float2 = float2;
+	packet->int1 = int1;
+	packet->char1 = char1;
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SENSOR_DIAG, (const char *)packet, MAVLINK_MSG_ID_SENSOR_DIAG_LEN, MAVLINK_MSG_ID_SENSOR_DIAG_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SENSOR_DIAG, (const char *)packet, MAVLINK_MSG_ID_SENSOR_DIAG_LEN);
+#endif
+#endif
+}
+#endif
+
 #endif
 
 // MESSAGE SENSOR_DIAG UNPACKING
