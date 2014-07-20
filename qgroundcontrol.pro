@@ -19,6 +19,8 @@
 
 message(Qt version $$[QT_VERSION])
 
+include(user_config.pri)
+
 # Setup our supported build types. We do this once here and then use the defined config scopes
 # to allow us to easily modify suported build types in one place instead of duplicated throughout
 # the project file.
@@ -712,7 +714,6 @@ SOURCES += \
     src/ui/uas/QGCMessageView.cc \
     src/ui/JoystickButton.cc \
     src/ui/JoystickAxis.cc \
-    src/ui/uas/QGCMessageView.cc \
     src/ui/configuration/ApmHardwareConfig.cc \
     src/ui/configuration/ApmSoftwareConfig.cc \
     src/ui/configuration/FrameTypeConfig.cc \
