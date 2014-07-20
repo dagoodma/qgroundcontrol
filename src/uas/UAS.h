@@ -543,7 +543,7 @@ public:
     void getStatusForCode(int statusCode, QString& uasState, QString& stateDescription);
     /** @brief Get the human-readable navigation mode translation for this mode */
     #ifdef MAVLINK_ENABLED_SLUGS
-    virtual QString getNavModeText(int mode);
+    virtual QString getNavModeText(int mode) { return QString("NONE"); }
     #endif
     /** @brief Check if vehicle is in autonomous mode */
     bool isAuto();
