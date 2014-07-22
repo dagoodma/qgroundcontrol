@@ -168,6 +168,42 @@ static inline void mavlink_msg_slugs_configuration_camera_send(mavlink_channel_t
 #endif
 }
 
+#if MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA_LEN <= MAVLINK_MAX_PAYLOAD_LEN
+/*
+  This varient of _send() can be used to save stack space by re-using
+  memory from the receive buffer.  The caller provides a
+  mavlink_message_t which is the size of a full mavlink message. This
+  is usually the receive buffer for the channel, and allows a reply to an
+  incoming message with minimum stack space usage.
+ */
+static inline void mavlink_msg_slugs_configuration_camera_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t target, uint8_t idOrder, uint8_t order)
+{
+#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
+	char *buf = (char *)msgbuf;
+	_mav_put_uint8_t(buf, 0, target);
+	_mav_put_uint8_t(buf, 1, idOrder);
+	_mav_put_uint8_t(buf, 2, order);
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA, buf, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA_LEN, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA, buf, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA_LEN);
+#endif
+#else
+	mavlink_slugs_configuration_camera_t *packet = (mavlink_slugs_configuration_camera_t *)msgbuf;
+	packet->target = target;
+	packet->idOrder = idOrder;
+	packet->order = order;
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA, (const char *)packet, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA_LEN, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA, (const char *)packet, MAVLINK_MSG_ID_SLUGS_CONFIGURATION_CAMERA_LEN);
+#endif
+#endif
+}
+#endif
+
 #endif
 
 // MESSAGE SLUGS_CONFIGURATION_CAMERA UNPACKING

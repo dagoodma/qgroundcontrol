@@ -267,6 +267,60 @@ static inline void mavlink_msg_gps_date_time_send(mavlink_channel_t chan, uint8_
 #endif
 }
 
+#if MAVLINK_MSG_ID_GPS_DATE_TIME_LEN <= MAVLINK_MAX_PAYLOAD_LEN
+/*
+  This varient of _send() can be used to save stack space by re-using
+  memory from the receive buffer.  The caller provides a
+  mavlink_message_t which is the size of a full mavlink message. This
+  is usually the receive buffer for the channel, and allows a reply to an
+  incoming message with minimum stack space usage.
+ */
+static inline void mavlink_msg_gps_date_time_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t min, uint8_t sec, uint8_t clockStat, uint8_t visSat, uint8_t useSat, uint8_t GppGl, uint8_t sigUsedMask, uint8_t percentUsed)
+{
+#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
+	char *buf = (char *)msgbuf;
+	_mav_put_uint8_t(buf, 0, year);
+	_mav_put_uint8_t(buf, 1, month);
+	_mav_put_uint8_t(buf, 2, day);
+	_mav_put_uint8_t(buf, 3, hour);
+	_mav_put_uint8_t(buf, 4, min);
+	_mav_put_uint8_t(buf, 5, sec);
+	_mav_put_uint8_t(buf, 6, clockStat);
+	_mav_put_uint8_t(buf, 7, visSat);
+	_mav_put_uint8_t(buf, 8, useSat);
+	_mav_put_uint8_t(buf, 9, GppGl);
+	_mav_put_uint8_t(buf, 10, sigUsedMask);
+	_mav_put_uint8_t(buf, 11, percentUsed);
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_GPS_DATE_TIME, buf, MAVLINK_MSG_ID_GPS_DATE_TIME_LEN, MAVLINK_MSG_ID_GPS_DATE_TIME_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_GPS_DATE_TIME, buf, MAVLINK_MSG_ID_GPS_DATE_TIME_LEN);
+#endif
+#else
+	mavlink_gps_date_time_t *packet = (mavlink_gps_date_time_t *)msgbuf;
+	packet->year = year;
+	packet->month = month;
+	packet->day = day;
+	packet->hour = hour;
+	packet->min = min;
+	packet->sec = sec;
+	packet->clockStat = clockStat;
+	packet->visSat = visSat;
+	packet->useSat = useSat;
+	packet->GppGl = GppGl;
+	packet->sigUsedMask = sigUsedMask;
+	packet->percentUsed = percentUsed;
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_GPS_DATE_TIME, (const char *)packet, MAVLINK_MSG_ID_GPS_DATE_TIME_LEN, MAVLINK_MSG_ID_GPS_DATE_TIME_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_GPS_DATE_TIME, (const char *)packet, MAVLINK_MSG_ID_GPS_DATE_TIME_LEN);
+#endif
+#endif
+}
+#endif
+
 #endif
 
 // MESSAGE GPS_DATE_TIME UNPACKING

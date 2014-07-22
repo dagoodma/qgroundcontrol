@@ -168,6 +168,42 @@ static inline void mavlink_msg_ptz_status_send(mavlink_channel_t chan, uint8_t z
 #endif
 }
 
+#if MAVLINK_MSG_ID_PTZ_STATUS_LEN <= MAVLINK_MAX_PAYLOAD_LEN
+/*
+  This varient of _send() can be used to save stack space by re-using
+  memory from the receive buffer.  The caller provides a
+  mavlink_message_t which is the size of a full mavlink message. This
+  is usually the receive buffer for the channel, and allows a reply to an
+  incoming message with minimum stack space usage.
+ */
+static inline void mavlink_msg_ptz_status_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t zoom, int16_t pan, int16_t tilt)
+{
+#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
+	char *buf = (char *)msgbuf;
+	_mav_put_int16_t(buf, 0, pan);
+	_mav_put_int16_t(buf, 2, tilt);
+	_mav_put_uint8_t(buf, 4, zoom);
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_PTZ_STATUS, buf, MAVLINK_MSG_ID_PTZ_STATUS_LEN, MAVLINK_MSG_ID_PTZ_STATUS_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_PTZ_STATUS, buf, MAVLINK_MSG_ID_PTZ_STATUS_LEN);
+#endif
+#else
+	mavlink_ptz_status_t *packet = (mavlink_ptz_status_t *)msgbuf;
+	packet->pan = pan;
+	packet->tilt = tilt;
+	packet->zoom = zoom;
+
+#if MAVLINK_CRC_EXTRA
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_PTZ_STATUS, (const char *)packet, MAVLINK_MSG_ID_PTZ_STATUS_LEN, MAVLINK_MSG_ID_PTZ_STATUS_CRC);
+#else
+    _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_PTZ_STATUS, (const char *)packet, MAVLINK_MSG_ID_PTZ_STATUS_LEN);
+#endif
+#endif
+}
+#endif
+
 #endif
 
 // MESSAGE PTZ_STATUS UNPACKING
