@@ -86,10 +86,10 @@ protected:
     float alt;
     bool localFrame;
     bool globalFrameKnown;
-    static const int updateDisplayIntervalMultiplier = 4;
-    static const int updateInterval = 200;
-    static const int updateIntervalLowPower = 200;
-    static const int errorUpdateInterval = 200;
+    int updateDisplayIntervalMultiplier;
+    int updateInterval;
+    int updateIntervalLowPower;
+    int errorUpdateInterval;
     // These are set in constructor
     float airSpeedLowLimit; ///< Lower limit for airspeed warning(red)
     float airSpeedHighLimit; ///< Upper limit for airspeed warning (red)
