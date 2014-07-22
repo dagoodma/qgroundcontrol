@@ -81,14 +81,17 @@ void ParameterInterface::addUAS(UASInterface* uas)
     paramWidgets->insert(uas->getUASID(), param);
     m_ui->stackedWidget->addWidget(param);
 
-
+#ifndef MAVLINK_ENABLED_SLUGS
     QGCSensorSettingsWidget* sensor = new QGCSensorSettingsWidget(uas, this);
     m_ui->sensorSettings->addWidget(sensor);
+#endif
 
     // Set widgets as default
     if (curr == -1) {
         // Clear
+#ifndef MAVLINK_ENABLED_SLUGS
         m_ui->sensorSettings->setCurrentWidget(sensor);
+#endif
         m_ui->stackedWidget->setCurrentWidget(param);
         curr = 0;
     }
