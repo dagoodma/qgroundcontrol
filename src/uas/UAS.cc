@@ -708,6 +708,53 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
             emit valueChanged(uasId, name.arg("drop_rate_comm"), "%", state.drop_rate_comm/100.0f, time);
         }
             break;
+        case MAVLINK_MSG_ID_PING:
+        {
+            mavlink_ping_t ping;
+            mavlink_msg_ping_decode(&message, &ping);
+
+            // Ping request (send a response)
+            if (ping.target_component == 0 && ping.target_system == 0) {
+                // This is a ping request, so respond
+                ping.target_system = this->mavlink->getSystemId();
+                ping.target_component =  this->mavlink->getComponentId();
+
+                sendMessage(ping);
+            }
+            // Ping response (calculate stats)
+            //TODO: add filtering
+            else if (ping.target_component ==  this->mavlink->getComponentId()
+                     && ping.target_system == this->mavlink->getSystemId()) {
+                // This is a ping response, and it matches this MAV. Record stats.
+                // Record packet loss and latency
+                if (ping.seq > this->expectedPingSequence) {
+                    this->expectedPingSequence = 1;
+                    qDebug() << "Reset ping sequence, because sender was ahead.";
+                }
+                else if (ping.seq != this->expectedPingSequence) {
+                    this->pingMessagesLost += this->expectedPingSequence - ping.seq;
+                    qDebug("Ping packets lost %d, total lost is %d\n", this->expectedPingSequence - ping.seq,
+                           this->pingMessagesLost);
+                }
+
+                // Now calculate latency
+                if (ping.time_usec < QGC::groundTimeUsecs()) {
+                    this->pingLatency = QGC::groundTimeUsecs() - ping.time_usec;
+                    // TODO move this to interface
+                    qDebug("Ping latency: %d (usec).", this->pingLatency);
+
+                }
+                else {
+                    qDebug("Ping response time %d (usec) was greater than groundstation time %d (usec).",
+                           ping.time_usec, QGC::groundTimeUsecs());
+                }
+            }
+            else {
+                qDebug("Received an unknown ping message from system id %d, component id %d.",
+                       ping.target_system, ping.target_component);
+            }
+        }
+            break;
         case MAVLINK_MSG_ID_ATTITUDE:
         {
             mavlink_attitude_t attitude;

@@ -74,6 +74,8 @@ public:
 public slots:
     /** @brief Receive a MAVLink message from this MAV */
     void receiveMessage(LinkInterface* link, mavlink_message_t message);
+    /** @brief Send a MAVLink ping request message */
+    void sendPing(void);
 
 signals:
     void midLevelCommandsChanged(int id, double altitude, double airspeed, double turnrate);
@@ -84,6 +86,9 @@ signals:
 private:
     unsigned int gpsFixQuality;
     bool isReturning;
+    bool sendPingRequests;
+    QTimer pingTimer;
+    int pingRate;
 
 };
 

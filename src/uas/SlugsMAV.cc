@@ -28,9 +28,16 @@ This file is part of the QGROUNDCONTROL project
 SlugsMAV::SlugsMAV(MAVLinkProtocol* mavlink, int id) :
     UAS(mavlink, id),
     gpsFixQuality(0),
-    isReturning(false)
+    isReturning(false),
+    sendPingRequests(true),
+    pingTimer(new QTimer(this)),
+    pingRate(1) // 1 Hz
 {
     qDebug() << "Spawning a SLUGS MAV.";
+    if (sendPingRequests) {
+        connect(pingTimer, SIGNAL(timeout()), this, SLOT(sendPing()));
+        pingTimer->start(1000/pingRate);
+    }
 }
 
 
@@ -112,6 +119,16 @@ void SlugsMAV::setNavMode(int newNavMode) {
     mavlink_msg_set_mode_pack(mavlink->getSystemId(), mavlink->getComponentId(), &msg, (uint8_t)uasId, this->mode, (uint16_t)newNavMode);
     sendMessage(msg);
     qDebug() << "SENDING REQUEST TO SET MODE TO SYSTEM" << uasId << ", REQUEST TO SET SLUGS NAV MODE " << newNavMode;
+}
+
+void SlugsMAV::sendPing(void) {
+    mavlink_ping_t ping;
+    ping.seq = ++expectedPingSequence;
+    ping.time_usec = QGC::groundTimeUsecs();
+    ping.target_component = 0;
+    ping.target_system = 0;
+
+    sendMessage(ping);
 }
 
 /**

@@ -361,6 +361,9 @@ protected: //COMMENTS FOR TEST UNIT
     float sendDropRate;           ///< Percentage of packets that were not received from the MAV by the GCS
     quint64 lastHeartbeat;        ///< Time of the last heartbeat message
     QTimer* statusTimeout;        ///< Timer for various status timeouts
+    quint32 expectedPingSequence; ///< Expected ping sequence response from MAV
+    quint64 pingLatency;          ///< Latency of ping responses from MAV
+    quint32 pingMessagesLost;     ///< Messages lost (determined by sequence number)
 
     /// BASIC UAS TYPE, NAME AND STATE
     QString name;                 ///< Human-friendly name of the vehicle, e.g. bravo
