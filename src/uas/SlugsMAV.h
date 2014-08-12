@@ -27,6 +27,7 @@ This file is part of the QGROUNDCONTROL project
 #include "UAS.h"
 #include "mavlink.h"
 #include <QTimer>
+#include <QObject>
 
 #ifdef MAVLINK_ENABLED_SLUGS
 #include "slugs/slugs.h"
@@ -87,7 +88,7 @@ private:
     unsigned int gpsFixQuality;
     bool isReturning;
     bool sendPingRequests;
-    QTimer pingTimer;
+    QTimer* pingTimer;
     int pingRate;
 
 };

@@ -719,7 +719,9 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
                 ping.target_system = this->mavlink->getSystemId();
                 ping.target_component =  this->mavlink->getComponentId();
 
-                sendMessage(ping);
+                mavlink_message_t msg;
+                mavlink_msg_ping_encode(mavlink->getSystemId(), mavlink->getComponentId(), &msg, &ping);
+;               sendMessage(msg);
             }
             // Ping response (calculate stats)
             //TODO: add filtering

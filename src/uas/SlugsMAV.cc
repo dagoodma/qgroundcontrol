@@ -122,13 +122,15 @@ void SlugsMAV::setNavMode(int newNavMode) {
 }
 
 void SlugsMAV::sendPing(void) {
+    mavlink_message_t msg;
     mavlink_ping_t ping;
     ping.seq = ++expectedPingSequence;
     ping.time_usec = QGC::groundTimeUsecs();
     ping.target_component = 0;
     ping.target_system = 0;
 
-    sendMessage(ping);
+    mavlink_msg_ping_encode(mavlink->getSystemId(), mavlink->getComponentId(), &msg, &ping);
+    sendMessage(msg);
 }
 
 /**
