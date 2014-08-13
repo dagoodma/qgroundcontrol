@@ -724,9 +724,9 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
 ;               sendMessage(msg);
             }
             // Ping response (calculate stats)
-            //TODO: add filtering
-            else if (ping.target_component ==  this->mavlink->getComponentId()
-                     && ping.target_system == this->mavlink->getSystemId()) {
+            //TODO: add filtering, get componenet id correct
+            else if (ping.target_component ==  1
+                     && ping.target_system == getUASID()) {
                 // This is a ping response, and it matches this MAV. Record stats.
                 // Record packet loss and latency
                 if (ping.seq > this->expectedPingSequence) {
@@ -735,15 +735,22 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
                 }
                 else if (ping.seq != this->expectedPingSequence) {
                     this->pingMessagesLost += this->expectedPingSequence - ping.seq;
-                    qDebug("Ping packets lost %d, total lost is %d\n", this->expectedPingSequence - ping.seq,
-                           this->pingMessagesLost);
+                    QString debugMsg = QString("Ping packets lost %1, total lost is %2\n")
+                           .arg(this->expectedPingSequence - ping.seq).arg(this->pingMessagesLost);
+                    qDebug() << "Ping: " << debugMsg;
+                    emit textMessageReceived(uasId, 1, 1, debugMsg);
+
                 }
 
                 // Now calculate latency
                 if (ping.time_usec < QGC::groundTimeUsecs()) {
                     this->pingLatency = QGC::groundTimeUsecs() - ping.time_usec;
                     // TODO move this to interface
-                    qDebug("Ping latency: %d (usec).", this->pingLatency);
+                    QString debugMsg = QString("Ping latency: %1 (usec).")
+                            .arg(this->pingLatency);
+
+                    qDebug() << "Ping: " << debugMsg;
+                    emit textMessageReceived(uasId, 1, 1, debugMsg);
 
                 }
                 else {
@@ -752,7 +759,7 @@ void UAS::receiveMessage(LinkInterface* link, mavlink_message_t message)
                 }
             }
             else {
-                qDebug("Received an unknown ping message from system id %d, component id %d.",
+                qDebug("Received an unknown ping message from system id %d, component id %d",
                        ping.target_system, ping.target_component);
             }
         }
