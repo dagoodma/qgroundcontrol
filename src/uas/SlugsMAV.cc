@@ -29,7 +29,7 @@ SlugsMAV::SlugsMAV(MAVLinkProtocol* mavlink, int id) :
     UAS(mavlink, id),
     gpsFixQuality(0),
     isReturning(false),
-    sendPingRequests(true),
+    sendPingRequests(false),
     pingTimer(new QTimer(this)),
     pingRate(1) // 1 Hz
 {

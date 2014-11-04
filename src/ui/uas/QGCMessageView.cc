@@ -58,6 +58,7 @@ void QGCMessageView::setActiveUAS(UASInterface* uas)
         connect(clearAction, SIGNAL(triggered()), ui->plainTextEdit, SLOT(clear()));
     }
 
+    ui->plainTextEdit->setMaximumBlockCount(0);
     connect(uas, SIGNAL(textMessageReceived(int,int,int,QString)), this, SLOT(handleTextMessage(int,int,int,QString)));
     activeUAS = uas;
 }
