@@ -54,6 +54,7 @@ QGCView {
     readonly property string    _autoSyncKey:       "AutoSync"
     readonly property string    _showHelpKey:       "ShowHelp"
     readonly property int       _addMissionItemsButtonAutoOffTimeout:   10000
+    readonly property int       _drawCoverageAreaButtonAutoOffTimeout:   10000
 
     property var    _missionItems:              controller.missionItems
 
@@ -167,6 +168,8 @@ QGCView {
                             var index = controller.addMissionItem(coordinate)
                             addMissionItemsButtonAutoOffTimer.start()
                             setCurrentItem(index)
+                        } else if (drawCoverageAreaButton.checked) {
+                            console.log("We're here baby.")
                         } else {
                             editorMap.zoomLevel = editorMap.maxZoomLevel - 2
                         }
@@ -619,6 +622,7 @@ QGCView {
                             source:             (qgcPal.globalTheme === QGCPalette.Light) ? "/qmlimages/MapAddMissionBlack.svg" : "/qmlimages/MapAddMission.svg"
                         }
 
+
                         QGCLabel {
                             id:                 addMissionItemsHelpText
                             anchors.leftMargin: ScreenTools.defaultFontPixelHeight
@@ -631,9 +635,31 @@ QGCView {
                         }
 
                         Image {
-                            id:                 deleteHelpIcon
+                            id:                 drawCoverageAreaHelpIcon
                             anchors.topMargin:  ScreenTools.defaultFontPixelHeight
                             anchors.top:        addMissionItemsHelpText.bottom
+                            width:              ScreenTools.defaultFontPixelHeight * 3
+                            fillMode:           Image.PreserveAspectFit
+                            mipmap:             true
+                            smooth:             true
+                            source:             (qgcPal.globalTheme === QGCPalette.Light) ? "/qmlimages/MapDrawCoverageAreaBlack.svg" : "/qmlimages/MapDrawCoverageArea.svg"
+                        }
+
+                        QGCLabel {
+                            id:                 drawCoverageAreaHelpText
+                            anchors.leftMargin: ScreenTools.defaultFontPixelHeight
+                            anchors.left:       mapTypeHelpIcon.right
+                            anchors.right:      parent.right
+                            anchors.top:        drawCoverageAreaHelpIcon.top
+                            wrapMode:           Text.WordWrap
+                            text:               "<b>Draw Coverage Area</b><br>" +
+                                                "When enabled, draw a polygon by clicking to add vertices on the map. When finished, click the Path Planner button to find waypoints that efficiently cover the region."
+                        }
+
+                        Image {
+                            id:                 deleteHelpIcon
+                            anchors.topMargin:  ScreenTools.defaultFontPixelHeight
+                            anchors.top:        drawCoverageAreaHelpText.bottom
                             width:              ScreenTools.defaultFontPixelHeight * 3
                             fillMode:           Image.PreserveAspectFit
                             mipmap:             true
@@ -780,10 +806,36 @@ QGCView {
                 }
 
                 RoundButton {
-                    id:                 deleteMissionItemButton
+                    id:                 drawCoverageAreaButton
                     anchors.margins:    _margin
                     anchors.left:       parent.left
                     anchors.top:        addMissionItemsButton.bottom
+                    buttonImage:        "/qmlimages/MapDrawCoverageArea.svg"
+                    exclusiveGroup:     _dropButtonsExclusiveGroup
+                    z:                  editorMap.zOrderWidgets
+
+                    onCheckedChanged: {
+                        if (checked) {
+                            drawCoverageAreaButtonAutoOffTimer.start()
+                        } else {
+                            drawCoverageAreaButtonAutoOffTimer.stop()
+                        }
+                    }
+
+                    Timer {
+                        id:         drawCoverageAreaButtonAutoOffTimer
+                        interval:   _drawCoverageAreaButtonAutoOffTimeout
+                        repeat:     false
+
+                        onTriggered: drawCoverageAreaButton.checked = false
+                    }
+                }
+
+                RoundButton {
+                    id:                 deleteMissionItemButton
+                    anchors.margins:    _margin
+                    anchors.left:       parent.left
+                    anchors.top:        drawCoverageAreaButton.bottom
                     buttonImage:        "/qmlimages/TrashDelete.svg"
                     exclusiveGroup:     _dropButtonsExclusiveGroup
                     z:                  editorMap.zOrderWidgets

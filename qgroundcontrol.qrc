@@ -3,7 +3,6 @@
         <file alias="MockLink.params">src/comm/MockLink.params</file>
         <file alias="FactSystemTest.qml">src/FactSystem/FactSystemTest.qml</file>
     </qresource>
-
     <qresource prefix="/qmlimages">
         <file alias="SafetyComponentTree.svg">src/AutoPilotPlugins/PX4/Images/SafetyComponentTree.svg</file>
         <file alias="SafetyComponentHome.png">src/AutoPilotPlugins/PX4/Images/SafetyComponentHome.png</file>
@@ -44,10 +43,9 @@
         <file alias="PowerComponentBattery_04cell.svg">src/AutoPilotPlugins/PX4/Images/PowerComponentBattery_04cell.svg</file>
         <file alias="PowerComponentBattery_05cell.svg">src/AutoPilotPlugins/PX4/Images/PowerComponentBattery_05cell.svg</file>
         <file alias="PowerComponentBattery_06cell.svg">src/AutoPilotPlugins/PX4/Images/PowerComponentBattery_06cell.svg</file>
-
         <file alias="attitudeDial.svg">src/FlightMap/Images/attitudeDial.svg</file>
         <file alias="attitudeInstrument.svg">src/FlightMap/Images/attitudeInstrument.svg</file>
-        <file alias="attitudePointer.svg">src//FlightMap/Images/attitudePointer.svg</file>
+        <file alias="attitudePointer.svg">src/FlightMap/Images/attitudePointer.svg</file>
         <file alias="buttonHome.svg">src/FlightMap/Images/buttonHome.svg</file>
         <file alias="buttonLeft.svg">src/FlightMap/Images/buttonLeft.svg</file>
         <file alias="buttonMore.svg">src/FlightMap/Images/buttonMore.svg</file>
@@ -65,12 +63,13 @@
         <file alias="airplaneOpaque.svg">src/FlightMap/Images/airplaneOpaque.svg</file>
         <file alias="ZoomPlus.svg">src/FlightMap/Images/ZoomPlus.svg</file>
         <file alias="ZoomMinus.svg">src/FlightMap/Images/ZoomMinus.svg</file>
-
         <!-- Map Buttons -->
         <file alias="Help.svg">src/FlightMap/Images/Help.svg</file>
         <file alias="HelpBlack.svg">src/FlightMap/Images/HelpBlack.svg</file>
         <file alias="MapAddMission.svg">src/FlightMap/Images/MapAddMission.svg</file>
         <file alias="MapAddMissionBlack.svg">src/FlightMap/Images/MapAddMissionBlack.svg</file>
+        <file alias="MapDrawCoverageArea.svg">src/FlightMap/Images/MapDrawCoverageArea.svg</file>
+        <file alias="MapDrawCoverageAreaBlack.svg">src/FlightMap/Images/MapDrawCoverageAreaBlack.svg</file>
         <file alias="MapCenter.svg">src/FlightMap/Images/MapCenter.svg</file>
         <file alias="MapCenterBlack.svg">src/FlightMap/Images/MapCenterBlack.svg</file>
         <file alias="MapHome.svg">src/FlightMap/Images/MapHome.svg</file>
@@ -84,7 +83,6 @@
         <file alias="TrashDeleteBlack.svg">src/FlightMap/Images/TrashDeleteBlack.svg</file>
         <file alias="XDelete.svg">src/FlightMap/Images/XDelete.svg</file>
         <file alias="XDeleteBlack.svg">src/FlightMap/Images/XDeleteBlack.svg</file>
-
     </qresource>
     <qresource prefix="/qml">
         <file alias="test.qml">src/test.qml</file>
@@ -96,9 +94,6 @@
         <file alias="QGroundControl/FactControls/FactCheckBox.qml">src/FactSystem/FactControls/FactCheckBox.qml</file>
         <file alias="QGroundControl/FactControls/FactComboBox.qml">src/FactSystem/FactControls/FactComboBox.qml</file>
         <file alias="QGroundControl/Controls/qmldir">src/QmlControls/QGroundControl.Controls.qmldir</file>
-
-
-        <!-- Controls module -->
         <file alias="QGroundControl/Controls/QGCButton.qml">src/QmlControls/QGCButton.qml</file>
         <file alias="QGroundControl/Controls/QGCRadioButton.qml">src/QmlControls/QGCRadioButton.qml</file>
         <file alias="QGroundControl/Controls/QGCCheckBox.qml">src/QmlControls/QGCCheckBox.qml</file>
@@ -130,19 +125,14 @@
         <file alias="QGroundControl/Controls/QGCCanvas.qml">src/QmlControls/QGCCanvas.qml</file>
         <file alias="QGroundControl/Controls/ExclusiveGroupItem.qml">src/QmlControls/ExclusiveGroupItem.qml</file>
         <file alias="QGroundControl/Controls/ClickableColor.qml">src/QmlControls/ClickableColor.qml</file>
-
-        <!-- Main Window -->
         <file alias="MainWindow.qml">src/ui/MainWindow.qml</file>
         <file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBar.qml</file>
         <file alias="MainToolBarActiveVehicleComponent.qml">src/ui/toolbar/MainToolBarActiveVehicleComponent.qml</file>
-
-        <!-- Vehicle Setup -->
         <file alias="SetupView.qml">src/VehicleSetup/SetupView.qml</file>
         <file alias="VehicleSummary.qml">src/VehicleSetup/VehicleSummary.qml</file>
         <file alias="FirmwareUpgrade.qml">src/VehicleSetup/FirmwareUpgrade.qml</file>
         <file alias="JoystickConfig.qml">src/VehicleSetup/JoystickConfig.qml</file>
         <file alias="SetupParameterEditor.qml">src/VehicleSetup/SetupParameterEditor.qml</file>
-
         <file alias="CustomCommandWidget.qml">src/ViewWidgets/CustomCommandWidget.qml</file>
         <file alias="SafetyComponent.qml">src/AutoPilotPlugins/PX4/SafetyComponent.qml</file>
         <file alias="RadioComponent.qml">src/AutoPilotPlugins/PX4/RadioComponent.qml</file>
@@ -161,15 +151,10 @@
         <file alias="FlightDisplayView.qml">src/FlightDisplay/FlightDisplayView.qml</file>
         <file alias="FlightDisplayWidget.qml">src/FlightDisplay/FlightDisplayWidget.qml</file>
         <file alias="MissionEditor.qml">src/MissionEditor/MissionEditor.qml</file>
-
-        <!-- FlightDisplay module -->
         <file alias="QGroundControl/FlightDisplay/qmldir">src/FlightDisplay/qmldir</file>
         <file alias="QGroundControl/FlightDisplay/FlightDisplayView.qml">src/FlightDisplay/FlightDisplayView.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlightDisplayViewDelayLoadInner.qml">src/FlightDisplay/FlightDisplayViewDelayLoadInner.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlightDisplayViewDelayLoadOuter.qml">src/FlightDisplay/FlightDisplayViewDelayLoadOuter.qml</file>
-
-
-        <!-- FlightMap module -->
         <file alias="QGroundControl/FlightMap/qmldir">src/FlightMap/qmldir</file>
         <file alias="QGroundControl/FlightMap/FlightMap.qml">src/FlightMap/FlightMap.qml</file>
         <file alias="QGroundControl/FlightMap/QGCVideoBackground.qml">src/FlightMap/QGCVideoBackground.qml</file>
@@ -188,7 +173,6 @@
         <file alias="QGroundControl/FlightMap/VehicleMapItem.qml">src/FlightMap/MapItems/VehicleMapItem.qml</file>
         <file alias="QGroundControl/FlightMap/MissionItemView.qml">src/FlightMap/MapItems/MissionItemView.qml</file>
         <file alias="QGroundControl/FlightMap/MissionLineView.qml">src/FlightMap/MapItems/MissionLineView.qml</file>
-
     </qresource>
     <qresource prefix="/res">
         <file alias="LeftArrow">resources/LeftArrow.svg</file>
@@ -261,7 +245,6 @@
         <file alias="accel_up.png">resources/calibration/accel_up.png</file>
         <file alias="accel_left.png">resources/calibration/accel_left.png</file>
     </qresource>
-
     <qresource prefix="/qml/calibration/mode1">
         <file alias="radioCenter.png">resources/calibration/mode1/radioCenter.png</file>
         <file alias="radioHome.png">resources/calibration/mode1/radioHome.png</file>
@@ -275,7 +258,6 @@
         <file alias="radioThrottleDown.png">resources/calibration/mode1/radioThrottleDown.png</file>
         <file alias="radioSwitchMinMax.png">resources/calibration/mode1/radioSwitchMinMax.png</file>
     </qresource>
-
     <qresource prefix="/qml/calibration/mode2">
         <file alias="radioCenter.png">resources/calibration/mode2/radioCenter.png</file>
         <file alias="radioHome.png">resources/calibration/mode2/radioHome.png</file>
@@ -289,7 +271,6 @@
         <file alias="radioThrottleDown.png">resources/calibration/mode2/radioThrottleDown.png</file>
         <file alias="radioSwitchMinMax.png">resources/calibration/mode2/radioSwitchMinMax.png</file>
     </qresource>
-
     <qresource prefix="/qml/calibration/joystick">
         <file alias="joystickCenter.png">resources/calibration/joystick/joystickCenter.png</file>
         <file alias="joystickRollLeft.png">resources/calibration/joystick/joystickRollLeft.png</file>
@@ -301,7 +282,6 @@
         <file alias="joystickThrottleUp.png">resources/calibration/joystick/joystickThrottleUp.png</file>
         <file alias="joystickThrottleDown.png">resources/calibration/joystick/joystickThrottleDown.png</file>
     </qresource>
-
     <qresource prefix="/res/styles">
         <file alias="style-dark.css">resources/styles/style-dark.css</file>
         <file alias="style-light.css">resources/styles/style-light.css</file>
