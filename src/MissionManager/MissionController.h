@@ -67,6 +67,7 @@ private:
     void _recalcChildItems(void);
     void _recalcAll(void);
     void _initAllMissionItems(void);
+    void _planMissionItemSequence(double turnRadius);
 
 private:
     QmlObjectListModel* _missionItems;
