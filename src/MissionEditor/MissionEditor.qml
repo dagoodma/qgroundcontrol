@@ -68,6 +68,13 @@ QGCView {
     property bool _syncNeeded:                  controller.missionItems.dirty
     property bool _syncInProgress:              _activeVehicle ? _activeVehicle.missionManager.inProgress : false
 
+    property var _mapPathPlannerManager:        QGroundControl.mapPathPlannerManager
+
+    property real _pathPlannerTurnRadius:       10 // [m]
+    property real _pathPlannerSensorWidth:      35 // [m]
+    property bool _pathPlannerReturnToInitial:  true
+    //property var _pathPlannerAlgorithm:
+
     property bool _showHelp:                    QGroundControl.flightMapSettings.loadBoolMapSetting(editorMap.mapName, _showHelpKey, true)
 
     MissionEditorController {
@@ -555,6 +562,209 @@ QGCView {
                     } // Column - Online view
                 } // Item - Home Position Manager
 
+                // Path Planner Manager
+                Rectangle {
+                    id:             pathPlannerManager
+                    anchors.top:    parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right:  parent.right
+                    width:          _rightPanelWidth
+                    visible:        mapPathPlannerButton.checked
+                    color:          qgcPal.window
+                    opacity:        _rightPanelOpacity
+                    z:              editorMap.zOrderTopMost
+
+                    Column {
+                        anchors.margins:    _margin
+                        anchors.fill:       parent
+                        visible:            true
+                        //visible:            !liveHomePositionAvailable
+
+                        QGCLabel {
+                            font.pixelSize: ScreenTools.mediumFontPixelSize
+                            text:           "Path Planner Manager"
+                        }
+
+                        Item {
+                            width: 10
+                            height: ScreenTools.defaultFontPixelHeight
+                        }
+
+                        QGCLabel {
+                            width:      parent.width
+                            wrapMode:   Text.WordWrap
+                            text:       "This is used to plan an efficient path by reordering all mission items for the active vehicle."
+                        }
+
+                        Item {
+                            width: 10
+                            height: ScreenTools.defaultFontPixelHeight
+                        }
+
+                        Item {
+                            width:  parent.width
+                            height: turnRadiusField.height
+
+                            QGCLabel {
+                                anchors.baseline:   turnRadiusField.baseline
+                                text:               "Turn radius:"
+                            }
+
+                            QGCTextField {
+                                id:             turnRadiusField
+                                anchors.right:  parent.right
+                                width:          _editFieldWidth
+                                text:           _pathPlannerTurnRadius
+                            }
+                        }
+
+                        Item {
+                            width: 10
+                            height: ScreenTools.defaultFontPixelHeight / 3
+                        }
+
+                        Item {
+                            width:  parent.width
+                            height: sensorWidthField.height
+
+                            QGCLabel {
+                                anchors.baseline:   sensorWidthField.baseline
+                                text:               "Sensor width:"
+                            }
+
+                            QGCTextField {
+                                id:             sensorWidthField
+                                anchors.right:  parent.right
+                                width:          _editFieldWidth
+                                text:           _pathPlannerSensorWidth
+                            }
+                        }
+
+                        Item {
+                            width: 10
+                            height: ScreenTools.defaultFontPixelHeight / 3
+                        }
+
+                        Item {
+                            width:  parent.width
+                            height: returnToInitialField.height
+
+                            QGCLabel {
+                                id:                 returnToInitialLabel
+                                anchors.baseline:   returnToInitialField.baseline
+                                text:               "Return to current position: "
+                            }
+
+                            CheckBox {
+                                id:             returnToInitialField
+                                anchors.left:   returnToInitialLabel.right
+                                anchors.leftMargin: 5
+                                checked:        _pathPlannerReturnToInitial
+                            }
+                        }
+
+
+                        Item {
+                            width: 10
+                            height: ScreenTools.defaultFontPixelHeight / 3
+                        }
+
+                        Row {
+                            spacing: ScreenTools.defaultFontPixelWidth
+
+                            QGCButton {
+                                text: "Plan Path"
+
+                                onClicked: {
+                                    Console.log("TODO connect to DPP library")
+                                }
+                            }
+
+                        }
+                    } // Column - Offline view
+
+                    // FIXME add online view
+                    /*
+                                    Column {
+                                        anchors.margins:    _margin
+                                        anchors.fill:       parent
+                                        visible:            liveHomePositionAvailable
+
+                                        QGCLabel {
+                                            font.pixelSize: ScreenTools.mediumFontPixelSize
+                                            text:           "Vehicle Home Position"
+                                        }
+
+                                        Item {
+                                            width: 10
+                                            height: ScreenTools.defaultFontPixelHeight
+                                        }
+
+                                        Item {
+                                            width:  parent.width
+                                            height: liveLatitudeField.height
+
+                                            QGCLabel {
+                                                anchors.baseline:   liveLatitudeField.baseline
+                                                text:               "Lat:"
+                                            }
+
+                                            QGCLabel {
+                                                id:             liveLatitudeField
+                                                anchors.right:  parent.right
+                                                width:          _editFieldWidth
+                                                text:           liveHomePosition.latitude
+                                            }
+                                        }
+
+                                        Item {
+                                            width: 10
+                                            height: ScreenTools.defaultFontPixelHeight / 3
+                                        }
+
+                                        Item {
+                                            width:  parent.width
+                                            height: liveLongitudeField.height
+
+                                            QGCLabel {
+                                                anchors.baseline:   liveLongitudeField.baseline
+                                                text:               "Lon:"
+                                            }
+
+                                            QGCLabel {
+                                                id:             liveLongitudeField
+                                                anchors.right:  parent.right
+                                                width:          _editFieldWidth
+                                                text:           liveHomePosition.longitude
+                                            }
+                                        }
+
+                                        Item {
+                                            width: 10
+                                            height: ScreenTools.defaultFontPixelHeight / 3
+                                        }
+
+                                        Item {
+                                            width:  parent.width
+                                            height: liveAltitudeField.height
+
+                                            QGCLabel {
+                                                anchors.baseline:   liveAltitudeField.baseline
+                                                text:               "Alt:"
+                                            }
+
+                                            QGCLabel {
+                                                id:             liveAltitudeField
+                                                anchors.right:  parent.right
+                                                width:          _editFieldWidth
+                                                text:           liveHomePosition.altitude
+                                            }
+                                        }
+                                    } // Column - Online view
+
+                                    */
+                } // Item - Path Planner Manager
+
                 // Help Panel
                 Rectangle {
                     id:                 helpPanel
@@ -720,9 +930,31 @@ QGCView {
                         }
 
                         Image {
-                            id:                 mapTypeHelpIcon
+                            id:                 mapPathPlannerHelpIcon
                             anchors.topMargin:  ScreenTools.defaultFontPixelHeight
                             anchors.top:        syncHelpText.bottom
+                            width:              ScreenTools.defaultFontPixelHeight * 3
+                            fillMode:           Image.PreserveAspectFit
+                            mipmap:             true
+                            smooth:             true
+                            source:             (qgcPal.globalTheme === QGCPalette.Light) ? "/qmlimages/MapPathPlannerBlack.svg" : "/qmlimages/MapPathPlanner.svg"
+                        }
+
+                        QGCLabel {
+                            id:                 mapPathPlannerHelpText
+                            anchors.leftMargin: ScreenTools.defaultFontPixelHeight
+                            anchors.left:       mapPathPlannerHelpIcon.right
+                            anchors.right:      parent.right
+                            anchors.top:        mapPathPlannerHelpIcon.top
+                            wrapMode:           Text.WordWrap
+                            text:               "<b>Path Planner</b><br>" +
+                                                "Reorders the mission items to minimize path length."
+                        }
+
+                        Image {
+                            id:                 mapTypeHelpIcon
+                            anchors.topMargin:  ScreenTools.defaultFontPixelHeight
+                            anchors.top:        mapPathPlannerHelpText.bottom
                             width:              ScreenTools.defaultFontPixelHeight * 3
                             fillMode:           Image.PreserveAspectFit
                             mipmap:             true
@@ -863,11 +1095,21 @@ QGCView {
                     enabled:            !_syncInProgress
                 }
 
+                RoundButton {
+                    id:                 mapPathPlannerButton
+                    anchors.margins:    _margin
+                    anchors.left:       parent.left
+                    anchors.top:        syncButton.bottom
+                    buttonImage:        "/qmlimages/MapPathPlanner.svg"
+                    exclusiveGroup:     _dropButtonsExclusiveGroup
+                    z:                  editorMap.zOrderWidgets
+                }
+
                 DropButton {
                     id:                 mapTypeButton
                     anchors.margins:    _margin
                     anchors.left:       parent.left
-                    anchors.top:        syncButton.bottom
+                    anchors.top:        mapPathPlannerButton.bottom
                     dropDirection:      dropRight
                     buttonImage:        "/qmlimages/MapType.svg"
                     viewportMargins:    ScreenTools.defaultFontPixelWidth / 2
