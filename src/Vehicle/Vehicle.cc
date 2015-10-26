@@ -53,6 +53,8 @@ Vehicle::Vehicle(LinkInterface* link, int vehicleId, MAV_AUTOPILOT firmwareType,
     , _joystickMode(JoystickModeRC)
     , _joystickEnabled(false)
     , _uas(NULL)
+    , _coordinate(37.803784, -122.462276)
+    , _coordinateValid(false)
     , _homePositionAvailable(false)
     , _mav(NULL)
     , _currentMessageCount(0)
@@ -74,8 +76,6 @@ Vehicle::Vehicle(LinkInterface* link, int vehicleId, MAV_AUTOPILOT firmwareType,
     , _navigationSpeedError(0.0f)
     , _navigationCrosstrackError(0.0f)
     , _navigationTargetBearing(0.0f)
-    , _latitude(DEFAULT_LAT)
-    , _longitude(DEFAULT_LON)
     , _refreshTimer(new QTimer(this))
     , _batteryVoltage(-1.0f)
     , _batteryPercent(0.0)
@@ -87,6 +87,7 @@ Vehicle::Vehicle(LinkInterface* link, int vehicleId, MAV_AUTOPILOT firmwareType,
     , _satelliteLock(0)
     , _updateCount(0)
     , _missionManager(NULL)
+    , _missionManagerInitialRequestComplete(false)
     , _armed(false)
     , _base_mode(0)
     , _custom_mode(0)
@@ -110,7 +111,8 @@ Vehicle::Vehicle(LinkInterface* link, int vehicleId, MAV_AUTOPILOT firmwareType,
     _firmwarePlugin = FirmwarePluginManager::instance()->firmwarePluginForAutopilot(_firmwareType, _vehicleType);
     _autopilotPlugin = AutoPilotPluginManager::instance()->newAutopilotPluginForVehicle(this);
     
-    connect(_autopilotPlugin, &AutoPilotPlugin::missingParametersChanged, this, &Vehicle::missingParametersChanged);
+    connect(_autopilotPlugin, &AutoPilotPlugin::parametersReadyChanged,     this, &Vehicle::_parametersReady);
+    connect(_autopilotPlugin, &AutoPilotPlugin::missingParametersChanged,   this, &Vehicle::missingParametersChanged);
 
     // Refresh timer
     connect(_refreshTimer, SIGNAL(timeout()), this, SLOT(_checkUpdate()));
@@ -166,27 +168,9 @@ Vehicle::~Vehicle()
 {
     delete _missionManager;
     _missionManager = NULL;
-    
-    // Stop listening for system messages
-    disconnect(UASMessageHandler::instance(), &UASMessageHandler::textMessageCountChanged,  this, &Vehicle::_handleTextMessage);
-    // Disconnect any previously connected active MAV
-    disconnect(_mav, SIGNAL(attitudeChanged                     (UASInterface*, double,double,double,quint64)),             this, SLOT(_updateAttitude(UASInterface*, double, double, double, quint64)));
-    disconnect(_mav, SIGNAL(attitudeChanged                     (UASInterface*, int,double,double,double,quint64)),         this, SLOT(_updateAttitude(UASInterface*,int,double, double, double, quint64)));
-    disconnect(_mav, SIGNAL(speedChanged                        (UASInterface*, double, double, quint64)),                  this, SLOT(_updateSpeed(UASInterface*, double, double, quint64)));
-    disconnect(_mav, SIGNAL(altitudeChanged                     (UASInterface*, double, double, double, double, quint64)),  this, SLOT(_updateAltitude(UASInterface*, double, double, double, double, quint64)));
-    disconnect(_mav, SIGNAL(navigationControllerErrorsChanged   (UASInterface*, double, double, double)),                   this, SLOT(_updateNavigationControllerErrors(UASInterface*, double, double, double)));
-    disconnect(_mav, SIGNAL(statusChanged                       (UASInterface*,QString,QString)),                           this, SLOT(_updateState(UASInterface*,QString,QString)));
-    disconnect(_mav, &UASInterface::NavigationControllerDataChanged, this, &Vehicle::_updateNavigationControllerData);
-    disconnect(_mav, &UASInterface::heartbeatTimeout,                this, &Vehicle::_heartbeatTimeout);
-    disconnect(_mav, &UASInterface::batteryChanged,                  this, &Vehicle::_updateBatteryRemaining);
-    disconnect(_mav, &UASInterface::batteryConsumedChanged,          this, &Vehicle::_updateBatteryConsumedChanged);
-    disconnect(_mav, &UASInterface::nameChanged,                     this, &Vehicle::_updateName);
-    disconnect(_mav, &UASInterface::systemTypeSet,                   this, &Vehicle::_setSystemType);
-    disconnect(_mav, &UASInterface::localizationChanged,             this, &Vehicle::_setSatLoc);
-    UAS* pUas = dynamic_cast<UAS*>(_mav);
-    if(pUas) {
-        disconnect(pUas, &UAS::satelliteCountChanged, this, &Vehicle::_setSatelliteCount);
-    }
+
+    delete _mav;
+    _mav = NULL;
 }
 
 void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t message)
@@ -218,17 +202,32 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
 
 void Vehicle::_handleHomePosition(mavlink_message_t& message)
 {
+    bool emitHomePositionChanged =          false;
+    bool emitHomePositionAvailableChanged = false;
+
     mavlink_home_position_t homePos;
     
     mavlink_msg_home_position_decode(&message, &homePos);
-    
-    _homePosition.setLatitude(homePos.latitude / 10000000.0);
-    _homePosition.setLongitude(homePos.longitude / 10000000.0);
-    _homePosition.setAltitude(homePos.altitude / 1000.0);
+
+    QGeoCoordinate newHomePosition (homePos.latitude / 10000000.0,
+                                    homePos.longitude / 10000000.0,
+                                    homePos.altitude / 1000.0);
+    if (newHomePosition != _homePosition) {
+        emitHomePositionChanged = true;
+        _homePosition = newHomePosition;
+    }
+
+    if (!_homePositionAvailable) {
+        emitHomePositionAvailableChanged = true;
+    }
     _homePositionAvailable = true;
-    
-    emit homePositionChanged(_homePosition);
-    emit homePositionAvailableChanged(true);
+
+    if (emitHomePositionChanged) {
+        emit homePositionChanged(_homePosition);
+    }
+    if (emitHomePositionAvailableChanged) {
+        emit homePositionAvailableChanged(true);
+    }
 }
 
 void Vehicle::_handleHeartbeat(mavlink_message_t& message)
@@ -338,13 +337,13 @@ QList<LinkInterface*> Vehicle::links(void)
 
 void Vehicle::setLatitude(double latitude)
 {
-    _geoCoordinate.setLatitude(latitude);
-    emit coordinateChanged(_geoCoordinate);
+    _coordinate.setLatitude(latitude);
+    emit coordinateChanged(_coordinate);
 }
 
 void Vehicle::setLongitude(double longitude){
-    _geoCoordinate.setLongitude(longitude);
-    emit coordinateChanged(_geoCoordinate);
+    _coordinate.setLongitude(longitude);
+    emit coordinateChanged(_coordinate);
 }
 
 void Vehicle::_updateAttitude(UASInterface*, double roll, double pitch, double yaw, quint64)
@@ -514,13 +513,11 @@ void Vehicle::_checkUpdate()
 {
     // Update current location
     if(_mav) {
-        if(_latitude != _mav->getLatitude()) {
-            _latitude = _mav->getLatitude();
-            emit latitudeChanged();
+        if(latitude() != _mav->getLatitude()) {
+            setLatitude(_mav->getLatitude());
         }
-        if(_longitude != _mav->getLongitude()) {
-            _longitude = _mav->getLongitude();
-            emit longitudeChanged();
+        if(longitude() != _mav->getLongitude()) {
+            setLongitude(_mav->getLongitude());
         }
     }
     // The timer rate is 20Hz for the coordinates above. These below we only check
@@ -721,6 +718,10 @@ void Vehicle::_setSatLoc(UASInterface*, int fix)
 {
     // fix 0: lost, 1: at least one satellite, but no GPS fix, 2: 2D lock, 3: 3D lock
     if(_satelliteLock != fix) {
+        if (fix > 2) {
+            _coordinateValid = true;
+            emit coordinateValidChanged(true);
+        }
         _satelliteLock = fix;
         emit satelliteLockChanged();
     }
@@ -1102,10 +1103,10 @@ void Vehicle::_missionManagerError(int errorCode, const QString& errorMsg)
 void Vehicle::_addNewMapTrajectoryPoint(void)
 {
     if (_mapTrajectoryHaveFirstCoordinate) {
-        _mapTrajectoryList.append(new CoordinateVector(_mapTrajectoryLastCoordinate, _geoCoordinate, this));
+        _mapTrajectoryList.append(new CoordinateVector(_mapTrajectoryLastCoordinate, _coordinate, this));
     }
     _mapTrajectoryHaveFirstCoordinate = true;
-    _mapTrajectoryLastCoordinate = _geoCoordinate;
+    _mapTrajectoryLastCoordinate = _coordinate;
 }
 
 void Vehicle::_mapTrajectoryStart(void)
@@ -1118,4 +1119,12 @@ void Vehicle::_mapTrajectoryStart(void)
 void Vehicle::_mapTrajectoryStop()
 {
     _mapTrajectoryTimer.stop();
+}
+
+void Vehicle::_parametersReady(bool parametersReady)
+{
+    if (parametersReady && !_missionManagerInitialRequestComplete) {
+        _missionManagerInitialRequestComplete = true;
+        _missionManager->requestMissionItems();
+    }
 }

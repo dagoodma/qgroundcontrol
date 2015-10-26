@@ -28,10 +28,11 @@
 #include "MockLink.h"
 #include "MissionManager.h"
 #include "MultiSignalSpy.h"
+#include "MissionControllerManagerTest.h"
 
 #include <QGeoCoordinate>
 
-class MissionManagerTest : public UnitTest
+class MissionManagerTest : public MissionControllerManagerTest
 {
     Q_OBJECT
     
@@ -39,61 +40,19 @@ public:
     MissionManagerTest(void);
     
 private slots:
-    void init(void);
-    void cleanup(void);
-    
-    void _testWriteFailureHandling(void);
-    void _testReadFailureHandling(void);
-    
+    void _testWriteFailureHandlingAPM(void);
+    void _testReadFailureHandlingAPM(void);
+    void _testWriteFailureHandlingPX4(void);
+    void _testReadFailureHandlingPX4(void);
+
 private:
-    void _checkInProgressValues(bool inProgress);
     void _roundTripItems(MockLinkMissionItemHandler::FailureMode_t failureMode, MissionManager::ErrorCode_t errorCode, bool failFirstTimeOnly);
     void _writeItems(MockLinkMissionItemHandler::FailureMode_t failureMode, MissionManager::ErrorCode_t errorCode, bool failFirstTimeOnly);
+    void _testWriteFailureHandlingWorker(void);
+    void _testReadFailureHandlingWorker(void);
     
-    void _readEmptyVehicle(void);
-    
-    MockLink*       _mockLink;
-    MissionManager* _missionManager;
-    
-    enum {
-        canEditChangedSignalIndex = 0,
-        newMissionItemsAvailableSignalIndex,
-        inProgressChangedSignalIndex,
-        errorSignalIndex,
-        maxSignalIndex
-    };
-    
-    enum {
-        canEditChangedSignalMask =              1 << canEditChangedSignalIndex,
-        newMissionItemsAvailableSignalMask =    1 << newMissionItemsAvailableSignalIndex,
-        inProgressChangedSignalMask =           1 << inProgressChangedSignalIndex,
-        errorSignalMask =                       1 << errorSignalIndex,
-    };
-
-    MultiSignalSpy*     _multiSpy;
-    static const size_t _cSignals = maxSignalIndex;
-    const char*         _rgSignals[_cSignals];
-    
-    typedef struct {
-        int            sequenceNumber;
-        QGeoCoordinate coordinate;
-        int            command;
-        double         param1;
-        double         param2;
-        double         param3;
-        double         param4;
-        bool           autocontinue;
-        bool           isCurrentItem;
-        int            frame;
-    } ItemInfo_t;
-    
-    typedef struct {
-        const char*         itemStream;
-        const ItemInfo_t    expectedItem;
-    } TestCase_t;
-
-    static const TestCase_t _rgTestCases[];
-    static const int        _signalWaitTime = MissionManager::_ackTimeoutMilliseconds * MissionManager::_maxRetryCount * 2;
+    static const MissionControllerManagerTest::TestCase_t   _rgTestCases[];
+    static const size_t                                     _cTestCases;
 };
 
 #endif

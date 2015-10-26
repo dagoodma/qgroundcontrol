@@ -41,16 +41,15 @@ import QGroundControl.Controllers   1.0
 Item {
     id: root
 
+    property alias latitude: flightMap.latitude
+    property alias longitude: flightMap.longitude
+
     // Top margin for all widgets. Used to prevent overlap with the toolbar
     property real   topMargin: 0
 
     // Used by parent to hide widgets when it displays something above in the z order.
     // Prevents z order drawing problems.
     property bool hideWidgets: false
-
-    readonly property alias zOrderTopMost:   flightMap.zOrderTopMost
-    readonly property alias zOrderWidgets:   flightMap.zOrderWidgets
-    readonly property alias zOrderMapItems:  flightMap.zOrderMapItems
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
 
@@ -70,21 +69,26 @@ Item {
 
     readonly property var _flightMap: flightMap
 
-    property real _roll:            _activeVehicle ? (isNaN(_activeVehicle.roll) ? _defaultRoll : _activeVehicle.roll) : _defaultRoll
-    property real _pitch:           _activeVehicle ? (isNaN(_activeVehicle.pitch) ? _defaultPitch : _activeVehicle.pitch) : _defaultPitch
-    property real _heading:         _activeVehicle ? (isNaN(_activeVehicle.heading) ? _defaultHeading : _activeVehicle.heading) : _defaultHeading
+    property real _roll:                _activeVehicle ? (isNaN(_activeVehicle.roll) ? _defaultRoll : _activeVehicle.roll) : _defaultRoll
+    property real _pitch:               _activeVehicle ? (isNaN(_activeVehicle.pitch) ? _defaultPitch : _activeVehicle.pitch) : _defaultPitch
+    property real _heading:             _activeVehicle ? (isNaN(_activeVehicle.heading) ? _defaultHeading : _activeVehicle.heading) : _defaultHeading
 
-    property var  _vehicleCoordinate:   _activeVehicle ? _activeVehicle.coordinate : _defaultVehicleCoordinate
+    property var  _vehicleCoordinate:   _activeVehicle ? (_activeVehicle.coordinateValid ? _activeVehicle.coordinate : _defaultVehicleCoordinate) : _defaultVehicleCoordinate
 
-    property real _altitudeWGS84:   _activeVehicle ? _activeVehicle.altitudeWGS84 : _defaultAltitudeWGS84
-    property real _groundSpeed:     _activeVehicle ? _activeVehicle.groundSpeed : _defaultGroundSpeed
-    property real _airSpeed:        _activeVehicle ? _activeVehicle.airSpeed : _defaultAirSpeed
-    property real _climbRate:       _activeVehicle ? _activeVehicle.climbRate : _defaultClimbRate
+    property real _altitudeWGS84:       _activeVehicle ? _activeVehicle.altitudeWGS84 : _defaultAltitudeWGS84
+    property real _groundSpeed:         _activeVehicle ? _activeVehicle.groundSpeed : _defaultGroundSpeed
+    property real _airSpeed:            _activeVehicle ? _activeVehicle.airSpeed : _defaultAirSpeed
+    property real _climbRate:           _activeVehicle ? _activeVehicle.climbRate : _defaultClimbRate
 
     property bool _showMap: getBool(QGroundControl.flightMapSettings.loadMapSetting(flightMap.mapName, _showMapBackgroundKey, "1"))
 
     FlightDisplayViewController { id: _controller }
-    MissionController { id: _missionController }
+
+    MissionController {
+        id: _missionController
+
+        Component.onCompleted: start(false /* editMode */)
+    }
 
     ExclusiveGroup {
         id: _dropButtonsExclusiveGroup
@@ -114,7 +118,6 @@ Item {
         QGroundControl.flightMapSettings.saveMapSetting(flightMap.mapName, _showMapBackgroundKey, setBool(_showMap))
     }
 
-
     FlightMap {
         id:             flightMap
         anchors.fill:   parent
@@ -126,6 +129,8 @@ Item {
         property var rootVehicleCoordinate: _vehicleCoordinate
         property bool rootLoadCompleted: false
 
+        property bool _followVehicle: true
+
         onRootVehicleCoordinateChanged: updateMapPosition(false /* force */)
 
         Component.onCompleted: flightMapDelayLoader.source = "FlightDisplayViewDelayLoadInner.qml"
@@ -136,26 +141,23 @@ Item {
                 flightMap.longitude = root._vehicleCoordinate.longitude
             }
         }
-
-        property bool _followVehicle: true
-
         // Home position
         MissionItemIndicator {
             label:          "H"
             coordinate:     (_activeVehicle && _activeVehicle.homePositionAvailable) ? _activeVehicle.homePosition : QtPositioning.coordinate(0, 0)
             visible:        _activeVehicle ? _activeVehicle.homePositionAvailable : false
-            z:              flightMap.zOrderMapItems
+            z:              QGroundControl.zOrderMapItems
         }
 
         // Add trajectory points to the map
         MapItemView {
             model: multiVehicleManager.activeVehicle ? multiVehicleManager.activeVehicle.trajectoryPoints : 0
-            
+
             delegate:
                 MapPolyline {
                     line.width: 3
                     line.color: "orange"
-                    z:          flightMap.zOrderMapItems - 1
+                    z:          QGroundControl.zOrderMapItems - 1
 
 
                     path: [
@@ -168,31 +170,34 @@ Item {
         // Add the vehicles to the map
         MapItemView {
             model: multiVehicleManager.vehicles
-            
+
             delegate:
                 VehicleMapItem {
                         vehicle:        object
                         coordinate:     object.coordinate
                         isSatellite:    flightMap.isSatelliteMap
-                        z:              flightMap.zOrderMapItems
+                        z:              QGroundControl.zOrderMapItems
                 }
         }
 
         // Add the mission items to the map
         MissionItemView {
             model:          _missionController.missionItems
-            zOrderMapItems: flightMap.zOrderMapItems
         }
 
         // Add lines between waypoints
         MissionLineView {
             model:          _missionController.waypointLines
-            zOrderMapItems: flightMap.zOrderMapItems
         }
 
         Loader {
             id:             flightMapDelayLoader
             anchors.fill:   parent
+        }
+
+        // Used to make pinch zoom work
+        MouseArea {
+            anchors.fill: parent
         }
     } // Flight Map
 

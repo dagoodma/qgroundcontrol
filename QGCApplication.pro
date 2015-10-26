@@ -18,7 +18,6 @@
 # -------------------------------------------------
 
 include(QGCCommon.pri)
-include(git_version.pri)
 
 TARGET = qgroundcontrol
 TEMPLATE = app
@@ -127,7 +126,9 @@ include(QGCExternalLibs.pri)
 # Main QGroundControl portion of project file
 #
 
-RESOURCES += qgroundcontrol.qrc
+RESOURCES += \
+    qgroundcontrol.qrc \
+    qgcresources.qrc
 
 DEPENDPATH += \
     . \
@@ -226,7 +227,6 @@ HEADERS += \
     src/Joystick/JoystickManager.h \
     src/LogCompressor.h \
     src/MG.h \
-    src/MissionEditor/MissionEditorController.h \
     src/MissionManager/MissionManager.h \
     src/MissionManager/MissionController.h \
     src/QGC.h \
@@ -345,7 +345,6 @@ SOURCES += \
     src/Joystick/JoystickManager.cc \
     src/LogCompressor.cc \
     src/main.cc \
-    src/MissionEditor/MissionEditorController.cc \
     src/MissionManager/MissionManager.cc \
     src/MissionManager/MissionController.cc \
     src/QGC.cc \
@@ -447,13 +446,15 @@ SOURCES += src/QmlControls/QmlTestWidget.cc
 !MobileBuild {
 
 INCLUDEPATH += \
-	src/qgcunittest
+    src/qgcunittest
 
 HEADERS += \
     src/FactSystem/FactSystemTestBase.h \
     src/FactSystem/FactSystemTestGeneric.h \
     src/FactSystem/FactSystemTestPX4.h \
     src/MissionItemTest.h \
+    src/MissionManager/MissionControllerTest.h \
+    src/MissionManager/MissionControllerManagerTest.h \
     src/MissionManager/MissionManagerTest.h \
     src/qgcunittest/FileDialogTest.h \
     src/qgcunittest/FileManagerTest.h \
@@ -474,6 +475,8 @@ SOURCES += \
     src/FactSystem/FactSystemTestGeneric.cc \
     src/FactSystem/FactSystemTestPX4.cc \
     src/MissionItemTest.cc \
+    src/MissionManager/MissionControllerTest.cc \
+    src/MissionManager/MissionControllerManagerTest.cc \
     src/MissionManager/MissionManagerTest.cc \
     src/qgcunittest/FileDialogTest.cc \
     src/qgcunittest/FileManagerTest.cc \
@@ -504,8 +507,8 @@ INCLUDEPATH += \
 HEADERS+= \
     src/AutoPilotPlugins/AutoPilotPlugin.h \
     src/AutoPilotPlugins/AutoPilotPluginManager.h \
+    src/AutoPilotPlugins/APM/APMAutoPilotPlugin.h \
     src/AutoPilotPlugins/Generic/GenericAutoPilotPlugin.h \
-    src/AutoPilotPlugins/Generic/GenericParameterFacts.h \
     src/AutoPilotPlugins/PX4/AirframeComponent.h \
     src/AutoPilotPlugins/PX4/AirframeComponentAirframes.h \
     src/AutoPilotPlugins/PX4/AirframeComponentController.h \
@@ -515,7 +518,6 @@ HEADERS+= \
     src/AutoPilotPlugins/PX4/PowerComponentController.h \
     src/AutoPilotPlugins/PX4/PX4AutoPilotPlugin.h \
     src/AutoPilotPlugins/PX4/PX4Component.h \
-    src/AutoPilotPlugins/PX4/PX4ParameterLoader.h \
     src/AutoPilotPlugins/PX4/RadioComponent.h \
     src/AutoPilotPlugins/PX4/RadioComponentController.h \
     src/AutoPilotPlugins/PX4/SafetyComponent.h \
@@ -524,11 +526,14 @@ HEADERS+= \
     src/FirmwarePlugin/FirmwarePluginManager.h \
     src/FirmwarePlugin/FirmwarePlugin.h \
     src/FirmwarePlugin/APM/APMFirmwarePlugin.h \
+    src/FirmwarePlugin/APM/APMParameterLoader.h \
     src/FirmwarePlugin/APM/ArduCopterFirmwarePlugin.h \
     src/FirmwarePlugin/APM/ArduPlaneFirmwarePlugin.h \
     src/FirmwarePlugin/APM/ArduRoverFirmwarePlugin.h \
     src/FirmwarePlugin/Generic/GenericFirmwarePlugin.h \
+    src/FirmwarePlugin/Generic/GenericParameterLoader.h \
     src/FirmwarePlugin/PX4/PX4FirmwarePlugin.h \
+    src/FirmwarePlugin/PX4/PX4ParameterLoader.h \
     src/Vehicle/MultiVehicleManager.h \
     src/Vehicle/Vehicle.h \
     src/VehicleSetup/VehicleComponent.h \
@@ -545,8 +550,8 @@ HEADERS += \
 SOURCES += \
     src/AutoPilotPlugins/AutoPilotPlugin.cc \
     src/AutoPilotPlugins/AutoPilotPluginManager.cc \
+    src/AutoPilotPlugins/APM/APMAutoPilotPlugin.cc \
     src/AutoPilotPlugins/Generic/GenericAutoPilotPlugin.cc \
-    src/AutoPilotPlugins/Generic/GenericParameterFacts.cc \
     src/AutoPilotPlugins/PX4/AirframeComponent.cc \
     src/AutoPilotPlugins/PX4/AirframeComponentAirframes.cc \
     src/AutoPilotPlugins/PX4/AirframeComponentController.cc \
@@ -556,19 +561,21 @@ SOURCES += \
     src/AutoPilotPlugins/PX4/PowerComponentController.cc \
     src/AutoPilotPlugins/PX4/PX4AutoPilotPlugin.cc \
     src/AutoPilotPlugins/PX4/PX4Component.cc \
-    src/AutoPilotPlugins/PX4/PX4ParameterLoader.cc \
     src/AutoPilotPlugins/PX4/RadioComponent.cc \
     src/AutoPilotPlugins/PX4/RadioComponentController.cc \
     src/AutoPilotPlugins/PX4/SafetyComponent.cc \
     src/AutoPilotPlugins/PX4/SensorsComponent.cc \
     src/AutoPilotPlugins/PX4/SensorsComponentController.cc \
     src/FirmwarePlugin/APM/APMFirmwarePlugin.cc \
+    src/FirmwarePlugin/APM/APMParameterLoader.cc \
     src/FirmwarePlugin/APM/ArduCopterFirmwarePlugin.cc \
     src/FirmwarePlugin/APM/ArduPlaneFirmwarePlugin.cc \
     src/FirmwarePlugin/APM/ArduRoverFirmwarePlugin.cc \
     src/FirmwarePlugin/FirmwarePluginManager.cc \
     src/FirmwarePlugin/Generic/GenericFirmwarePlugin.cc \
+    src/FirmwarePlugin/Generic/GenericParameterLoader.cc \
     src/FirmwarePlugin/PX4/PX4FirmwarePlugin.cc \
+    src/FirmwarePlugin/PX4/PX4ParameterLoader.cc \
     src/Vehicle/MultiVehicleManager.cc \
     src/Vehicle/Vehicle.cc \
     src/VehicleSetup/VehicleComponent.cc \

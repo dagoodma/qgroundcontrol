@@ -25,15 +25,14 @@ import QtQuick          2.3
 import QtQuick.Controls 1.2
 import QtPositioning    5.2
 
+import QGroundControl               1.0
 import QGroundControl.Controls      1.0
 import QGroundControl.FlightDisplay 1.0
 import QGroundControl.ScreenTools   1.0
 
 /// Qml for MainWindow
-FlightDisplayView {
+Item {
     id: _root
-
-    topMargin: toolbarLoader.height + (ScreenTools.defaultFontPixelHeight / 2)
 
     property var _toolbar: toolbarLoader.item
 
@@ -41,30 +40,31 @@ FlightDisplayView {
     readonly property string _setupViewSource:  "SetupView.qml"
 
     Connections {
+
         target: controller
 
         onShowFlyView: {
-            setupViewLoader.visible = false
-            planViewLoader.visible = false
-            _root.hideWidgets = false
+            flightView.visible          = true
+            setupViewLoader.visible     = false
+            planViewLoader.visible      = false
         }
 
         onShowPlanView: {
-            if (planViewLoader.source != _planViewSource) {
-                planViewLoader.source = _planViewSource
+            if (planViewLoader.source   != _planViewSource) {
+                planViewLoader.source   = _planViewSource
             }
-            setupViewLoader.visible = false
-            planViewLoader.visible = true
-            _root.hideWidgets = true
+            flightView.visible          = false
+            setupViewLoader.visible     = false
+            planViewLoader.visible      = true
         }
 
         onShowSetupView: {
-            if (setupViewLoader.source != _setupViewSource) {
-                setupViewLoader.source = _setupViewSource
+            if (setupViewLoader.source  != _setupViewSource) {
+                setupViewLoader.source  = _setupViewSource
             }
-            setupViewLoader.visible = true
-            planViewLoader.visible = false
-            _root.hideWidgets = true
+            flightView.visible          = false
+            setupViewLoader.visible     = true
+            planViewLoader.visible      = false
         }
 
         onShowToolbarMessage: _toolbar.showToolbarMessage(message)
@@ -82,22 +82,46 @@ FlightDisplayView {
         toolbarLoader.source = "MainToolBar.qml"
     }
 
-    Loader {
-        id:     toolbarLoader
-        width:  parent.width
-        height: item ? item.height : 0
-        z:      _root.zOrderTopMost
+    // Detect tablet position
+    property var tabletPosition: QtPositioning.coordinate(37.803784, -122.462276)
+    PositionSource {
+        id:             positionSource
+        updateInterval: 1000
+        active:         ScreenTools.isMobile
+
+        onPositionChanged: {
+            tabletPosition = positionSource.position.coordinate
+            flightView.latitude = tabletPosition.latitude
+            flightView.longitude = tabletPosition.longitude
+            positionSource.active = false
+        }
     }
 
     Loader {
-        id:             planViewLoader
-        anchors.left:   parent.left
-        anchors.right:  parent.right
-        anchors.top:    toolbarLoader.bottom
-        anchors.bottom: parent.bottom
-        visible:        false
+        id:                 toolbarLoader
+        width:              parent.width
+        height:             item ? item.height : 0
+        z:                  QGroundControl.zOrderTopMost
+    }
 
-        property real zOrder: _root.zOrderTopMost
+    FlightDisplayView {
+        id:                 flightView
+        anchors.left:       parent.left
+        anchors.right:      parent.right
+        anchors.top:        toolbarLoader.bottom
+        anchors.bottom:     parent.bottom
+        visible:            true
+    }
+
+    Loader {
+        id:                 planViewLoader
+        anchors.left:       parent.left
+        anchors.right:      parent.right
+        anchors.top:        toolbarLoader.bottom
+        anchors.bottom:     parent.bottom
+        visible:            false
+
+        property var tabletPosition:    _root.tabletPosition
     }
 
     Loader {
@@ -108,6 +132,6 @@ FlightDisplayView {
         anchors.bottom:     parent.bottom
         visible:            false
 
-        property real zOrder: _root.zOrderTopMost
+        property var tabletPosition:    _root.tabletPosition
     }
 }
