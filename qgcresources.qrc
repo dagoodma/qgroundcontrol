@@ -74,6 +74,8 @@
         <file alias="MapSync.svg">src/FlightMap/Images/MapSync.svg</file>
         <file alias="MapSyncBlack.svg">src/FlightMap/Images/MapSyncBlack.svg</file>
         <file alias="MapSyncChanged.svg">src/FlightMap/Images/MapSyncChanged.svg</file>
+        <file alias="MapPathPlanner.svg">src/FlightMap/Images/MapPathPlanner.svg</file>
+        <file alias="MapPathPlannerBlack.svg">src/FlightMap/Images/MapPathPlannerBlack.svg</file>
         <file alias="MapType.svg">src/FlightMap/Images/MapType.svg</file>
         <file alias="MapTypeBlack.svg">src/FlightMap/Images/MapTypeBlack.svg</file>
         <file alias="TrashDelete.svg">src/FlightMap/Images/TrashDelete.svg</file>

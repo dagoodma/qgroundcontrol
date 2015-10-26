@@ -552,3 +552,19 @@ QmlObjectListModel* MissionController::missionItems(void)
 {
     return _missionItems;
 }
+
+/// Use dpp::WaypointSequencePlanner to replan the active vehicle's waypoint sequence
+void MissionController::_planMissionItemSequence(double turnRadius) {
+    /*
+    dpp::WaypointList originalList;
+    // i=0 is inital position
+    for(int i = 0; i <= _missionItems->count(); i++) {
+        dpp::Waypoint w = {};
+        originalList.push_back()
+    }
+    dpp::WaypointSequencePlanner p;
+        p.initialHeading(INITIAL_HEADING_ANGLE);
+        p.turnRadius(TURN_RADIUS);
+        p.addWaypoints(waypoints);
+        */
+}
