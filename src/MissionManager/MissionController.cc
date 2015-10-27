@@ -21,6 +21,9 @@ This file is part of the QGROUNDCONTROL project
 
 ======================================================================*/
 
+//#include <dpp/basic/basic.h>
+#include <dpp/planner/WaypointSequencePlanner.h>
+
 #include "MissionController.h"
 #include "MultiVehicleManager.h"
 #include "MissionManager.h"
@@ -28,6 +31,7 @@ This file is part of the QGROUNDCONTROL project
 #include "CoordinateVector.h"
 #include "QGCMessageBox.h"
 #include "FirmwarePlugin.h"
+#include "QGCGeo.h"
 
 QGC_LOGGING_CATEGORY(MissionControllerLog, "MissionControllerLog")
 
@@ -554,17 +558,86 @@ QmlObjectListModel* MissionController::missionItems(void)
 }
 
 /// Use dpp::WaypointSequencePlanner to replan the active vehicle's waypoint sequence
-void MissionController::_planMissionItemSequence(double turnRadius) {
-    /*
+void MissionController::planMissionItemSequence(double turnRadius) {
     dpp::WaypointList originalList;
-    // i=0 is inital position
-    for(int i = 0; i <= _missionItems->count(); i++) {
-        dpp::Waypoint w = {};
-        originalList.push_back()
+
+    // FIXME, home position comes from vehicle
+    // use _missionIems.get(0)
+    _liveHomePosition = QGeoCoordinate(37.803907, -122.464062, 0.0);
+
+    qDebug() << "Runnig path planner with " << _missionItems->count()
+             << " mission items for a vehicle with turn radius of " << turnRadius << " meters.";
+
+     // Need at least 2 points, origin doesn't count
+    if (!_missionItems || _missionItems->count() < 3) {
+        return;
     }
+
+    // Convert the initial position to local coordinates and add it to the list
+    // Use home location as initial position if there's no active vehicle
+    QGeoCoordinate initialPosition(_liveHomePosition);
+    if (_activeVehicle) {
+        initialPosition = _activeVehicle->coordinate();
+    }
+
+    double x, y, z;
+    dpp::Waypoint w;
+    // FIXME add check for: _liveHomePositionAvailable
+    convertGeoToEnu(initialPosition, _liveHomePosition, &x, &y, &z);
+    w.x = x;
+    w.y = y;
+    originalList.push_back(w);
+
+    // First element is inital position, now add all mission items
+    qDebug() << "Building waypoint list: ";
+    qDebug() << "    Initial position i=0: x=" << w.x << ", y=" << w.y;
+    for(int i = 1; i < _missionItems->count(); i++) {
+        MissionItem* item =  qobject_cast<MissionItem*>(_missionItems->get(i));
+        qDebug() << "    Adding mission item " << i << ": " << item
+                 << " lat=" << item->latitude() << ", lon=" << item->longitude();
+
+        convertGeoToEnu(item->coordinate(), _liveHomePosition, &x, &y, &z);
+        w.x = x;
+        w.y = y;
+        originalList.push_back(w);
+        qDebug() << "    converted to i=" << (i) <<": x=" << w.x << ", y=" << w.y;
+    }
+
+    // Construct the planner, and solve for the best sequence
     dpp::WaypointSequencePlanner p;
-        p.initialHeading(INITIAL_HEADING_ANGLE);
-        p.turnRadius(TURN_RADIUS);
-        p.addWaypoints(waypoints);
-        */
+    p.initialHeading(0.0); // FIXME get initial heading from vehicle
+    p.turnRadius(turnRadius);
+    p.addWaypoints(originalList);
+    p.planWaypointSequence();
+
+    // Rebuild the mission item list with the solution
+    QmlObjectListModel* newMissionItems = new QmlObjectListModel(this);
+    newMissionItems->append(_missionItems->get(0));
+
+    std::vector<int> newSequenceList = p.newWaypointSequenceList();
+    double cost = p.cost();
+
+    std::cout << "Solved " << p.waypointCount() << " point tour with cost " << cost << "." << std::endl;
+    std::cout << "New waypoint order: { ";
+    bool first = true;
+    for (const auto& i : newSequenceList) {
+        if (!first) std::cout << ", ";
+        std::cout << i;
+        // Skip the initial position
+        if (!first) {
+            newMissionItems->append(_missionItems->get(i));
+        }
+        first = false;
+    }
+    std::cout << " }" << std::endl;
+
+    // Overwrite old mission item list
+    /*
+    if (_missionItems) {
+        _deinitAllMissionItems();
+        _missionItems->deleteLater();
+    }
+    */
+    _missionItems = newMissionItems; //new QmlObjectListModel(this);
+    _recalcAll();
 }

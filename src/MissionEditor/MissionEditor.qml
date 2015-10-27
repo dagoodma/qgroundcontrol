@@ -688,7 +688,7 @@ QGCView {
                     id:             pathPlannerManager
                     anchors.top:    parent.top
                     anchors.bottom: parent.bottom
-                    anchors.right:  parent.right
+                    anchors.left:  helpButton.right
                     width:          _rightPanelWidth
                     visible:        mapPathPlannerButton.checked
                     color:          qgcPal.window
@@ -797,7 +797,9 @@ QGCView {
                                 text: "Plan Path"
 
                                 onClicked: {
-                                    Console.log("TODO connect to DPP library")
+                                    console.log("TODO connect to DPP library")
+                                    controller.planMissionItemSequence(_pathPlannerTurnRadius)
+                                    _missionItems = controller.missionItems
                                 }
                             }
 

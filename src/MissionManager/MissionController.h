@@ -56,6 +56,8 @@ public:
     Q_INVOKABLE void removeMissionItem(int index);
     Q_INVOKABLE void deleteCurrentMissionItem(void);
 
+    Q_INVOKABLE void planMissionItemSequence(double turnRadius);
+
     // Property accessors
 
     QmlObjectListModel* missionItems(void);
@@ -96,7 +98,6 @@ private:
     void _autoSyncSend(void);
     void _setupMissionItems(bool loadFromVehicle, bool forceLoad);
     void _setupActiveVehicle(Vehicle* activeVehicle, bool forceLoadFromVehicle);
-    void _planMissionItemSequence(double turnRadius);
 
 private:
     bool                _editMode;

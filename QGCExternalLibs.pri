@@ -293,3 +293,48 @@ contains (DEFINES, DISABLE_ZEROCONF) {
     message("Skipping support for Zeroconf (unsupported platform)")
 }
 
+#
+# [OPTIONAL] Dubins Path Planner
+# TODO write about dependcies and enable flags
+#
+#INCLUDEPATH += \
+#    libs/thirdParty/dpp
+
+#DPP_DEPENDENT_HEADERS += \
+#    src/comm/XbeeLinkInterface.h \
+#    src/comm/XbeeLink.h \
+#    src/comm/HexSpinBox.h \
+#    src/ui/XbeeConfigurationWindow.h \
+#    src/comm/CallConv.h
+DPP_DEFINES = QGC_DPP_ENABLED
+
+contains(DEFINES, DISABLE_DPP) {
+    message("Skipping support for Dubins Path Planner (manual override from command line")
+    DEFINES -= DISABLE_DPP
+# Otherwise the user can still disable this feature in the user_config.pri file.
+} else:exists(user_config.pri):infile(user_config.pri, DEFINES, DISABLE_DPP) {
+    message("Skipping support for Dubins Path Planner (manual override from user_config.pri)")
+} else:WindowsBuild {
+    message("Skipping support for Dubins Path Planner (Windows not yet supported)")
+} else:LinuxBuild {
+    message("Skipping support for Dubins Path Planner (Linux not yet supported)")
+} else:MacBuild {
+    message("Including support for Dubins Path Planner")
+    HEADERS += \
+        $$DPP_DEPENDENT_HEADERS \
+
+    DEFINES += $$DPP_DEFINES
+
+    CONFIG += c++11
+    QMAKE_CXXFLAGS += -std=c++11 -stdlib=libstdc++
+
+    INCLUDEPATH += \
+        $$BASEDIR/libs/thirdParty/dpp/include \
+
+    LIBS += \
+        -L$$BASEDIR/libs/thirdParty/dpp/ \
+        -lOGDF -lCOIN -lDPP
+} else {
+    message("Skipping support for Dubins Path Planner (unsupported platform)")
+}
+
