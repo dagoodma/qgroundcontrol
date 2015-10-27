@@ -583,7 +583,7 @@ void MissionController::planMissionItemSequence(double turnRadius) {
     double x, y, z;
     dpp::Waypoint w;
     // FIXME add check for: _liveHomePositionAvailable
-    convertGeoToEnu(initialPosition, _liveHomePosition, &x, &y, &z);
+    convertGeoToNed(initialPosition, _liveHomePosition, &x, &y, &z);
     w.x = x;
     w.y = y;
     originalList.push_back(w);
@@ -596,7 +596,7 @@ void MissionController::planMissionItemSequence(double turnRadius) {
         qDebug() << "    Adding mission item " << i << ": " << item
                  << " lat=" << item->latitude() << ", lon=" << item->longitude();
 
-        convertGeoToEnu(item->coordinate(), _liveHomePosition, &x, &y, &z);
+        convertGeoToNed(item->coordinate(), _liveHomePosition, &x, &y, &z);
         w.x = x;
         w.y = y;
         originalList.push_back(w);
