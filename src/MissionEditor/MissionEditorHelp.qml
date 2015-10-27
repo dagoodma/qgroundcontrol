@@ -190,10 +190,33 @@ Rectangle {
                                 "Options for saving/loading mission items."
         }
 
+		Image {
+			id:                 mapPathPlannerHelpIcon
+			anchors.topMargin:  ScreenTools.defaultFontPixelHeight
+			anchors.top:        syncHelpText.bottom
+			width:              ScreenTools.defaultFontPixelHeight * 3
+			fillMode:           Image.PreserveAspectFit
+			mipmap:             true
+			smooth:             true
+			source:             (qgcPal.globalTheme === QGCPalette.Light) ? "/qmlimages/MapPathPlannerBlack.svg" : "/qmlimages/MapPathPlanner.svg"
+		}
+
+		QGCLabel {
+			id:                 mapPathPlannerHelpText
+			anchors.leftMargin: ScreenTools.defaultFontPixelHeight
+			anchors.left:       mapPathPlannerHelpIcon.right
+			anchors.right:      parent.right
+			anchors.top:        mapPathPlannerHelpIcon.top
+			wrapMode:           Text.WordWrap
+			text:               "<b>Path Planner</b><br>" +
+								"Reorders the mission items to minimize path length."
+		}
+
+
         Image {
             id:                 mapTypeHelpIcon
             anchors.topMargin:  ScreenTools.defaultFontPixelHeight
-            anchors.top:        syncHelpText.bottom
+            anchors.top:        mapPathPlannerHelpText.bottom
             width:              ScreenTools.defaultFontPixelHeight * 3
             fillMode:           Image.PreserveAspectFit
             mipmap:             true

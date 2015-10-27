@@ -69,14 +69,14 @@ QGCView {
     property var    liveHomePositionAvailable:  controller.liveHomePositionAvailable
     property var    homePosition:               _defaultVehicleCoordinate
 
-    property bool _syncNeeded:                  controller.missionItems.dirty
-    property bool _syncInProgress:              _activeVehicle ? _activeVehicle.missionManager.inProgress : false
-
-    property var _mapPathPlannerManager:        QGroundControl.mapPathPlannerManager
+    //property var _mapPathPlannerManager:        QGroundControl.mapPathPlannerManager
     property real _pathPlannerTurnRadius:       10 // [m]
     property real _pathPlannerSensorWidth:      35 // [m]
     property bool _pathPlannerReturnToInitial:  true
     //property var _pathPlannerAlgorithm:
+
+    property bool _syncNeeded:                  controller.missionItems.dirty
+    property bool _syncInProgress:              _activeVehicle ? _activeVehicle.missionManager.inProgress : false
 
     property bool _showHelp:                    QGroundControl.flightMapSettings.loadBoolMapSetting(editorMap.mapName, _showHelpKey, true)
 
@@ -84,6 +84,7 @@ QGCView {
 
     Component.onCompleted: {
         helpPanel.source = "MissionEditorHelp.qml"
+        pathPlannerPanel.source = "MissionEditorPathPlanner.qml"
         updateMapToVehiclePosition()
     }
 
@@ -686,128 +687,14 @@ QGCView {
                 } // Item - Home Position Manager
                 */
 
-				// Path Planner Manager
-                Rectangle {
-                    id:             pathPlannerManager
+				//-- Path Planner Panel
+                Loader {
+                    id:             pathPlannerPanel
                     anchors.top:    parent.top
                     anchors.bottom: parent.bottom
-                    anchors.right:  parent.right
+                    anchors.left:   addMissionItemsButton.right
                     width:          _rightPanelWidth
-                    visible:        mapPathPlannerButton.checked
-                    color:          qgcPal.window
-                    opacity:        _rightPanelOpacity
-                    z:              editorMap.zOrderTopMost
-
-                    Column {
-                        anchors.margins:    _margin
-                        anchors.fill:       parent
-                        visible:            true
-                        //visible:            !liveHomePositionAvailable
-
-                        QGCLabel {
-                            font.pixelSize: ScreenTools.mediumFontPixelSize
-                            text:           "Path Planner Manager"
-                        }
-
-                        Item {
-                            width: 10
-                            height: ScreenTools.defaultFontPixelHeight
-                        }
-
-                        QGCLabel {
-                            width:      parent.width
-                            wrapMode:   Text.WordWrap
-                            text:       "This is used to plan an efficient path by reordering all mission items for the active vehicle."
-                        }
-
-                        Item {
-                            width: 10
-                            height: ScreenTools.defaultFontPixelHeight
-                        }
-
-                        Item {
-                            width:  parent.width
-                            height: turnRadiusField.height
-
-                            QGCLabel {
-                                anchors.baseline:   turnRadiusField.baseline
-                                text:               "Turn radius:"
-                            }
-
-                            QGCTextField {
-                                id:             turnRadiusField
-                                anchors.right:  parent.right
-                                width:          _editFieldWidth
-                                text:           _pathPlannerTurnRadius
-                            }
-                        }
-
-                        Item {
-                            width: 10
-                            height: ScreenTools.defaultFontPixelHeight / 3
-                        }
-
-                        Item {
-                            width:  parent.width
-                            height: sensorWidthField.height
-
-                            QGCLabel {
-                                anchors.baseline:   sensorWidthField.baseline
-                                text:               "Sensor width:"
-                            }
-
-                            QGCTextField {
-                                id:             sensorWidthField
-                                anchors.right:  parent.right
-                                width:          _editFieldWidth
-                                text:           _pathPlannerSensorWidth
-                            }
-                        }
-
-                        Item {
-                            width: 10
-                            height: ScreenTools.defaultFontPixelHeight / 3
-                        }
-
-                        Item {
-                            width:  parent.width
-                            height: returnToInitialField.height
-
-                            QGCLabel {
-                                id:                 returnToInitialLabel
-                                anchors.baseline:   returnToInitialField.baseline
-                                text:               "Return to current position: "
-                            }
-
-                            CheckBox {
-                                id:             returnToInitialField
-                                anchors.left:   returnToInitialLabel.right
-                                anchors.leftMargin: 5
-                                checked:        _pathPlannerReturnToInitial
-                            }
-                        }
-
-
-                        Item {
-                            width: 10
-                            height: ScreenTools.defaultFontPixelHeight / 3
-                        }
-
-                        Row {
-                            spacing: ScreenTools.defaultFontPixelWidth
-
-                            QGCButton {
-                                text: "Plan Path"
-
-                                onClicked: {
-                                    Console.log("TODO connect to DPP library")
-                                }
-                            }
-
-                        }
-                    } // Column - Offline view
-                    // FIXME add online view
-                } // Item - Path Planner Manager
+                }
 
                 //-- Help Panel
                 Loader {

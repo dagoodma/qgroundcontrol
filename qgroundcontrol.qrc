@@ -78,6 +78,7 @@
         <file alias="FlightDisplayWidget.qml">src/FlightDisplay/FlightDisplayWidget.qml</file>
         <file alias="MissionEditor.qml">src/MissionEditor/MissionEditor.qml</file>
         <file alias="MissionEditorHelp.qml">src/MissionEditor/MissionEditorHelp.qml</file>
+        <file alias="MissionEditorPathPlanner.qml">src/MissionEditor/MissionEditorPathPlanner.qml</file>
 
         <!-- FlightDisplay module -->
         <file alias="QGroundControl/FlightDisplay/qmldir">src/FlightDisplay/qmldir</file>
