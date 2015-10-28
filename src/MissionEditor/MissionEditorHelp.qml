@@ -98,9 +98,31 @@ Rectangle {
         }
 
         Image {
+			id:                 drawCoverageAreaHelpIcon
+			anchors.topMargin:  ScreenTools.defaultFontPixelHeight
+			anchors.top:        addMissionItemsHelpText.bottom
+			width:              ScreenTools.defaultFontPixelHeight * 3
+			fillMode:           Image.PreserveAspectFit
+			mipmap:             true
+			smooth:             true
+			source:             (qgcPal.globalTheme === QGCPalette.Light) ? "/qmlimages/MapDrawCoverageAreaBlack.svg" : "/qmlimages/MapDrawCoverageArea.svg"
+		}
+
+		QGCLabel {
+			id:                 drawCoverageAreaHelpText
+			anchors.leftMargin: ScreenTools.defaultFontPixelHeight
+			anchors.left:       mapTypeHelpIcon.right
+			anchors.right:      parent.right
+			anchors.top:        drawCoverageAreaHelpIcon.top
+			wrapMode:           Text.WordWrap
+			text:               "<b>Draw Coverage Area</b><br>" +
+								"When enabled, draw a polygon by clicking to add vertices on the map. When finished, press the <b>Enter</b> key, then click the Path Planner button, and press <b>Plan Path</b> to find waypoints that efficiently cover the region."
+		}
+
+        Image {
             id:                 deleteHelpIcon
             anchors.topMargin:  ScreenTools.defaultFontPixelHeight
-            anchors.top:        addMissionItemsHelpText.bottom
+            anchors.top:        drawCoverageAreaHelpText.bottom
             width:              ScreenTools.defaultFontPixelHeight * 3
             fillMode:           Image.PreserveAspectFit
             mipmap:             true

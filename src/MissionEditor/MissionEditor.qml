@@ -50,10 +50,11 @@ QGCView {
     readonly property real      _editFieldWidth:    ScreenTools.defaultFontPixelWidth * 16
     readonly property real      _rightPanelWidth:   ScreenTools.defaultFontPixelWidth * 30
     readonly property real      _rightPanelOpacity: 0.8
-    readonly property int       _toolButtonCount:   6
+    readonly property int       _toolButtonCount:   8
     readonly property string    _autoSyncKey:       "AutoSync"
     readonly property string    _showHelpKey:       "ShowHelp"
     readonly property int       _addMissionItemsButtonAutoOffTimeout:   10000
+    readonly property int       _drawCoverageAreaButtonAutoOffTimeout:   10000
     readonly property var       _defaultVehicleCoordinate:   QtPositioning.coordinate(37.803784, -122.462276)
 
     property var    _missionItems:  controller.missionItems
@@ -72,8 +73,10 @@ QGCView {
     //property var _mapPathPlannerManager:        QGroundControl.mapPathPlannerManager
     property real _pathPlannerTurnRadius:       10 // [m]
     property real _pathPlannerSensorWidth:      35 // [m]
-    property bool _pathPlannerReturnToInitial:  true
-    //property var _pathPlannerAlgorithm:
+    property bool _pathPlannerReturnToInitial:  true // FIXME pass this to the planner
+    property bool _pathPlannerHomeAsInitial:	!_activeVehicle // FIXME add onActiveVehicleChanged
+    //property var _pathPlannerAlgorithm: // FIXME add algorithm choice
+    property bool _pathPlannerWantsCoverage:    false
 
     property bool _syncNeeded:                  controller.missionItems.dirty
     property bool _syncInProgress:              _activeVehicle ? _activeVehicle.missionManager.inProgress : false
@@ -81,6 +84,10 @@ QGCView {
     property bool _showHelp:                    QGroundControl.flightMapSettings.loadBoolMapSetting(editorMap.mapName, _showHelpKey, true)
 
     onGpsLockChanged:       updateMapToVehiclePosition()
+
+
+    // FIXME get keys working
+    //Keys.onPressed: console.log("Key Press Detected")
 
     Component.onCompleted: {
         helpPanel.source = "MissionEditorHelp.qml"
@@ -95,6 +102,43 @@ QGCView {
             editorMap.longitude = _activeVehicle.longitude
         }
     }
+
+    function finalizeCoveragePolygon() {
+        var result = false
+        _pathPlannerWantsCoverage = false
+        controller.clearCoveragePolygon();
+
+        // Add each vertex into
+        for (var index = 0; index < coverageAreaPolygon.path.length; ++index) {
+            var v = coverageAreaPolygon.path[index]
+            console.log("Adding vertex: " + v)
+            controller.addCoveragePolygonVertex(v["latitude"], v["longitude"])
+        }
+        
+        if (controller.hasValidCoveragePolygon()) {
+            _pathPlannerWantsCoverage = true
+        }
+        else {
+            controller.clearCoveragePolygon();
+        }
+
+        return _pathPlannerWantsCoverage
+    }
+
+    function clearCoveragePolygon() {
+        console.log("Removing " + coverageAreaPolygon.path.length + " vertices in polygon.")
+        var path = coverageAreaPolygon.path
+        path = [ ]
+        coverageAreaPolygon.path = path
+        coverageAreaPolygon.path.length = 0
+        controller.clearCoveragePolygon()
+        _pathPlannerWantsCoverage = false
+
+        // FIXME get polygon to update after modifying the path
+        coverageAreaPolygon.update()
+        coverageAreaPolygon.updateMapItem()
+    }
+
 
     MissionController {
         id:         controller
@@ -178,10 +222,24 @@ QGCView {
                             var index = controller.addMissionItem(coordinate)
                             addMissionItemsButtonAutoOffTimer.start()
                             setCurrentItem(index)
+						} else if (drawCoverageAreaButton.checked) {
+							coverageAreaPolygon.addCoordinate(coordinate)
+							drawCoverageAreaButtonAutoOffTimer.start()
                         } else {
                             editorMap.zoomLevel = editorMap.maxZoomLevel - 2
                         }
                     }
+					
+                    // FIXME get key presses ggoing
+					//Keys.onPressed: { if (event.key == Qt.Key_Enter) console.log("Got enter"); console.log(event.key); }
+                }
+
+                MapPolygon {
+                    id: coverageAreaPolygon
+                    visible: drawCoverageAreaButton.checked || _pathPlannerWantsCoverage
+                    color: 'green'
+
+                    onPathChanged: update()
                 }
 
                 // We use this item to support dragging since dragging a MapQuickItem just doesn't seem to work
@@ -410,6 +468,62 @@ QGCView {
                                         "You will only be able to save these to a file, or send them to a vehicle."
                     }
                 } // Item - Mission Item editor
+
+                // Coverage Polygon Editor
+
+                // Add coverage polygon
+                //MissionLineView {
+                //    model:          _pathPlannerCoveragePolygon
+                //}
+                /*
+                Item {
+                    id:             coveragePolygonEditor
+                    anchors.top:    parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right:  parent.right
+                    width:          _rightPanelWidth
+                    visible:        drawCoverageAreaButton.checked
+                    opacity:        _rightPanelOpacity
+                    z:              QGroundControl.zOrderTopMost
+
+                    ListView {
+                        id:             missionItemSummaryList
+                        anchors.fill:   parent
+                        spacing:        _margin / 2
+                        orientation:    ListView.Vertical
+                        model:          controller.coveragePolygon
+
+                        property real _maxItemHeight: 0
+
+                        delegate:
+                            CoveragePolygonEditor {
+                            polygonVertex:  object
+                            width:          parent.width
+                            visible:        true
+
+                            onClicked:  setCurrentItem(object.sequenceNumber)
+
+                            onRemove: {
+                                var newCurrentItem = object.sequenceNumber - 1
+                                controller.removeMissionItem(object.sequenceNumber)
+                                if (_missionItems.count > 1) {
+                                    newCurrentItem = Math.min(_missionItems.count - 1, newCurrentItem)
+                                    setCurrentItem(newCurrentItem)
+                                }
+                            }
+                        }
+                    } // ListView
+
+                    QGCLabel {
+                        anchors.fill:   parent
+                        visible:        !controller.canEdit
+                        wrapMode:       Text.WordWrap
+                        text:           "The set of mission items you have loaded cannot be edited by QGroundControl. " +
+                                        "You will only be able to save these to a file, or send them to a vehicle."
+                    }
+                } // Item - Coverage Polygon editor
+                */
+			    
 
                 /*
                   Home Position Manager temporarily disbled till more work is done on it
@@ -733,11 +847,45 @@ QGCView {
                     }
                 }
 
+				RoundButton {
+					id:                 drawCoverageAreaButton
+					anchors.margins:    _margin
+					anchors.left:       parent.left
+					anchors.top:        addMissionItemsButton.bottom
+					buttonImage:        "/qmlimages/MapDrawCoverageArea.svg"
+					exclusiveGroup:     _dropButtonsExclusiveGroup
+					z:                  editorMap.zOrderWidgets
+
+					onCheckedChanged: {
+						if (checked) {
+							drawCoverageAreaButtonAutoOffTimer.start()
+						} else {
+							drawCoverageAreaButtonAutoOffTimer.stop()
+    
+                            // Finalize the polygon if path planner was clicked
+                            if (mapPathPlannerButton.checked) {
+                                if (!finalizeCoveragePolygon()) { clearCoveragePolygon(); }
+                            }
+                            else {
+                                clearCoveragePolygon();
+                            }
+                        }
+                        //console.log(Object.getOwnPropertyNames(coverageAreaPolygon));
+					}
+
+					Timer {
+						id:         drawCoverageAreaButtonAutoOffTimer
+						interval:   _drawCoverageAreaButtonAutoOffTimeout
+						repeat:     false
+						onTriggered: drawCoverageAreaButton.checked = false
+					}
+				}
+
                 RoundButton {
                     id:                 deleteMissionItemButton
                     anchors.margins:    _margin
                     anchors.left:       parent.left
-                    anchors.top:        addMissionItemsButton.bottom
+                    anchors.top:        drawCoverageAreaButton.bottom
                     buttonImage:        "/qmlimages/TrashDelete.svg"
                     exclusiveGroup:     _dropButtonsExclusiveGroup
                     z:                  QGroundControl.zOrderWidgets
@@ -829,6 +977,7 @@ QGCView {
                     buttonImage:        "/qmlimages/MapPathPlanner.svg"
                     exclusiveGroup:     _dropButtonsExclusiveGroup
                     z:                  editorMap.zOrderWidgets
+                    onCheckedChanged:   { _pathPlannerWantsCoverage = false }
                 }
 
                 DropButton {

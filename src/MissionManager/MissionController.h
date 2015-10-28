@@ -25,6 +25,8 @@ This file is part of the QGROUNDCONTROL project
 #define MissionController_H
 
 #include <QObject>
+#include <QLocation>
+#include <QPolygon>
 
 #include "QmlObjectListModel.h"
 #include "Vehicle.h"
@@ -57,6 +59,10 @@ public:
     Q_INVOKABLE void deleteCurrentMissionItem(void);
 
     Q_INVOKABLE void planMissionItemSequence(double turnRadius);
+    Q_INVOKABLE void planCoverageArea(double turnRadius, double sensorWidth);
+    Q_INVOKABLE void addCoveragePolygonVertex(double lat, double lon);
+    Q_INVOKABLE bool hasValidCoveragePolygon(void);
+    Q_INVOKABLE void clearCoveragePolygon(void);
 
     // Property accessors
 
@@ -111,6 +117,7 @@ private:
     bool                _firstItemsFromVehicle;
     bool                _missionItemsRequested;
     bool                _queuedSend;
+    QList<QVector2D>    _coveragePolygonVertices;
 
     static const char* _settingsGroup;
 };

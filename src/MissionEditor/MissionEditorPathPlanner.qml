@@ -34,7 +34,7 @@ Rectangle {
     visible:        mapPathPlannerButton.checked
     color:          qgcPal.window
     opacity:        _rightPanelOpacity
-    z:              editorMap.zOrderTopMost
+    z:              QGroundControl.zOrderTopMost
 
     Column {
         anchors.margins:    _margin
@@ -52,9 +52,11 @@ Rectangle {
         }
 
         QGCLabel {
+            id:         mapPathPlannerPanelLabel
             width:      parent.width
             wrapMode:   Text.WordWrap
-            text:       "This is used to plan an efficient path by reordering all mission items for the active vehicle."
+            // FIXME update text when the flag is changed
+            text: !_pathPlannerWantsCoverage ? "This is used to plan an efficient path by reordering all mission items for the active vehicle." : "This will plan an efficient path to cover the designated polygon."
         }
 
         Item {
@@ -73,9 +75,18 @@ Rectangle {
 
             QGCTextField {
                 id:             turnRadiusField
+                showUnits:		true
+                unitsLabel:		"[m]"
                 anchors.right:  parent.right
                 width:          _editFieldWidth
                 text:           _pathPlannerTurnRadius
+
+                Keys.onPressed: {
+                        if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
+                            console.log("Turn radius changed to " + Number(turnRadiusField.text))
+                            _pathPlannerTurnRadius = Number(turnRadiusField.text)
+                        }
+                }
             }
         }
 
@@ -87,6 +98,7 @@ Rectangle {
         Item {
             width:  parent.width
             height: sensorWidthField.height
+            enabled: _pathPlannerWantsCoverage
 
             QGCLabel {
                 anchors.baseline:   sensorWidthField.baseline
@@ -95,9 +107,50 @@ Rectangle {
 
             QGCTextField {
                 id:             sensorWidthField
+                showUnits:		true
+                unitsLabel:		"[m]"
                 anchors.right:  parent.right
                 width:          _editFieldWidth
                 text:           _pathPlannerSensorWidth
+
+                Keys.onPressed: {
+                        if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
+                            console.log("Sensor width changed to " + Number(sensorWidthField.text))
+                            _pathPlannerSensorWidth = Number(sensorWidthField.text)
+                        }
+                }
+            }
+        }
+        // FIXME add algorithm option
+
+        Item {
+            width: 10
+            height: ScreenTools.defaultFontPixelHeight / 3
+        }
+
+
+        Item {
+            width: parent.width
+            height: homeAsInitialPositionLabel.height
+            enabled: _activeVehicle
+
+            QGCLabel {
+                id:                 homeAsInitialPositionLabel
+                //anchors.baseline:   homeAsInitialPositionField.baseline
+                width: 				parent.width
+                text:   "Use the home as the initial position when planning. If this " +
+                        "is unchecked, the active vehicle's current position will be " +
+                        "used instead."
+                wrapMode: Text.WordWrap
+            }
+
+            CheckBox {
+                id:             homeAsInitialPositionField
+                anchors.left:   homeAsInitialPositionLabel.right
+                anchors.baseline: homeAsInitialPositionLabel.bottom
+                ///anchors.bottom: homeAsInitialPositionLabel.bottom
+                anchors.leftMargin: -55 // FIXME anchor to end of last line of text
+                checked:        _pathPlannerHomeAsInitial
             }
         }
 
@@ -105,8 +158,8 @@ Rectangle {
             width: 10
             height: ScreenTools.defaultFontPixelHeight / 3
         }
-
         /*
+          // FIXME add return to initial option
         Item {
             width:  parent.width
             height: returnToInitialField.height
@@ -138,8 +191,18 @@ Rectangle {
                 text: "Plan Path"
 
                 onClicked: {
-                    controller.planMissionItemSequence(_pathPlannerTurnRadius)
-                    _missionItems = controller.missionItems
+                    if (!_pathPlannerWantsCoverage) {
+                        controller.planMissionItemSequence(_pathPlannerTurnRadius)
+                        _missionItems = controller.missionItems
+                    }
+                    else if (controller.hasValidCoveragePolygon()) {
+                        controller.planCoverageArea( _pathPlannerTurnRadius, _pathPlannerSensorWidth)
+                        _missionItems = controller.missionItems
+                        // Remove the polygon
+                        // FIXME not sure if this behavior is correct
+                        _pathPlannerWantsCoverage = false
+                        clearCoveragePolygon()
+                    }
                 }
             }
 

@@ -67,6 +67,8 @@
         <file alias="HelpBlack.svg">src/FlightMap/Images/HelpBlack.svg</file>
         <file alias="MapAddMission.svg">src/FlightMap/Images/MapAddMission.svg</file>
         <file alias="MapAddMissionBlack.svg">src/FlightMap/Images/MapAddMissionBlack.svg</file>
+        <file alias="MapDrawCoverageArea.svg">src/FlightMap/Images/MapDrawCoverageArea.svg</file>
+        <file alias="MapDrawCoverageAreaBlack.svg">src/FlightMap/Images/MapDrawCoverageAreaBlack.svg</file>
         <file alias="MapCenter.svg">src/FlightMap/Images/MapCenter.svg</file>
         <file alias="MapCenterBlack.svg">src/FlightMap/Images/MapCenterBlack.svg</file>
         <file alias="MapHome.svg">src/FlightMap/Images/MapHome.svg</file>
