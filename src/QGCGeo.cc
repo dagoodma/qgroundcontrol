@@ -31,15 +31,11 @@
 
 #define M_RAD_TO_DEG (180.0 / M_PI)
 
-#define CONSTANTS_ONE_G					9.80665f		/* m/s^2		*/
-#define CONSTANTS_AIR_DENSITY_SEA_LEVEL_15C		1.225f			/* kg/m^3		*/
-#define CONSTANTS_AIR_GAS_CONST				287.1f 			/* J/(kg * K)		*/
-#define CONSTANTS_ABSOLUTE_NULL_CELSIUS			-273.15f		/* °C			*/
-#define CONSTANTS_RADIUS_OF_EARTH			6371000			/* meters (m)		*/
+#define RADIUS_OF_EARTH			6371000			/* meters (m)		*/
 
 static const float epsilon = std::numeric_limits<double>::epsilon();
 
-void convertGeoToNed(QGeoCoordinate coord, QGeoCoordinate origin, double* x, double* y, double* z) {
+void convertGeoToNed(QGeoCoordinate coord, QGeoCoordinate origin, double* n, double* e, double* d) {
 
     double lat_rad = coord.latitude() * M_DEG_TO_RAD;
     double lon_rad = coord.longitude() * M_DEG_TO_RAD;
@@ -57,16 +53,16 @@ void convertGeoToNed(QGeoCoordinate coord, QGeoCoordinate origin, double* x, dou
     double c = acos(ref_sin_lat * sin_lat + ref_cos_lat * cos_lat * cos_d_lon);
     double k = (fabs(c) < epsilon) ? 1.0 : (c / sin(c));
 
-    *x = k * (ref_cos_lat * sin_lat - ref_sin_lat * cos_lat * cos_d_lon) * CONSTANTS_RADIUS_OF_EARTH;
-    *y = k * cos_lat * sin(lon_rad - ref_lon_rad) * CONSTANTS_RADIUS_OF_EARTH;
+    *n = k * (ref_cos_lat * sin_lat - ref_sin_lat * cos_lat * cos_d_lon) * RADIUS_OF_EARTH;
+    *e = k * cos_lat * sin(lon_rad - ref_lon_rad) * RADIUS_OF_EARTH;
 
-    *z = -(coord.altitude() - origin.altitude());
+    *d = -(coord.altitude() - origin.altitude());
 }
 
-void convertNedToGeo(double x, double y, double z, QGeoCoordinate origin, QGeoCoordinate *coord) {
-    double x_rad = x / CONSTANTS_RADIUS_OF_EARTH;
-    double y_rad = y / CONSTANTS_RADIUS_OF_EARTH;
-    double c = sqrtf(x_rad * x_rad + y_rad * y_rad);
+void convertNedToGeo(double n, double e, double d, QGeoCoordinate origin, QGeoCoordinate *coord) {
+    double n_rad = n / RADIUS_OF_EARTH;
+    double e_rad = e / RADIUS_OF_EARTH;
+    double c = sqrtf(n_rad * n_rad + e_rad * e_rad);
     double sin_c = sin(c);
     double cos_c = cos(c);
 
@@ -80,8 +76,8 @@ void convertNedToGeo(double x, double y, double z, QGeoCoordinate origin, QGeoCo
     double lon_rad;
 
     if (fabs(c) > epsilon) {
-        lat_rad = asin(cos_c * ref_sin_lat + (x_rad * sin_c * ref_cos_lat) / c);
-        lon_rad = (ref_lon_rad + atan2(y_rad * sin_c, c * ref_cos_lat * cos_c - x_rad * ref_sin_lat * sin_c));
+        lat_rad = asin(cos_c * ref_sin_lat + (n_rad * sin_c * ref_cos_lat) / c);
+        lon_rad = (ref_lon_rad + atan2(e_rad * sin_c, c * ref_cos_lat * cos_c - n_rad * ref_sin_lat * sin_c));
 
     } else {
         lat_rad = ref_lat_rad;
@@ -91,6 +87,6 @@ void convertNedToGeo(double x, double y, double z, QGeoCoordinate origin, QGeoCo
     coord->setLatitude(lat_rad * M_RAD_TO_DEG);
     coord->setLongitude(lon_rad * M_RAD_TO_DEG);
 
-    coord->setAltitude(-z + origin.altitude());
+    coord->setAltitude(-d + origin.altitude());
 }
 

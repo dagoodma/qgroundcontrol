@@ -43,20 +43,20 @@
  * North, and Down components in meters.
  * @param[in] coord Geodetic coordinate to project onto LTP.
  * @param[in] origin Geoedetic origin for LTP projection.
- * @param[out] x North component of coordinate in local plane.
- * @param[out] y East component of coordinate in local plane.
- * @param[out] z Down component of coordinate in local plane.
+ * @param[out] n North component of coordinate in local plane.
+ * @param[out] e East component of coordinate in local plane.
+ * @param[out] d Down component of coordinate in local plane.
  */
-void convertGeoToNed(QGeoCoordinate coord, QGeoCoordinate origin, double* x, double* y, double* z);
+void convertGeoToNed(QGeoCoordinate coord, QGeoCoordinate origin, double* n, double* e, double* d);
 
 /**
  * @brief Transform a local (East, North, and Down) coordinate into a geodetic coordinate.
- * @param[in] x North component of local coordinate in meters.
- * @param[in] x East component of local coordinate in meters.
- * @param[in] x Down component of local coordinate in meters.
+ * @param[in] n North component of local coordinate in meters.
+ * @param[in] e East component of local coordinate in meters.
+ * @param[in] d Down component of local coordinate in meters.
  * @param[in] origin Geoedetic origin for LTP.
  * @param[out] coord Geodetic coordinate to hold result.
  */
-void convertNedToGeo(double x, double y, double z, QGeoCoordinate origin, QGeoCoordinate *coord);
+void convertNedToGeo(double n, double e, double d, QGeoCoordinate origin, QGeoCoordinate *coord);
 
 #endif // QGCGEO_H
