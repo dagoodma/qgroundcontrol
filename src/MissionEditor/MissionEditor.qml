@@ -54,8 +54,9 @@ QGCView {
     readonly property string    _autoSyncKey:       "AutoSync"
     readonly property string    _showHelpKey:       "ShowHelp"
     readonly property int       _addMissionItemsButtonAutoOffTimeout:   10000
-    readonly property int       _drawCoverageAreaButtonAutoOffTimeout:   10000
-    readonly property var       _defaultVehicleCoordinate:   QtPositioning.coordinate(37.803784, -122.462276)
+    readonly property int       _drawCoverageAreaButtonAutoOffTimeout:   20000
+    //readonly property var       _defaultVehicleCoordinate:   QtPositioning.coordinate(37.803784, -122.462276)
+    readonly property var       _defaultVehicleCoordinate:   QtPositioning.coordinate(36.988505, -122.0509133)
 
     property var    _missionItems:  controller.missionItems
 
@@ -239,7 +240,10 @@ QGCView {
                     visible: drawCoverageAreaButton.checked || _pathPlannerWantsCoverage
                     color: 'green'
 
-                    onPathChanged: update()
+                    onPathChanged: {
+                        update() // does this work?
+                        drawCoverageAreaButtonAutoOffTimer.start()
+                    }
                 }
 
                 // We use this item to support dragging since dragging a MapQuickItem just doesn't seem to work
@@ -854,7 +858,7 @@ QGCView {
 					anchors.top:        addMissionItemsButton.bottom
 					buttonImage:        "/qmlimages/MapDrawCoverageArea.svg"
 					exclusiveGroup:     _dropButtonsExclusiveGroup
-					z:                  editorMap.zOrderWidgets
+                    z:                  QGroundControl.zOrderWidgets
 
 					onCheckedChanged: {
 						if (checked) {
@@ -976,7 +980,7 @@ QGCView {
                     anchors.top:        syncButton.bottom
                     buttonImage:        "/qmlimages/MapPathPlanner.svg"
                     exclusiveGroup:     _dropButtonsExclusiveGroup
-                    z:                  editorMap.zOrderWidgets
+                    z:                  QGroundControl.zOrderWidgets
                     onCheckedChanged:   { _pathPlannerWantsCoverage = false }
                 }
 

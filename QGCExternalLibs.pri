@@ -333,7 +333,7 @@ contains(DEFINES, DISABLE_DPP) {
 
     LIBS += \
         -L$$BASEDIR/libs/thirdParty/dpp/ \
-        -lOGDF -lCOIN -lDPP
+        -lOGDF -lCOIN -lDPP -lDUBINSCURVES
 } else {
     message("Skipping support for Dubins Path Planner (unsupported platform)")
 }

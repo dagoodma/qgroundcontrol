@@ -81,11 +81,17 @@ Rectangle {
                 width:          _editFieldWidth
                 text:           _pathPlannerTurnRadius
 
+                /*
                 Keys.onPressed: {
                         if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
                             console.log("Turn radius changed to " + Number(turnRadiusField.text))
                             _pathPlannerTurnRadius = Number(turnRadiusField.text)
                         }
+                }
+                */
+                onTextChanged: {
+                    console.log("Turn radius changed to " + Number(turnRadiusField.text))
+                    _pathPlannerTurnRadius = Number(turnRadiusField.text)
                 }
             }
         }
@@ -113,11 +119,17 @@ Rectangle {
                 width:          _editFieldWidth
                 text:           _pathPlannerSensorWidth
 
+                /*
                 Keys.onPressed: {
                         if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return) {
                             console.log("Sensor width changed to " + Number(sensorWidthField.text))
                             _pathPlannerSensorWidth = Number(sensorWidthField.text)
                         }
+                }
+                */
+                onTextChanged: {
+                    console.log("Sensor width changsed to " + Number(sensorWidthField.text))
+                    _pathPlannerSensorWidth = Number(sensorWidthField.text)
                 }
             }
         }
@@ -200,8 +212,8 @@ Rectangle {
                         _missionItems = controller.missionItems
                         // Remove the polygon
                         // FIXME not sure if this behavior is correct
-                        _pathPlannerWantsCoverage = false
-                        clearCoveragePolygon()
+                        //_pathPlannerWantsCoverage = false
+                        //clearCoveragePolygon()
                     }
                 }
             }

@@ -561,13 +561,30 @@ QmlObjectListModel* MissionController::missionItems(void)
     return _missionItems;
 }
 
+
+// West field
+//#define HOME_LAT 	36.9865175999
+//#define HOME_LON	-122.06447650
+
+// East field
+#define HOME_LAT     36.988505
+#define HOME_LON     -122.0509133
+
 /// Use dpp::WaypointSequencePlanner to replan the active vehicle's waypoint sequence
 void MissionController::planMissionItemSequence(double turnRadius) {
+    qDebug() << "**Planning waypoint sequence with turnRadius=" << turnRadius;
+    QString logFilename("dppDtspSolverOutput.log");
+    dpp::Logger *log = dpp::Logger::Instance();
+    log->level(dpp::Logger::Level::LL_DEBUG);
+    log->verbose(2);
+    dpp::Logger::initializeLogger(logFilename.toStdString());
+    qDebug() << "Logging solver output to log file: " << logFilename;
+
     dpp::WaypointList originalList;
 
     // FIXME, home position comes from vehicle
     // use _missionIems.get(0)
-    _liveHomePosition = QGeoCoordinate(37.803907, -122.464062, 0.0);
+    _liveHomePosition = QGeoCoordinate(HOME_LAT, HOME_LON, 0.0);
 
     qDebug() << "Runnig path planner with " << _missionItems->count()
              << " mission items for a vehicle with turn radius of " << turnRadius << " meters.";
@@ -584,35 +601,41 @@ void MissionController::planMissionItemSequence(double turnRadius) {
         initialPosition = _activeVehicle->coordinate();
     }
 
-    double x, y, z;
+    double n, e ,d;
     dpp::Waypoint w;
     // FIXME add check for: _liveHomePositionAvailable
-    convertGeoToNed(initialPosition, _liveHomePosition, &x, &y, &z);
-    w.x = x;
-    w.y = y;
+    convertGeoToNed(initialPosition, _liveHomePosition, &n, &e, &d);
+    w.x = e;
+    w.y = n;
     originalList.push_back(w);
 
     // First element is inital position, now add all mission items
-    qDebug() << "Building waypoint list: ";
-    qDebug() << "    Initial position i=0: x=" << w.x << ", y=" << w.y;
+    qDebug() << "Waypoints: ";
+    qDebug() << "    wp  0 : x= " << w.x << ", y= " << w.y ;
     for(int i = 1; i < _missionItems->count(); i++) {
         MissionItem* item =  qobject_cast<MissionItem*>(_missionItems->get(i));
-        qDebug() << "    Adding mission item " << i << ": " << item
-                 << " lat=" << item->latitude() << ", lon=" << item->longitude();
+        //qDebug() << "    Adding mission item " << i << ": " << item
+        //         << " lat=" << item->latitude() << ", lon=" << item->longitude();
 
-        convertGeoToNed(item->coordinate(), _liveHomePosition, &x, &y, &z);
-        w.x = x;
-        w.y = y;
+        convertGeoToNed(item->coordinate(), _liveHomePosition, &n, &e, &d);
+        w.x = e;
+        w.y = n;
         originalList.push_back(w);
-        qDebug() << "    converted to i=" << (i) <<": x=" << w.x << ", y=" << w.y;
+        //qDebug() << "    converted to i=" << (i) <<": x=" << w.x << ", y=" << w.y;
+        qDebug() << "    wp  " << i << " : x= " << w.x << ", y= " << w.y ;
     }
+    qDebug() << "}";
 
     // Construct the planner, and solve for the best sequence
     dpp::WaypointSequencePlanner p;
     p.initialHeading(0.0); // FIXME get initial heading from vehicle
     p.turnRadius(turnRadius);
     p.addWaypoints(originalList);
-    p.planWaypointSequence(); // FIXME check for solution success
+    if (!p.planWaypointSequence()) {
+        qDebug() << "Failed to plan waypoint sequence with solver.";
+        qDebug() << "Check log file " << logFilename << " for more details.";
+        return;
+    }
 
     // Rebuild the mission item list with the solution
     QmlObjectListModel* newMissionItems = new QmlObjectListModel(this);
@@ -626,7 +649,7 @@ void MissionController::planMissionItemSequence(double turnRadius) {
     bool first = true;
     for (const auto& i : newSequenceList) {
         if (!first) dbgStr.append(", ");
-        dbgStr += i;
+        dbgStr.append("%1").arg(i);
         // Skip the initial position
         if (!first) {
             newMissionItems->append(_missionItems->get(i));
@@ -646,27 +669,19 @@ void MissionController::planMissionItemSequence(double turnRadius) {
     _recalcAll();
 }
 
-void MissionController::clearCoveragePolygon(void) {
-    _coveragePolygonVertices.clear();
-}
-
-bool MissionController::hasValidCoveragePolygon(void) {
-    // FIXME check if area is compatible with sensor width
-    return _coveragePolygonVertices.size() >= 3;
-}
-
-void MissionController::addCoveragePolygonVertex(double lat, double lon) {
-    qDebug() << "Adding polygon vertex: lat=" << lat << ", lon= " << lon;
-    _coveragePolygonVertices << QVector2D(lat, lon);
-}
-
 void MissionController::planCoverageArea(double turnRadius, double sensorWidth) {
-    qDebug() << "Planning path tp cover polygon with turnRadius=" << turnRadius
+    qDebug() << "**Planning path to cover polygon with turnRadius=" << turnRadius
         << " and sensorWidth=" << sensorWidth;
+    QString logFilename("dppCppSolverOutput.log");
+    dpp::Logger *log = dpp::Logger::Instance();
+    log->level(dpp::Logger::Level::LL_DEBUG);
+    log->verbose(2);
+    dpp::Logger::initializeLogger(logFilename.toStdString());
+    qDebug() << "Logging solver output to log file: " << logFilename;
 
     // FIXME, home position comes from vehicle
     // use _missionIems.get(0)
-    _liveHomePosition = QGeoCoordinate(37.803907, -122.464062, 0.0);
+    _liveHomePosition = QGeoCoordinate(HOME_LAT, HOME_LON, 0.0);
 
     // Convert the initial position to local coordinates and add it to the list
     // Use home location as initial position if there's no active vehicle
@@ -676,26 +691,31 @@ void MissionController::planCoverageArea(double turnRadius, double sensorWidth) 
     }
 
     // FIXME add check for: _liveHomePositionAvailable
-    double x, y, z;
-    convertGeoToNed(initialPosition, _liveHomePosition, &x, &y, &z);
+    double n, e, d;
+    convertGeoToNed(initialPosition, _liveHomePosition, &n, &e, &d);
 
     // Create and initialize the planner
     dpp::CoverageWaypointPlanner planner(turnRadius, sensorWidth);
-    planner.initialConfiguration(x, y, 0.0);// FIXME use initial heading
+    planner.initialConfiguration(e, n, 0.0);// FIXME use initial heading
 
     // Convert the polygon points to the local plane
     dpp::Vertex v;
     for (QVector2D p : _coveragePolygonVertices) {
-        convertGeoToNed(QGeoCoordinate(p.x(), p.y(), 0), _liveHomePosition, &x, &y, &z);
-        v.x = x;
-        v.y = y;
+        // p.x is lat, and p.y is lon
+        convertGeoToNed(QGeoCoordinate(p.x(), p.y(), 0), _liveHomePosition, &n, &e, &d);
+        v.x = e;
+        v.y = n;
         qDebug() << "Adding point " << p << " to the polygon as: x="
-            << x << ", y=" << y;
+            << e << ", y=" << n;
         planner.addPolygonVertex(v);
     }
 
     // Generate coverage waypoints and update mission items
-    planner.planCoverageWaypoints(); // FIXME check for solution success
+    if (!planner.planCoverageWaypoints()) {
+        qDebug() << "Failed to plan coverage waypoints with solver.";
+        qDebug() << "Check log file " << logFilename << " for more details.";
+        return;
+    }
     qDebug() << "Got " << planner.waypointCount() << " waypoints.";
 
     QmlObjectListModel* newMissionItems = new QmlObjectListModel(this);
@@ -707,16 +727,18 @@ void MissionController::planCoverageArea(double turnRadius, double sensorWidth) 
     qDebug() << "Solved " << planner.waypointCount() - 1 << " point tour with cost " << cost << ".";
     qDebug() << "Waypoints: ";
     bool first = true;
+    int i = 0;
     for (const auto& w : waypointList) {
-       qDebug() << "    wp " << newMissionItems->count() << ": x=" << w.x << ", y=" << w.y;
+       qDebug() << "    wp " << i << ": x=" << w.x << ", y=" << w.y;
         // Skip the initial position
         if (!first) {
             QGeoCoordinate coord; // FIXME set a default altitude
-            convertNedToGeo(w.x,w.y,0.0, _liveHomePosition, &coord);
+            convertNedToGeo(w.y,w.x,0.0, _liveHomePosition, &coord);
             MissionItem *mi = new MissionItem();
             mi->setCoordinate(coord);
             newMissionItems->append(mi);
         }
+        i++;
         first = false;
     }
     qDebug() << " }";
@@ -731,3 +753,16 @@ void MissionController::planCoverageArea(double turnRadius, double sensorWidth) 
     _recalcAll();
 }
 
+void MissionController::clearCoveragePolygon(void) {
+    _coveragePolygonVertices.clear();
+}
+
+bool MissionController::hasValidCoveragePolygon(void) {
+    // FIXME check if area is compatible with sensor width
+    return _coveragePolygonVertices.size() >= 3;
+}
+
+void MissionController::addCoveragePolygonVertex(double lat, double lon) {
+    qDebug() << "Adding polygon vertex: lat=" << lat << ", lon= " << lon;
+    _coveragePolygonVertices << QVector2D(lat, lon);
+}
